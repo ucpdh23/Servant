@@ -1,0 +1,43 @@
+{
+	"mongodb" : {
+		"uri" : "",
+		"database" : ""
+	},
+  	"ParrotVerticle" : {
+    	"host": "",
+    	"port": 0,
+    	"service": "",
+    	"authentication" : {
+      		"login" : "",
+      		"password" : ""
+		}
+	},
+	"masters":[
+		{"email":""}
+  ],
+	"NetworkVerticle" : {
+    	"server" : "",
+    	"usr" : "",
+    	"pws" : ""
+  	},
+  	"HomeVerticle":[
+    	{"name" : "" , "mac" : ""}
+  	],
+  	"WebServerVerticle" : {
+    	"port" : 0
+  	},
+  	"ThermostatVerticle" : {
+    	"__comment__" : "",
+    	"url" : "",
+    	"token" : ""
+  	},
+  	"SensorVerticle" : {
+        "server":"",
+        "usr":"",
+        "pws":"",
+        "items" : [
+                {"name" : "", "command" : ""},
+                {"name" : "", "command" : ""}
+        ]
+  	}
+}

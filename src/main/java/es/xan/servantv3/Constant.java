@@ -1,0 +1,17 @@
+package es.xan.servantv3;
+
+public class Constant {
+	public static final String WEBSERVER_VERTICLE = "webserver.verticle";
+	public static final String THERMOSTAT_VERTICLE 	= "thermostat.verticle";
+	public static final String TEMPERATURE_VERTICLE = "temperature.verticle";
+	public static final String PARROT_VERTICLE = "parrot.verticle";
+	public static final String NETWORK_VERTICLE = "network.verticle";
+	public static final String SENSORS_VERTICLE = "sensors.verticle";
+	public static final String HOME_VERTICLE = "home.verticle";
+	public static final String BRAIN_VERTICLE = "brain.verticle";
+	
+	public static final String EVENT = "event";
+	
+	public static final String REPLY_OK = "REPLY.OK";
+	public static final String REPLY_KO = "REPLY.KO";
+}
