@@ -28,7 +28,8 @@ public class TranslationUtils {
 		if (Constant.REPLY_OK.equals(response.getString("status"))) {
 			return "Your wish is my command";
 		} else {
-			return "Sorry, but something weird happens";
+			String message = response.getString("message");
+			return "Sorry, something weird happens. " + ((message!=null)? message : "");
 		}
 		
 	}

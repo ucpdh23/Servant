@@ -63,27 +63,46 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		try {
 			switch (status.status.toLowerCase()) {
 			case "on":
-				send("HIGH");
-				boilerOn = true;
+				boolean updatedOn = send("HIGH");
 				
-				ReplyBuilder builderOn = MessageBuilder.createReply();
-				builderOn.setOk();
-				msg.reply(builderOn.build());
-				
-				this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
-					this.status = "on";
-				}});
+				if (updatedOn) {
+					boilerOn = true;
+					
+					ReplyBuilder builderOn = MessageBuilder.createReply();
+					builderOn.setOk();
+					msg.reply(builderOn.build());
+					
+					this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
+						this.status = "on";
+					}});
+				} else {
+					ReplyBuilder builderOn = MessageBuilder.createReply();
+					builderOn.setError();
+					builderOn.setMessage("Please, try it back in 5 minutes");
+					msg.reply(builderOn.build());
+				}
 				break;
 			case "off":
-				send("LOW");
-				boilerOn = false;
+				boolean updatedOff = send("LOW");
 				
-				ReplyBuilder builderOff = MessageBuilder.createReply();
-				builderOff.setOk();
-				msg.reply(builderOff.build());
-				this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
-					this.status = "off";
-				}});
+				if (updatedOff) {
+					boilerOn = false;
+					
+					ReplyBuilder builderOff = MessageBuilder.createReply();
+					builderOff.setOk();
+					msg.reply(builderOff.build());
+					this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
+						this.status = "off";
+					}});
+				} else {
+					ReplyBuilder builderOn = MessageBuilder.createReply();
+					builderOn.setError();
+					builderOn.setMessage("Please, try it back in 5 minutes");
+					msg.reply(builderOn.build());
+					
+//					publishAction(Actions.SWITCH_BOILER, status, reply -> reply.);
+				}
+				
 				break;
 			}
 		} catch (Exception e) {
@@ -108,7 +127,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		LOG.info("started Thermostat");
 	}
 
-	private void send(String operation) throws ClientProtocolException, IOException {
+	private boolean send(String operation) throws ClientProtocolException, IOException {
 		LOG.info("setting thermostat to " + operation);
 		
 		final String url = configuration.getString("url");
@@ -124,8 +143,10 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 			LOG.info("StatusCode:" + response.getStatusLine().getStatusCode());
 		    final HttpEntity entity = response.getEntity();
 		    
-		    // and ensure it is fully consumed
-		    EntityUtils.consume(entity);
+		    String content = EntityUtils.toString(entity);
+		    JsonObject json = new JsonObject(content);
+		    
+		    return json.getBoolean("ok");
 		}
 	}
 

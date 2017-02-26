@@ -58,6 +58,10 @@ public class MessageBuilder {
 		public void setOk() {
 			object.put("status", Constant.REPLY_OK);
 		}
+
+		public void setMessage(String message) {
+			object.put("message", message);
+		}
 		
 	}
 

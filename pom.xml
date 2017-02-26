@@ -14,6 +14,12 @@
 
 		<vertx.version>3.3.3</vertx.version>
 		<smack.version>4.0.5</smack.version>
+		<httpclient.version>4.3.3</httpclient.version>
+		<commons.io.version>2.5</commons.io.version>
+		<commons.collections.version>4.0</commons.collections.version>
+		<jsch.version>0.1.54</jsch.version>
+
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -70,25 +76,25 @@
 		 <dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.3</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 		
 		 <dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<version>${commons.io.version}</version>
 		</dependency>
 		
 		 <dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.0</version>
+			<version>${commons.collections.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.54</version>
+			<version>${jsch.version}</version>
 		</dependency>
 
 	</dependencies>
