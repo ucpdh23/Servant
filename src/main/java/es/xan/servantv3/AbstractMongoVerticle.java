@@ -35,6 +35,10 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		
 		this.mCollection = collection;
 	}
+	
+	static {
+		System.setProperty("org.mongodb.async.type", "netty");
+	}
 
 	@Override
 	public void start() {
