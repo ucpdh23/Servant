@@ -77,6 +77,19 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		};
 	}
 	
+	private Map<String,Long> mLastTimestamp = new HashMap<>();
+	
+	protected boolean saveFilter(Temperature item) {
+		final Long lastTimestamp = mLastTimestamp.getOrDefault(item.room, 0L);
+
+		if (item.timestamp - lastTimestamp < 15000) {
+			return false;
+		} else {
+			mLastTimestamp.put(item.room, item.timestamp);
+			return true;
+		}
+	}
+	
 	private Handler<Long> createTimerForRoom(String room) {
 		return (Long event) -> {
 			Room roomInfo = (Room) Events.NO_TEMPERATURE_INFO.createBean();

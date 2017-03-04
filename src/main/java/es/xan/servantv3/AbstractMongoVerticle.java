@@ -58,6 +58,15 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 	}
 
 	public void save(T item, final Message<Object> msg) {
+		boolean toSave = saveFilter(item);
+		
+		if (!toSave) {
+			LOGGER.debug("Discarting item" + item);
+			ReplyBuilder builder = MessageBuilder.createReply();
+			builder.setError();
+			msg.reply(builder.build());
+			return;
+		}
 		LOGGER.debug("saving " + item);
 		
 		mongoClient.save(mCollection, new JsonObject(Json.encode(item)), res -> {
@@ -75,6 +84,10 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		});
 	}
 	
+	protected boolean saveFilter(T item) {
+		return true;
+	}
+
 	private void onSaved(T item, AsyncResult<String> res) {
 		final BiConsumer<T, String> onSaved = onSaved();
 		if (onSaved != null) onSaved.accept(item, res.result());
