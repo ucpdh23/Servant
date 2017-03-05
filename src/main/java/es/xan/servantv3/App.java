@@ -5,6 +5,7 @@ import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle;
 import es.xan.servantv3.webservice.WebServerVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -29,8 +30,8 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
-
 		LOG.info("Started :)");
 	}
 }
