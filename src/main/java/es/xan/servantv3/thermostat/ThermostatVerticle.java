@@ -144,9 +144,10 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		    final HttpEntity entity = response.getEntity();
 		    
 		    String content = EntityUtils.toString(entity);
+		    LOG.info(content);
 		    JsonObject json = new JsonObject(content);
 		    
-		    return json.getBoolean("ok");
+		    return json.getBoolean("connected");
 		}
 	}
 
