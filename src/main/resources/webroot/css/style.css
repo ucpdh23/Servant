@@ -1,0 +1,326 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,700|Open+Sans:400,600,700');
+
+@import url('https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css');
+
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font: 1em 'Raleway', sans-serif;
+  color: #555;
+  background: #fff;
+}
+
+h1 {
+  padding: 50px 0;
+  font-weight: 400;
+  text-align: center;
+}
+
+p {
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+main {
+  min-width: 320px;
+  
+  padding: 3vw;
+  margin: 0 auto;
+  height:100%;
+}
+
+section {
+  display: none;
+  padding: 20px 0 0;
+  border-top: 1px solid #ddd;
+  height: 100%;
+}
+
+input {
+  display: none;
+}
+
+label {
+  display: inline-block;
+  margin: 0 0 -1px;
+  padding: 2.5vw 1.2vw;
+  font-weight: 700;
+  text-align: center;
+  color: #bbb;
+  border: 1px solid transparent;
+  font-size:3vw;
+}
+
+label:before {
+  font-family: fontawesome;
+  font-weight: normal;
+  margin-right: 1vw;
+}
+
+label[for*='1']:before { content: '\f1bb'; }
+label[for*='2']:before { content: '\f236'; }
+label[for*='3']:before { content: '\f108'; }
+label[for*='4']:before { content: '\f1b9'; }
+label[for*='5']:before { content: '\f085'; }
+
+label:hover {
+  color: #546E7A;
+  cursor: pointer;
+}
+
+input:checked + label {
+  color: #546E7A;
+  border: 1px solid #ddd;
+  border-top: .6vw solid #546E7A;
+  border-bottom: 1px solid #FFF;
+}
+
+#tab1:checked ~ #content1,
+#tab2:checked ~ #content2,
+#tab3:checked ~ #content3,
+#tab4:checked ~ #content4,
+#tab5:checked ~ #content5{
+  display: block;
+}
+
+@media screen and (max-width: 650px) {
+  /*label {
+    font-size: 0;
+  }
+  label:before {
+    margin: 0;
+    font-size: 18px;
+  }*/
+}
+
+@media screen and (max-width: 400px) {
+  /*label {
+    padding: 25px;
+  }*/
+}
+
+
+.switch-widget{
+  background: rgb(70, 72, 75);
+  width: 100%;
+  background-color: #263238;
+  border: 1vw solid #546E7A;
+  height: 25vw;
+  padding: 0;
+  border-radius: 3vw;
+  display:block;
+  margin-bottom: 3vw;
+}
+
+.switch-widget .title {
+  font-size: 6vw;
+  line-height: 6vw;
+  text-align: center;
+  font-weight:700;
+  text-shadow: 0 0 0.2vw #fff;
+}
+
+.switch-widget .text {
+  font-size: 6vw;
+  text-align: center;
+  line-height: 6vw;
+  font-weight:700;
+  text-shadow: 0 0 0.2vw #fff;
+}
+.switch-widget .icon {
+  font-size: 11vw;
+  text-align: center;
+  transition: text-shadow 400ms;
+  text-shadow: 0 0 .2vw #fff;
+}
+
+.switch-widget .icon.disabled {
+    opacity: 0.3;
+}
+
+i.fa.icon.active {
+    text-shadow: 0 0 1vw #fff, 0 0 6vw #fcd000;
+}
+
+.switch-widget .right {
+  float: right;
+}
+
+.switch-widget ul li{
+  
+      /* This is the code responsible for the centering of content */
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    
+    -webkit-flex-pack:center;
+  -webkit-justify-content:center;
+  -moz-justify-content:center;
+  -ms-flex-pack:center;
+  justify-content:center;
+    
+    
+    -webkit-flex-direction:column;
+  -moz-flex-direction:column;
+  -ms-flex-direction:column;
+  flex-direction:column;
+    padding: 0 0.3em;
+    width: 40%;
+    color: #EEE;
+    height: 100%;
+}
+
+.switch-widget ul li:first-child {
+  width: 40%;
+}
+.switch-widget ul li:last-child {
+  width: 20%;
+}
+
+
+.switch-widget ul{
+  
+     /* This lines the li's up in a row and will wrap them under each other */
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    
+    -webkit-flex-direction:row;
+    -moz-flex-direction:row;
+    -ms-flex-direction:row;
+    flex-direction:row;
+    
+    -webkit-flex-wrap:wrap;
+    -moz-flex-wrap:wrap;
+    -ms-flex-wrap:wrap;
+    flex-wrap:wrap; 
+  height: 100%;
+  
+}
+
+
+/** TOOGLE **/
+
+.toggle {
+  position: relative;
+  display: block;
+  margin: 0 auto;
+  width: 18vw;
+  height: 9vw;
+  color: white;
+  outline: 0;
+  text-decoration: none;
+  border-radius: 3vw;
+  border: 0.3vw solid #546E7A;
+  background-color: #263238;
+  transition: all 500ms;
+  text-shadow: 0 0 0 transparent;
+}
+
+.toggle:active { background-color: #1c2429; }
+
+.toggle:hover:not(.toggle-moving):after { background-color: #455A64; }
+
+.toggle:after {
+  display: block;
+  position: absolute;
+  top: 0.4vw;
+  bottom: 0.4vw;
+  left: 0.4vw;
+  width: calc(50% - 0.4vw);
+  line-height: 7vw;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 3vw;
+  font-weight: bold;
+  color: white;
+  background-color: #37474F;
+  border: 0.3vw solid;
+  transition: all 500ms;
+}
+.toggle-on:after {
+  content: 'On';
+  border-radius: 2.4vw .3vw .3vw 2.4vw;
+  color: #66BB6A;
+}
+.toggle-off:after {
+  content: 'Off';
+  border-radius: .3vw 2.4vw 2.4vw .3vw;
+  transform: translate(100%, 0);
+  color: #f44336;
+}
+.toggle-moving { background-color: #1c2429; }
+
+.toggle-moving:after {
+  color: transparent;
+  border-color: #435862;
+  background-color: #222c31;
+  transition: color 0s, transform 500ms, border-radius 500ms, background-color 500ms;
+}
+
+a.toggle.disabled:after {
+  color: #546E7A;
+  border-color: #546E7A;
+}
+.button {
+  position: relative;
+  display: block;
+  margin: 1vw auto;
+  width: 16vw;
+  height: 16vw;
+  color: #66BB6A;
+  outline: 0;
+  font-size: 3vw;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 2vw;
+  border: 0.3vw solid #546E7A;
+  background-color: #263238;
+  transition: all 500ms;
+  text-shadow: 0 0 0 transparent;
+}
+.button:after {
+  display: block;
+  position: absolute;
+  top: 0.5vw;
+  bottom: 0.5vw;
+  left: 0.5vw;
+  width: calc(100% - 1vw);
+  line-height: 6.6vw;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 3vw;
+  font-weight: bold;
+  color: #66BB6A;
+  background-color: #37474F;
+  border: 0.3vw solid;
+  transition: all 500ms;
+  font-family: fontawesome;
+  border-radius: 1.4vw;
+}
+
+
+.button.button1:after {
+  content: '\f077';
+  color: #66BB6A;
+}
+.button.button2:after {
+  content: '\f04d';
+  line-height: 3.8vw;
+}
+
+.button.button3:after {
+  content: '\f078';
+}

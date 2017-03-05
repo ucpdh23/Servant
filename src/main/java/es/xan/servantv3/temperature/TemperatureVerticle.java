@@ -102,10 +102,10 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	public void last_values(Message<Object> msg) {
 		JsonArray array = new JsonArray();
 		
-		Calendar rightNow = Calendar.getInstance();
-		rightNow.add(Calendar.DAY_OF_MONTH, -7);
+		Calendar aWeekAgo = Calendar.getInstance();
+		aWeekAgo.add(Calendar.DAY_OF_MONTH, -7);
 		
-		array.add(new JsonObject("{ \"$match\": { \"timestamp\" : { \"$gt\" : " + rightNow.getTimeInMillis() + "}}}"));
+		array.add(new JsonObject("{ \"$match\": { \"timestamp\" : { \"$gt\" : " + aWeekAgo.getTimeInMillis() + "}}}"));
 		array.add(new JsonObject("{ \"$group\" : { \"_id\" :\"$room\", \"maxTimestamp\" : { \"$max\" : \"$timestamp\"}}}"));
 		
 		JsonObject command = new JsonObject()

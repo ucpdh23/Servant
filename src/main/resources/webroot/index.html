@@ -1,38 +1,61 @@
-<html>
-<head>
-  <title></title>
-  <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-  <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
-  <script src="vertx-eventbus.js"></script>
-</head>
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+	<meta name="description" content="Page, js and css copied from glazaro's 'Home Sweet Home' app. Thanks to GLazaro and to SMoreno for your great job">
+    <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">    
 
-<style>
-  .news {
-    font-size: 20pt;
-  }
-</style>
+    <title>Servant</title>
 
-<body>
+    <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
+    <link rel="stylesheet" href="css/style.css">
 
-<div class="news">Latest news:</div>
-<br>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+    <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+  	<script src="vertx-eventbus.js"></script>
+  </head>
 
-<div id="status" class="news"></div>
+  <body>
 
-<script>
-  var eb = new EventBus("./eventbus");
-  eb.onopen = function () {
-    eb.registerHandler("event", function (err, msg) {
-      var str = "<code>" + JSON.stringify(msg.body) + "</code><br>";
-      $('#status').prepend(str);
-    });
-    
-    eb.send('temperature.verticle', {action: 'LAST_VALUES'}, function (err, msg) {
-      var str = "<code>" + JSON.stringify(msg.body) + "</code><br>";
-      $('#status').prepend(str);
-    })
-  }
-</script>
+    <main>
+      
+      <!-- TABS -->
 
-</body>
+      <!-- General -->  
+      <input id="tab1" type="radio" name="tabs" checked>
+      <label for="tab1">General</label>
+        
+      <!-- General -->  
+
+      <section id="content1">
+        <div class="switch-widget" id="widget-outside">
+          <ul>
+          <li class="title"></li>
+          <li class="text"></li>
+          <li><i class="fa icon" aria-hidden="true"></i></li>
+          </ul>
+        </div>
+        <div class="switch-widget" id="widget-livingRoom">
+          <ul>
+          <li class="title"></li>
+          <li class="text"></li>
+          <li><i class="fa icon" aria-hidden="true"></i></li>
+          </ul>
+        </div>
+        <div class="switch-widget" id="widget-bedRoom">
+          <ul>
+          <li class="title"></li>
+          <li class="text"></li>
+          <li><i class="fa icon" aria-hidden="true"></i></li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+    <script src="js/widgets.js"></script>
+    <script src="js/index.js"></script>
+
+  </body>
 </html>
