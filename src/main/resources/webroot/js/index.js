@@ -24,7 +24,7 @@ function initWidgets() {
 
   initWidget({
     id: "widget-livingRoom",
-    title: "Interior",
+    title: "Salón",
     text: "-",
     enable: false,
     switch_active: false,
@@ -35,7 +35,7 @@ function initWidgets() {
 
   initWidget({
     id: "widget-bedRoom",
-    title: "Interior",
+    title: "Habitación",
     text: "-",
     enable: false,
     switch_active: false,
