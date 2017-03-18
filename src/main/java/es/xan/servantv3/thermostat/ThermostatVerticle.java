@@ -106,7 +106,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 				break;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.warn("cannot process message [{}]", msg.body(), e);
 		}
 	}
 	
