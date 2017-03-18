@@ -21,8 +21,8 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 	
 	private RouterPageManager mManager = null;
 	
-	private List<Device> devices;
-	private List<Device> quarantine;
+	private List<Device> mDevices;
+	private List<Device> mQuarantine;
 	
 	public NetworkVerticle() {
 		super(Constant.NETWORK_VERTICLE);
@@ -50,8 +50,8 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 	public void start() {
 		super.start();
 		
-		devices = new ArrayList<RouterPageManager.Device>();
-		quarantine = new ArrayList<RouterPageManager.Device>();
+		mDevices = new ArrayList<RouterPageManager.Device>();
+		mQuarantine = new ArrayList<RouterPageManager.Device>();
 		
 		mManager = new RouterPageManager(Vertx.currentContext().config().getJsonObject("NetworkVerticle"));
 	
@@ -66,13 +66,13 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 			try {
 				List<Device> newDevices = mManager.getDevices();
 				
-				List<Device> newItems = resolveDiffsDevices(devices, newDevices);
-				List<Device> newsInQuarantine = resolveIntersectionDevices(newItems, quarantine);
-				List<Device> newsToNotify = resolveDiffsDevices(quarantine, newItems);
+				List<Device> newItems = resolveDiffsDevices(mDevices, newDevices);
+				List<Device> newsInQuarantine = resolveIntersectionDevices(newItems, mQuarantine);
+				List<Device> newsToNotify = resolveDiffsDevices(mQuarantine, newItems);
 				
-				List<Device> removedToNotify = resolveDiffsDevices(newsInQuarantine, quarantine);
+				List<Device> removedToNotify = resolveDiffsDevices(newsInQuarantine, mQuarantine);
 				
-				List<Device> lost = resolveDiffsDevices(newDevices, devices);
+				List<Device> lost = resolveDiffsDevices(newDevices, mDevices);
 				
 				if (!newsToNotify.isEmpty()) {
 					for (Device item : newsToNotify)
@@ -84,10 +84,10 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 						publishEvent(Events.REM_NETWORK_DEVICES_MESSAGE, item);
 				}
 				
-				devices = newDevices;
-				quarantine = lost;
+				mDevices = newDevices;
+				mQuarantine = lost;
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.warn(e.getMessage(), e);
 			}
 	}
 

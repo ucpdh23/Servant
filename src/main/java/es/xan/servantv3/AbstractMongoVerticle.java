@@ -75,7 +75,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		final long init = new Date().getTime();
 		mongoClient.save(mCollection, new JsonObject(Json.encode(item)), res -> {
 			final long elapsed = new Date().getTime() - init;
-			if (elapsed > MAX_ELAPSED_TIME) LOGGER.warn("Inserting in mongo required [{}] millis", elapsed);
+			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Inserting in mongo required [{}] millis", elapsed);
 			
 			onSaved(item, res);
 			if (res.succeeded()) {
@@ -108,7 +108,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		final long init = new Date().getTime();
 		mongoClient.findWithOptions(mCollection, query.filter != null? new JsonObject(Json.encode(query.filter)) : new JsonObject(), options, res -> {
 			final long elapsed = new Date().getTime() - init;
-			if (elapsed > MAX_ELAPSED_TIME) LOGGER.warn("Querying in mongo required [{}] millis", elapsed);
+			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Querying in mongo required [{}] millis", elapsed);
 
 			ReplyBuilder builder = MessageBuilder.createReply();
 			builder.setResult(res.result());

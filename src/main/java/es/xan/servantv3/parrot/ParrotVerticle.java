@@ -25,7 +25,7 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 
 	private GTalkService channel;
 	
-	private static final int WAITING_TIME = /*30 **/ 1000;
+	private static final int WAITING_TIME = 1000; // 1 seg
 
 	/**
 	 * Supported actions for this {@link Verticle}

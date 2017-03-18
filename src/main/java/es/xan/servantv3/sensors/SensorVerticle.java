@@ -31,11 +31,11 @@ public class SensorVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SensorVerticle.class);
 	
-	private String host;
-	private String login;
-	private String password;
+	private String mHost;
+	private String mLogin;
+	private String mPassword;
 	
-	private Map<String,String> sensors;
+	private Map<String, String> mSensors;
 	
 	public SensorVerticle() {
 		super(Constant.SENSORS_VERTICLE);
@@ -68,28 +68,28 @@ public class SensorVerticle extends AbstractServantVerticle {
 	}
 	
 	private void loadConfiguration(JsonObject config) {
-		host = config.getString("server");
-		login = config.getString("usr");
-		password = config.getString("pws");
+		mHost = config.getString("server");
+		mLogin = config.getString("usr");
+		mPassword = config.getString("pws");
 		
 		loadSensors(config.getJsonArray("items"));
 	}
 
 	private void loadSensors(JsonArray array) {
-		sensors = new HashMap<>();
+		mSensors = new HashMap<>();
 		
 		for (int i=0; i < array.getList().size(); i++) {
 			final JsonObject sensor = (JsonObject) array.getList().get(i);
 			String name = sensor.getString("name");
 			String command = sensor.getString("command");
 			
-			sensors.put(name, command);
+			mSensors.put(name, command);
 		}
 	}
 
 	public void reset_sensor(Sensor sensor, Message<Object> message) {
 		LOGGER.info("Asking to reset sensor [{}]", sensor.sensor);
-		final String command = sensors.get(sensor.sensor);
+		final String command = mSensors.get(sensor.sensor);
 		
 		final ReplyBuilder builder = MessageBuilder.createReply();
 		if (command == null) {
@@ -102,7 +102,7 @@ public class SensorVerticle extends AbstractServantVerticle {
 			try {
 				result = runRemoteCommand(command);
 			} catch (JSchException | IOException e) {
-				e.printStackTrace();
+				LOGGER.warn(e.getMessage(), e);
 			}
 			
 			if (result) builder.setOk();
@@ -114,9 +114,9 @@ public class SensorVerticle extends AbstractServantVerticle {
 	private boolean runRemoteCommand(String command) throws JSchException, IOException {
 		JSch jsch = new JSch();
 		
-		Session session = jsch.getSession(login, host, 22);
+		Session session = jsch.getSession(mLogin, mHost, 22);
 		session.setConfig("StrictHostKeyChecking", "no");
-		session.setPassword(password);
+		session.setPassword(mPassword);
 		session.connect();
 			 
 		//create the excution channel over the session

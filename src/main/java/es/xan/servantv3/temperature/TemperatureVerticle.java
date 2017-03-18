@@ -31,6 +31,9 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TemperatureVerticle.class);
 
 	private static final String TEMPERATURES_COLLECTION = "temperatures";
+	
+	private static final long MIN_TIME_INTERVAL = 45000L; // 45 seg
+	private static final int MAX_TIME_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 	public TemperatureVerticle() {
 		super(TEMPERATURES_COLLECTION, Constant.TEMPERATURE_VERTICLE);
@@ -70,7 +73,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 			if (timerId != null)
 				this.vertx.cancelTimer(timerId);
 			
-			Long newTimerId = this.vertx.setTimer(60 * 60 * 1000, createTimerForRoom(room));
+			Long newTimerId = this.vertx.setTimer(MAX_TIME_INTERVAL, createTimerForRoom(room));
 			this.mTimers.put(room, newTimerId);
 			
 			this.publishEvent(Events.TEMPERATURE_RECEIVED, temperature);
@@ -82,7 +85,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	protected boolean saveFilter(Temperature item) {
 		final Long lastTimestamp = mLastTimestamp.getOrDefault(item.room, 0L);
 
-		if (item.timestamp - lastTimestamp < 15000) {
+		if (item.timestamp - lastTimestamp < MIN_TIME_INTERVAL) {
 			return false;
 		} else {
 			mLastTimestamp.put(item.room, item.timestamp);
@@ -139,9 +142,18 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 				}
 				
 				CompositeFuture.all(futures).setHandler(result -> {
-					ReplyBuilder builder = MessageBuilder.createReply();
-					builder.setResult(result.result().list()); 
-					msg.reply(builder.build());
+					if (result.failed()) {
+						ReplyBuilder builder = MessageBuilder.createReply();
+						builder.setError();
+						builder.setMessage(result.cause().getLocalizedMessage());
+						msg.reply(builder.build());
+					} else {
+						ReplyBuilder builder = MessageBuilder.createReply();
+						LOGGER.debug("replying [{}]", result.result().list());
+						
+						builder.setResult(result.result().list()); 
+						msg.reply(builder.build());
+					}
 				});
 			}
 		});

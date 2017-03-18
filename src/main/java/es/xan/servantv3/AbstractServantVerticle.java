@@ -140,7 +140,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.warn(e.getMessage(), e);
 		}
 	}
 	
@@ -149,15 +149,22 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 		final String actionName = json.getString("action");
 		
 		LOGGER.debug("Action [{}]", actionName);
-		LOGGER.debug("mapped [{}]", mActionMap.get(actionName));
 		
-		final Action action = mActionMap.get(actionName).left;
+		Pair<Action, Method> actionPair = mActionMap.get(actionName);
+		if (actionPair == null) {
+			LOGGER.warn("Cannot perform action [{}] in verticle [{}]", actionName, mVerticleName);
+			return;
+		}
+		
+		final Action action = actionPair.left;
+		final Method method = actionPair.right;
+		
+		LOGGER.debug("mapped [{}-{}]", action, method.getName());
 		
 		try {
-			final Method actionMethod = mActionMap.get(actionName).right;
-			final int parameterCount = actionMethod.getParameterCount();
+			final int parameterCount = method.getParameterCount();
 			if (parameterCount == 0) {
-				actionMethod.invoke(this);
+				method.invoke(this);
 				
 			} else {
 				if (parameterCount == 1) {
@@ -169,14 +176,14 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 						parameter = Json.decodeValue(entity.encode(), beanClass);
 					}
 					
-					actionMethod.invoke(this, parameter);
+					method.invoke(this, parameter);
 				
 				} else if (parameterCount == 2) {
 					final Class<?> beanClass = action.getPayloadClass();
 					final JsonObject entity = json.getJsonObject("bean");
 					final Object newInstance = Json.decodeValue(entity.encode(), beanClass);
 
-					actionMethod.invoke(this, newInstance, message);
+					method.invoke(this, newInstance, message);
 				}
 			}
 		} catch (Exception e) {

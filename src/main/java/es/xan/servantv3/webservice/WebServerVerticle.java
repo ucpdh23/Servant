@@ -26,7 +26,7 @@ public class WebServerVerticle extends AbstractServantVerticle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebServerVerticle.class);
 	
-	private JsonObject configuration;
+	private JsonObject mConfiguration;
 	
 	public WebServerVerticle() {
 		super(Constant.WEBSERVER_VERTICLE);
@@ -35,9 +35,9 @@ public class WebServerVerticle extends AbstractServantVerticle {
 	public void start() {
 		LOGGER.debug("Starting Web Server...");
 		
-		configuration = Vertx.currentContext().config().getJsonObject("WebServerVerticle");
+		mConfiguration = Vertx.currentContext().config().getJsonObject("WebServerVerticle");
 
-		final int port = configuration.getInteger("port");
+		final int port = mConfiguration.getInteger("port");
 		
 		Router router = buildRouter();
 

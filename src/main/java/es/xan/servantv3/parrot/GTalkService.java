@@ -28,23 +28,23 @@ public class GTalkService implements MessageListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(GTalkService.class);
 	
-	private JsonObject configuration;
+	private JsonObject mConfiguration;
 
-	private Map<String, Chat> conversations = new HashMap<>();
+	private Map<String, Chat> mConversations = new HashMap<>();
 
-	private XMPPConnection connection;
-	private CommunicationListener listener;
+	private XMPPConnection mConnection;
+	private CommunicationListener mListener;
 	
 	public GTalkService(JsonObject configuration) {
-		this.configuration = configuration;
+		this.mConfiguration = configuration;
 	}
 	
 	public boolean isInit() {
-		return connection != null;
+		return mConnection != null;
 	}
 	
 	public void setCommunicationListener(CommunicationListener listener) {
-		this.listener = listener;
+		this.mListener = listener;
 	}
 
 	public void start() {
@@ -56,26 +56,26 @@ public class GTalkService implements MessageListener {
 	}
 
 	private void init() throws Exception {
-		final String host = configuration.getString("host");
-		final int port = configuration.getInteger("port");
-		final String service = configuration.getString("service");
+		final String host = mConfiguration.getString("host");
+		final int port = mConfiguration.getInteger("port");
+		final String service = mConfiguration.getString("service");
 		
-		connection = createConnection(host, port, service);
-		connection.connect();
+		mConnection = createConnection(host, port, service);
+		mConnection.connect();
 
-		JsonObject authentication = configuration.getJsonObject("authentication");
+		JsonObject authentication = mConfiguration.getJsonObject("authentication");
 		String login = authentication.getString("login");
 		String password = authentication.getString("password");
 		
-		connection.login(login, password);
+		mConnection.login(login, password);
 
 		// set presence status info
 		Presence presence = new Presence(Presence.Type.available);
-		connection.sendPacket(presence);
+		mConnection.sendPacket(presence);
 	}
 
 	public void createChat(String partner) throws Exception {
-		Chat chat = ChatManager.getInstanceFor(connection).createChat(partner, this);
+		Chat chat = ChatManager.getInstanceFor(mConnection).createChat(partner, this);
 
 		// google bounces back the default message types, you must use chat
 		this.msg = new Message(partner, Message.Type.chat);
@@ -90,8 +90,8 @@ public class GTalkService implements MessageListener {
 
 		if (message.getType().equals(Message.Type.chat) && message.getBody() != null) {
 			
-			if (listener != null) {
-				listener.onMessage(message.getFrom(), message.getBody());
+			if (mListener != null) {
+				mListener.onMessage(message.getFrom(), message.getBody());
 			} else {
 				try {
 					Message msg = new Message();
@@ -102,7 +102,7 @@ public class GTalkService implements MessageListener {
 				}
 			}
 		} else {
-			LOGGER.warn("I received a message I don't undestand [{}]", message);
+			LOGGER.trace("I received a message I don't undestand [{}]", message);
 		}
 	}
 
@@ -123,11 +123,11 @@ public class GTalkService implements MessageListener {
 
 	public boolean send(String receptor, String message) {
 		try {
-			Chat chat = conversations.get(receptor);
+			Chat chat = mConversations.get(receptor);
 			
 			if (chat == null)  {
-				chat = ChatManager.getInstanceFor(connection).createChat(receptor, this);
-				conversations.put(receptor, chat);
+				chat = ChatManager.getInstanceFor(mConnection).createChat(receptor, this);
+				mConversations.put(receptor, chat);
 			}
 			
 			this.msg = new Message(receptor, Message.Type.chat);
