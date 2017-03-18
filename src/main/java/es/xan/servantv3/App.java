@@ -16,11 +16,11 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class App extends AbstractVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(App.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
 	@Override
 	public void start() {
-		LOG.info("Starting servant app");
+		LOGGER.info("Starting servant app");
 		
 		JsonObject config = Vertx.currentContext().config();
 		
@@ -32,6 +32,6 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
-		LOG.info("Started :)");
+		LOGGER.info("Started :)");
 	}
 }

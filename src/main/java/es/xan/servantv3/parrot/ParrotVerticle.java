@@ -15,7 +15,7 @@ import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
 
 public class ParrotVerticle extends AbstractServantVerticle implements CommunicationListener {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(ParrotVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ParrotVerticle.class);
 	
 	public ParrotVerticle() {
 		super(Constant.PARROT_VERTICLE);
@@ -79,7 +79,7 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 			publishEvent(Events.PARRONT_AVAILABLE);
 		});
 		
-		LOG.info("Started ParrotVerticle");
+		LOGGER.info("Started ParrotVerticle");
 	}
 	
 	@Override

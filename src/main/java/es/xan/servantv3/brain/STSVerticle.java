@@ -27,7 +27,7 @@ import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
  */
 public class STSVerticle extends AbstractServantVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(STSVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(STSVerticle.class);
 	
 	private JsonArray mMasters;
 
@@ -44,7 +44,7 @@ public class STSVerticle extends AbstractServantVerticle {
 		super.start();
 		
 		this.mMasters = Vertx.currentContext().config().getJsonArray("masters");
-		LOG.info("Started brainVerticle");
+		LOGGER.info("Started brainVerticle");
 	}
 	
 	/**
@@ -54,7 +54,7 @@ public class STSVerticle extends AbstractServantVerticle {
 		for (Object item : mMasters.getList()) {
 			JsonObject emailInfo = (JsonObject) item;
 
-			LOG.debug("creating chat for user :" + emailInfo.getString("email"));
+			LOGGER.debug("creating chat for user [{}]", emailInfo.getString("email"));
 			publishAction(Actions.CREATE_CHAT, new CreateChat() {{
 				this.user = emailInfo.getString("email");
 			}});
@@ -66,7 +66,8 @@ public class STSVerticle extends AbstractServantVerticle {
 	 * @param parrotMessage
 	 */
 	public void parrot_message_received(ParrotMessageReceived parrotMessage) {
-		LOG.info("Received:" + parrotMessage.message + " from user:" + parrotMessage.user);
+		LOGGER.debug("Received [{}] from user [{}]", parrotMessage.message, parrotMessage.user);
+		
 		final Translation translation = TranslationFacade.translate(parrotMessage.message);
 		
 		if (translation.action != null) {

@@ -1,0 +1,28 @@
+<configuration>
+
+	<property name="LOGS_PATH" value="/var/log/servant" />
+
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGS_PATH}/backend.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOGS_PATH}/backend.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+			<maxFileSize>100MB</maxFileSize>    
+			<maxHistory>60</maxHistory>
+			<totalSizeCap>2GB</totalSizeCap>
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%date [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="es.xan" level="INFO" />
+	<logger name="es.xan.servant" level="DEBUG" />
+
+	<root level="WARN">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

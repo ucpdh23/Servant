@@ -23,7 +23,7 @@ import es.xan.servantv3.MessageBuilder.EventBuilder;
 
 public  class AbstractServantVerticle extends AbstractVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractServantVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServantVerticle.class);
 	
 	private final String mVerticleName;
 	private final Map<String, Pair<Action, Method>> mActionMap;
@@ -61,7 +61,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 	}
 
 	protected AbstractServantVerticle(String verticleName, Class<? extends Enum<?>> actions, Class<? extends Enum<?>> events) {
-		LOG.info("Processing verticle " + verticleName);
+		LOGGER.info("Processing verticle [{}]", verticleName);
 		this.mVerticleName = verticleName;
 		
 		this.mMethodMap = createMap(this.getClass().getMethods());
@@ -91,8 +91,8 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 			if (currentMethodClass.equals(AbstractVerticle.class.getCanonicalName())) continue;
 			if (currentMethodClass.equals(AbstractServantVerticle.class.getCanonicalName())) continue;
 			
-			LOG.debug("method from:" + method.getDeclaringClass().getCanonicalName());
-			LOG.debug("Mapping method " + method.getName());
+			LOGGER.debug("method from: [{}]", method.getDeclaringClass().getCanonicalName());
+			LOGGER.debug("Mapping method [{}]", method.getName());
 			map.put(method.getName(), method);
 		}
 		
@@ -112,10 +112,10 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 	private void processEvent(Message<Object> message) {
 		JsonObject body = (JsonObject) message.body();
 		String action = body.getString("action");
-		LOG.debug("Processing action: " + action);
+		LOGGER.debug("Processing action [{}]", action);
 		
 		if (!mEventMap.containsKey(action)) {
-			LOG.debug("Not processed event: " + action);
+			LOGGER.warn("Not processed event [{}] ", action);
 			return;
 		}
 		
@@ -123,7 +123,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 		
 		try {
 			int count = mEventMap.get(action).right.getParameterCount();
-			LOG.trace("trying to execute method " + mEventMap.get(action).right.getName() + " with " + count + " parameters");
+			LOGGER.trace("trying to execute method [{}] with [{}] parameters", mEventMap.get(action).right.getName(), count);
 			
 			if (count == 0) {
 				mEventMap.get(action).right.invoke(this);
@@ -149,8 +149,8 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 		final JsonObject json = (JsonObject) message.body();
 		final String actionName = json.getString("action");
 		
-		LOG.debug("Action:" + actionName);
-		LOG.debug("mapped:" + mActionMap.get(actionName));
+		LOGGER.debug("Action [{}]", actionName);
+		LOGGER.debug("mapped [{}]", mActionMap.get(actionName));
 		
 		final Action action = mActionMap.get(actionName).left;
 		
@@ -181,8 +181,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 				}
 			}
 		} catch (Exception e) {
-			LOG.info("Action:" + action);
-			e.printStackTrace();
+			LOGGER.warn("Action: [{}]", action, e);
 		}
 		
 	}
@@ -239,7 +238,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 			return matcher.group(1).toLowerCase()+".verticle";
 		}
 		
-		throw new RuntimeException();
+		throw new RuntimeException("Not found pattern of 'Verticle' into canonicalName:" + canonicalName);
 	}
 
 	protected void supportedEvents(Events...events) {

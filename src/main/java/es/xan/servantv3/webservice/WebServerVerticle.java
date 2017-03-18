@@ -24,7 +24,7 @@ import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 
 public class WebServerVerticle extends AbstractServantVerticle {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebServerVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebServerVerticle.class);
 	
 	private JsonObject configuration;
 	
@@ -33,7 +33,7 @@ public class WebServerVerticle extends AbstractServantVerticle {
 	}
 	
 	public void start() {
-		LOG.debug("Starting Web Server...");
+		LOGGER.debug("Starting Web Server...");
 		
 		configuration = Vertx.currentContext().config().getJsonObject("WebServerVerticle");
 
@@ -43,7 +43,7 @@ public class WebServerVerticle extends AbstractServantVerticle {
 
 	    vertx.createHttpServer().requestHandler(router::accept).listen(port);
 		
-		LOG.info("Started web server listening in port " + port);
+		LOGGER.info("Started web server listening in port [{}]", port);
 	}
 
 	private Router buildRouter() {
@@ -89,7 +89,7 @@ public class WebServerVerticle extends AbstractServantVerticle {
 	    			.addInboundPermitted(new PermittedOptions().setAddressRegex(".*"));
 	    return SockJSHandler.create(vertx).bridge(options, event -> {
 	         if (event.type().equals(BridgeEventType.SOCKET_CREATED)) {
-	            LOG.info("A socket was created");
+	            LOGGER.info("A socket was created");
 	        }
 	        event.complete(true);
 	    });

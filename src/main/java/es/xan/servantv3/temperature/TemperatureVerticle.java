@@ -28,7 +28,7 @@ import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
 
 public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(TemperatureVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TemperatureVerticle.class);
 
 	private static final String TEMPERATURES_COLLECTION = "temperatures";
 
@@ -114,7 +114,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		
 		mongoClient.runCommand("aggregate", command, res -> {
 			if (res.succeeded()) {
-				LOG.debug(res.result().toString());
+				LOGGER.debug(res.result().toString());
 				List<JsonObject> items = res.result().getJsonArray("result").getList();
 				
 				List<Future> futures = new ArrayList<>();

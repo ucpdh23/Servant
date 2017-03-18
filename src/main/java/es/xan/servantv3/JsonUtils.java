@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtils {
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	static {
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.setVisibility(mapper.getSerializationConfig()
+		MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		MAPPER.setVisibility(MAPPER.getSerializationConfig()
 				.getDefaultVisibilityChecker()
 				.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
 				.withGetterVisibility(JsonAutoDetect.Visibility.NONE)
@@ -23,7 +23,7 @@ public class JsonUtils {
 	
 	public static String toJson(Object item) {
 		try {
-			return mapper.writeValueAsString(item);
+			return MAPPER.writeValueAsString(item);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -31,7 +31,7 @@ public class JsonUtils {
 	
 	public static <T> T toBean(String json, Class<T> valueType) {
 		try {
-			return mapper.readValue(json, valueType);
+			return MAPPER.readValue(json, valueType);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

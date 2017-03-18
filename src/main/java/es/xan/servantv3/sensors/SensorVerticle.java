@@ -29,7 +29,7 @@ import es.xan.servantv3.sensors.SensorVerticle.Actions.Sensor;
 
 public class SensorVerticle extends AbstractServantVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(SensorVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SensorVerticle.class);
 	
 	private String host;
 	private String login;
@@ -88,7 +88,7 @@ public class SensorVerticle extends AbstractServantVerticle {
 	}
 
 	public void reset_sensor(Sensor sensor, Message<Object> message) {
-		LOG.info("Asking to reset sensor " + sensor.sensor);
+		LOGGER.info("Asking to reset sensor [{}]", sensor.sensor);
 		final String command = sensors.get(sensor.sensor);
 		
 		final ReplyBuilder builder = MessageBuilder.createReply();

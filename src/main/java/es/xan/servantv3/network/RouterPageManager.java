@@ -119,7 +119,6 @@ public class RouterPageManager {
 				
 				else if (line.contains("].index =")) {
 					if (item.active) {
-//						System.out.println(item.name + " " + item.ip + " " + item.mac);
 						result.add(item);
 					}
 				}

@@ -17,7 +17,7 @@ import es.xan.servantv3.network.RouterPageManager.Device;
 
 public class NetworkVerticle  extends AbstractServantVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(NetworkVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NetworkVerticle.class);
 	
 	private RouterPageManager mManager = null;
 	
@@ -59,7 +59,7 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 			publishAction(Actions.CHECK_NETWORK);
 		});
 		
-		LOG.info("started NetworkVerticle");
+		LOGGER.info("started NetworkVerticle");
 	}
 		
 	public void check_network() {

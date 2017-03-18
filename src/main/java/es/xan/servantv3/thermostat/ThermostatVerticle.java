@@ -31,7 +31,7 @@ import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 
 public class ThermostatVerticle extends AbstractServantVerticle {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ThermostatVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ThermostatVerticle.class);
 	
 	public ThermostatVerticle() {
 		super(Constant.THERMOSTAT_VERTICLE);
@@ -124,11 +124,11 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 
 		boilerOn = false;
 		
-		LOG.info("started Thermostat");
+		LOGGER.info("started Thermostat");
 	}
 
 	private boolean send(String operation) throws ClientProtocolException, IOException {
-		LOG.info("setting thermostat to " + operation);
+		LOGGER.info("setting thermostat to [{}]", operation);
 		
 		final String url = configuration.getString("url");
 		final String token = configuration.getString("token");
@@ -140,11 +140,11 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
 
 		try (CloseableHttpResponse response = mHttpclient.execute(httpPost)) {
-			LOG.info("StatusCode:" + response.getStatusLine().getStatusCode());
+			LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
 		    final HttpEntity entity = response.getEntity();
 		    
 		    String content = EntityUtils.toString(entity);
-		    LOG.info(content);
+		    LOGGER.info(content);
 		    JsonObject json = new JsonObject(content);
 		    
 		    return json.getBoolean("connected");

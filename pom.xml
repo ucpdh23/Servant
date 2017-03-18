@@ -18,8 +18,12 @@
 		<commons.io.version>2.5</commons.io.version>
 		<commons.collections.version>4.0</commons.collections.version>
 		<jsch.version>0.1.54</jsch.version>
+		<logback.version>1.0.13</logback.version>
 
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    	
+    	<maven.compiler.source>1.8</maven.compiler.source>
+    	<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -95,6 +99,12 @@
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<version>${jsch.version}</version>
+		</dependency>
+		
+		<dependency> 
+  			<groupId>ch.qos.logback</groupId>
+  			<artifactId>logback-classic</artifactId>
+  			<version>${logback.version}</version>
 		</dependency>
 
 	</dependencies>

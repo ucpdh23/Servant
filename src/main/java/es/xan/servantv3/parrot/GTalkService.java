@@ -1,7 +1,5 @@
 package es.xan.servantv3.parrot;
 
-import io.vertx.core.json.JsonObject;
-
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -19,10 +17,16 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 
 
 
 public class GTalkService implements MessageListener {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(GTalkService.class);
 	
 	private JsonObject configuration;
 
@@ -47,7 +51,7 @@ public class GTalkService implements MessageListener {
 		try {
 			init();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.warn(e.getMessage(), e);
 		}
 	}
 
@@ -94,11 +98,11 @@ public class GTalkService implements MessageListener {
 					msg.setBody("I am a Java bot. You said: " + message.getBody());
 					chat.sendMessage(msg);
 				} catch (NotConnectedException ex) {
-					ex.printStackTrace();
+					LOGGER.warn(ex.getMessage(), ex);
 				}
 			}
 		} else {
-			System.out.println("I got a message I didn''t understand");
+			LOGGER.warn("I received a message I don't undestand [{}]", message);
 		}
 	}
 
@@ -132,7 +136,7 @@ public class GTalkService implements MessageListener {
 			
 			return true;
 		} catch (NotConnectedException e) {
-			e.printStackTrace();
+			LOGGER.warn(e.getMessage(), e);
 			return false;
 		}
 	}

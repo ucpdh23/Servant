@@ -31,7 +31,7 @@ import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
  */
 public class HomeVerticle extends AbstractServantVerticle {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(HomeVerticle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 	
 	public HomeVerticle() {
 		super(Constant.HOME_VERTICLE);
@@ -93,7 +93,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		final JsonArray mastersConfig = vertx.getOrCreateContext().config().getJsonArray("masters");
 		this.mBoss = loadBoss(mastersConfig.getList());
 		
-		LOG.info("Started HomeVerticle");
+		LOGGER.info("Started HomeVerticle");
 	}
 
 	public void no_temperature_info(Room room) {

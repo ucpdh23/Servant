@@ -61,13 +61,13 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		boolean toSave = saveFilter(item);
 		
 		if (!toSave) {
-			LOGGER.debug("Discarting item" + item);
+			LOGGER.debug("Discarting item [{}]", item);
 			ReplyBuilder builder = MessageBuilder.createReply();
 			builder.setError();
 			msg.reply(builder.build());
 			return;
 		}
-		LOGGER.debug("saving " + item);
+		LOGGER.debug("saving [{}]", item);
 		
 		mongoClient.save(mCollection, new JsonObject(Json.encode(item)), res -> {
 			onSaved(item, res);
@@ -77,6 +77,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 				msg.reply(builder.build());
 			} else {
 				LOGGER.warn(res.cause().getMessage(), res.cause());
+				
 				ReplyBuilder builder = MessageBuilder.createReply();
 				builder.setError();
 				msg.reply(builder.build());
