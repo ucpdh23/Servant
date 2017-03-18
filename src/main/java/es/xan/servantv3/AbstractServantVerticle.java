@@ -106,7 +106,6 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 		
 		if (!this.mEventMap.isEmpty())
 			eb.consumer(Constant.EVENT).handler(event -> processEvent(event));
-			
 	}
 	
 	private void processEvent(Message<Object> message) {
@@ -115,7 +114,7 @@ public  class AbstractServantVerticle extends AbstractVerticle {
 		LOGGER.debug("Processing action [{}]", action);
 		
 		if (!mEventMap.containsKey(action)) {
-			LOGGER.warn("Not processed event [{}] ", action);
+			LOGGER.debug("Not processed event [{}] in verticle [{}]", action, this.mVerticleName);
 			return;
 		}
 		

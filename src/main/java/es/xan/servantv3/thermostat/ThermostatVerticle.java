@@ -1,18 +1,11 @@
 package es.xan.servantv3.thermostat;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -28,6 +21,11 @@ import es.xan.servantv3.Events;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class ThermostatVerticle extends AbstractServantVerticle {
 
@@ -99,8 +97,6 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 					builderOn.setError();
 					builderOn.setMessage("Please, try it back in 5 minutes");
 					msg.reply(builderOn.build());
-					
-//					publishAction(Actions.SWITCH_BOILER, status, reply -> reply.);
 				}
 				
 				break;
@@ -127,7 +123,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		LOGGER.info("started Thermostat");
 	}
 
-	private boolean send(String operation) throws ClientProtocolException, IOException {
+	private boolean send(String operation) throws UnsupportedEncodingException {
 		LOGGER.info("setting thermostat to [{}]", operation);
 		
 		final String url = configuration.getString("url");
@@ -148,6 +144,9 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		    JsonObject json = new JsonObject(content);
 		    
 		    return json.getBoolean("connected");
+		} catch (Exception e) {
+			LOGGER.warn("Cannot setting boiler to [{}]", operation, e);
+			return false;
 		}
 	}
 

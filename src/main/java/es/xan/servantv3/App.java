@@ -1,5 +1,7 @@
 package es.xan.servantv3;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
@@ -22,6 +24,13 @@ public class App extends AbstractVerticle {
 	public void start() {
 		LOGGER.info("Starting servant app");
 		
+		initializeLogBridges();
+		initializeVerticles();
+		
+		LOGGER.info("Started :)");
+	}
+
+	private void initializeVerticles() {
 		JsonObject config = Vertx.currentContext().config();
 		
 		vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
@@ -31,7 +40,14 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		
-		LOGGER.info("Started :)");
+	}
+
+	private void initializeLogBridges() {
+		// Optionally remove existing handlers attached to j.u.l root logger
+		 SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
+
+		 // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
+		 // the initialization phase of your application
+		 SLF4JBridgeHandler.install();		
 	}
 }

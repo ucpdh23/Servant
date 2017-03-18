@@ -10,6 +10,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 
+import java.util.Date;
 import java.util.function.BiConsumer;
 
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
@@ -27,6 +28,8 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 	protected MongoClient mongoClient;
 
 	private String mCollection;
+	
+	private static final long MAX_ELAPSED_TIME = 300; // ms
 	
 	abstract protected BiConsumer<T, String> onSaved();
 	
@@ -69,7 +72,11 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		}
 		LOGGER.debug("saving [{}]", item);
 		
+		final long init = new Date().getTime();
 		mongoClient.save(mCollection, new JsonObject(Json.encode(item)), res -> {
+			final long elapsed = new Date().getTime() - init;
+			if (elapsed > MAX_ELAPSED_TIME) LOGGER.warn("Inserting in mongo required [{}] millis", elapsed);
+			
 			onSaved(item, res);
 			if (res.succeeded()) {
 				ReplyBuilder builder = MessageBuilder.createReply();
@@ -98,7 +105,11 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		final FindOptions options = new FindOptions();
 		options.setLimit(query.limit);
 		
+		final long init = new Date().getTime();
 		mongoClient.findWithOptions(mCollection, query.filter != null? new JsonObject(Json.encode(query.filter)) : new JsonObject(), options, res -> {
+			final long elapsed = new Date().getTime() - init;
+			if (elapsed > MAX_ELAPSED_TIME) LOGGER.warn("Querying in mongo required [{}] millis", elapsed);
+
 			ReplyBuilder builder = MessageBuilder.createReply();
 			builder.setResult(res.result());
 			msg.reply(builder.build());
