@@ -14,10 +14,15 @@
 
 		<vertx.version>3.3.3</vertx.version>
 		<smack.version>4.0.5</smack.version>
+		
 		<httpclient.version>4.3.3</httpclient.version>
+		
 		<commons.io.version>2.5</commons.io.version>
 		<commons.collections.version>4.0</commons.collections.version>
+		<commons.lang.version>3.4</commons.lang.version>
+		
 		<jsch.version>0.1.54</jsch.version>
+		
 		<logback.version>1.0.13</logback.version>
 		<julToSlf4j.version>1.7.24</julToSlf4j.version>
 		<sentryLogback.version>7.8.5</sentryLogback.version>
@@ -95,6 +100,13 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons.collections.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons.lang.version}</version>
 		</dependency>
 		
 		<dependency>

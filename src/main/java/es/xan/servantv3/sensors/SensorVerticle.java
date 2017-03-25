@@ -93,8 +93,9 @@ public class SensorVerticle extends AbstractServantVerticle {
 		
 		final ReplyBuilder builder = MessageBuilder.createReply();
 		if (command == null) {
-			builder.setError();
+			LOGGER.warn("Sensor [{}] not found", sensor.sensor);
 			
+			builder.setError();
 			message.reply(builder.build());
 		} else {
 			
@@ -107,6 +108,7 @@ public class SensorVerticle extends AbstractServantVerticle {
 			
 			if (result) builder.setOk();
 			else builder.setError();
+			
 			message.reply(builder.build());
 		}
 	}

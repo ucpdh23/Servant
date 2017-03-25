@@ -1,9 +1,8 @@
 package es.xan.servantv3.brain.nlp;
 
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 import es.xan.servantv3.Action;
-import es.xan.servantv3.Constant;
+import es.xan.servantv3.MessageUtils;
+import io.vertx.core.eventbus.Message;
 
 public class TranslationUtils {
 	
@@ -24,12 +23,13 @@ public class TranslationUtils {
 	}
 	
 	public static String forwarding(Message<Object> msg) {
-		JsonObject response = (JsonObject) msg.body();
-		if (Constant.REPLY_OK.equals(response.getString("status"))) {
+		if (msg == null) return "Sorry, but something extremally weird happened";
+		
+		if (MessageUtils.isOk(msg)) {
 			return "Your wish is my command";
 		} else {
-			String message = response.getString("message");
-			return "Sorry, something weird happens. " + ((message!=null)? message : "");
+			final String message = MessageUtils.getErrorMessage(msg);
+			return "Sorry, something weird happens. " + ((message != null)? message : "");
 		}
 		
 	}

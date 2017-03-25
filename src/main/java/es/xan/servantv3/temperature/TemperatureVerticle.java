@@ -1,14 +1,5 @@
 package es.xan.servantv3.temperature;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -20,11 +11,19 @@ import es.xan.servantv3.AbstractMongoVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.MessageBuilder;
-import es.xan.servantv3.Query;
 import es.xan.servantv3.Events.Room;
+import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.Query;
 import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	
@@ -81,6 +80,11 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	}
 	
 	private Map<String,Long> mLastTimestamp = new HashMap<>();
+	
+	@Override
+	public void start() {
+		super.start();
+	}
 	
 	protected boolean saveFilter(Temperature item) {
 		final Long lastTimestamp = mLastTimestamp.getOrDefault(item.room, 0L);

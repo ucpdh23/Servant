@@ -1,8 +1,12 @@
 package es.xan.servantv3.thermostat;
 
+import static es.xan.servantv3.Scheduler.at;
+
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -20,6 +24,9 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.Scheduler;
+import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
@@ -27,6 +34,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * Manages the boiler, switching it on or off 
+ * @author Xan
+ *
+ */
 public class ThermostatVerticle extends AbstractServantVerticle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ThermostatVerticle.class);
@@ -38,12 +50,20 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	}
 
 	private CloseableHttpClient mHttpclient;
+	private Scheduler mScheduler;
+	
+	private Boolean mAutomaticMode;
+	private boolean mBoilerOn;
+	private JsonObject mConfiguration;
+	private UUID mScheduledTask;
 	
 	public enum Actions implements Action {
 		SWITCH_BOILER(NewStatus.class),
+		AUTOMATIC_MODE(AutomaticMode.class)
 		;
 		
 		public static class NewStatus { public String status; }
+		public static class AutomaticMode { public Boolean enabled; }
 
 		private Class<?> mMessageClass;
 		
@@ -64,7 +84,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 				boolean updatedOn = send("HIGH");
 				
 				if (updatedOn) {
-					boilerOn = true;
+					mBoilerOn = true;
 					
 					ReplyBuilder builderOn = MessageBuilder.createReply();
 					builderOn.setOk();
@@ -84,7 +104,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 				boolean updatedOff = send("LOW");
 				
 				if (updatedOff) {
-					boilerOn = false;
+					mBoilerOn = false;
 					
 					ReplyBuilder builderOff = MessageBuilder.createReply();
 					builderOff.setOk();
@@ -106,19 +126,24 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		}
 	}
 	
-	@SuppressWarnings("unused")
-	private boolean boilerOn;
-
-	private JsonObject configuration;
+	public void automatic_mode(AutomaticMode mode) {
+		this.mAutomaticMode = mode.enabled;
+		
+		performAutomaticActions();
+	}
+	
 	
 	@Override
 	public void start() {
 		super.start();
-		configuration = Vertx.currentContext().config().getJsonObject("ThermostatVerticle");
+		this.mConfiguration = Vertx.currentContext().config().getJsonObject("ThermostatVerticle");
 
-		mHttpclient = HttpClients.createDefault();
+		this.mHttpclient = HttpClients.createDefault();
+		
+		this.mScheduler = new Scheduler(getVertx());
 
-		boilerOn = false;
+		this.mBoilerOn = Boolean.FALSE;
+		this.mAutomaticMode = Boolean.FALSE;
 		
 		LOGGER.info("started Thermostat");
 	}
@@ -126,8 +151,8 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	private boolean send(String operation) throws UnsupportedEncodingException {
 		LOGGER.info("setting thermostat to [{}]", operation);
 		
-		final String url = configuration.getString("url");
-		final String token = configuration.getString("token");
+		final String url = mConfiguration.getString("url");
+		final String token = mConfiguration.getString("token");
 		
 		final HttpPost httpPost = new HttpPost(url);
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -143,11 +168,31 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		    LOGGER.info(content);
 		    JsonObject json = new JsonObject(content);
 		    
-		    return json.getBoolean("connected");
+		    return json.getBoolean("connected", Boolean.FALSE);
 		} catch (Exception e) {
 			LOGGER.warn("Cannot setting boiler to [{}]", operation, e);
 			return false;
 		}
 	}
+	
+	private void performAutomaticActions() {
+		if (this.mAutomaticMode) {
+			this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(23, 0)), (UUID id) -> { if (this.mBoilerOn) switchBoilerOffAndNotify();  return true; });
+		} else {
+			if (this.mScheduledTask != null) {
+				this.mScheduler.removeScheduledTask(this.mScheduledTask);
+			}
+		}
+	}
+
+	private void switchBoilerOffAndNotify() {
+		publishAction(Actions.SWITCH_BOILER, new NewStatus() {{
+			this.status = "off";
+		}}, msg -> publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new HomeVerticle.Actions.BossMessage() {{
+			this.text = "Automatic boiler off";
+		}}));
+		
+	}
+
 
 }

@@ -29,7 +29,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 
 	private String mCollection;
 	
-	private static final long MAX_ELAPSED_TIME = 300; // ms
+	private static final long MAX_ELAPSED_TIME = 1000; // ms
 	
 	abstract protected BiConsumer<T, String> onSaved();
 	

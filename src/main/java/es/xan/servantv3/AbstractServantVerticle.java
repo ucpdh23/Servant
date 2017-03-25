@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import es.xan.servantv3.MessageBuilder.ActionBuilder;
 import es.xan.servantv3.MessageBuilder.EventBuilder;
 
-public  class AbstractServantVerticle extends AbstractVerticle {
+public class AbstractServantVerticle extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServantVerticle.class);
 	

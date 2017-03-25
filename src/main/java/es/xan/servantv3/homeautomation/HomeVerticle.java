@@ -17,11 +17,14 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
+import es.xan.servantv3.MessageUtils;
 import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.homeautomation.HomeVerticle.Actions.BossMessage;
 import es.xan.servantv3.network.RouterPageManager.Device;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
+import es.xan.servantv3.sensors.SensorVerticle;
 
 /**
  * Home automation verticle.
@@ -37,7 +40,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		super(Constant.HOME_VERTICLE);
 		
 		supportedActions(
-			Actions.GET_HOME_STATUS);
+			Actions.values());
 		
 		supportedEvents(
 			Events.NO_TEMPERATURE_INFO,  
@@ -52,7 +55,10 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	public enum Actions implements Action {
 		GET_HOME_STATUS(null),
+		NOTIFY_BOSS(Message.class)
 		;
+		
+		public static class BossMessage { public String text; }
 
 		Class<?> beanClass;
 		
@@ -97,10 +103,22 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void no_temperature_info(Room room) {
+		notify_boss(new BossMessage() {{ this.text = "no temperature info since 1 hour for room " + room.room; }});
+		publishAction(SensorVerticle.Actions.RESET_SENSOR, new SensorVerticle.Actions.Sensor() {{ this.sensor = room.room;}},
+				msg -> {if (MessageUtils.isOk(msg)) {
+						notify_boss(new BossMessage() {{ this.text = "Sensor reseted"; }});
+					} else {
+						notify_boss(new BossMessage() {{ this.text = "Cannot reset sensor"; }});
+					}});
+	}
+	
+	
+	public void notify_boss(BossMessage content) {
 		ParrotMessage message = new ParrotMessage();
 		message.user = this.mBoss;
-		message.message = "no temperature info since 1 hour for room " + room.room;
+		message.message = content.text;
 		publishAction(ParrotVerticle.Actions.SEND, message);
+		
 	}
 
 
