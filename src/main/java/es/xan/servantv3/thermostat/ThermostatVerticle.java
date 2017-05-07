@@ -129,7 +129,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	public void automatic_mode(AutomaticMode mode) {
 		this.mAutomaticMode = mode.enabled;
 		
-		performAutomaticActions();
+		scheduleAutomaticActions();
 	}
 	
 	
@@ -175,7 +175,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		}
 	}
 	
-	private void performAutomaticActions() {
+	private void scheduleAutomaticActions() {
 		if (this.mAutomaticMode) {
 			this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(23, 0)), (UUID id) -> { if (this.mBoilerOn) switchBoilerOffAndNotify();  return true; });
 		} else {
@@ -186,6 +186,8 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	}
 
 	private void switchBoilerOffAndNotify() {
+		LOGGER.info("Its time to shut the boiler off");
+		
 		publishAction(Actions.SWITCH_BOILER, new NewStatus() {{
 			this.status = "off";
 		}}, msg -> publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new HomeVerticle.Actions.BossMessage() {{

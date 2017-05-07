@@ -155,6 +155,8 @@ public class SensorVerticle extends AbstractServantVerticle {
 		if (exitStatus < 0) {
 			return true;
 		} else if(exitStatus > 0) {
+			LOGGER.warn("proccess yielded [{}]", result);
+			
 			return false;
 		} else {
 			return true;

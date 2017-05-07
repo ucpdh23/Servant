@@ -20,10 +20,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import es.xan.servantv3.MessageBuilder.ActionBuilder;
 import es.xan.servantv3.MessageBuilder.EventBuilder;
+import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 
 public class AbstractServantVerticle extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServantVerticle.class);
+	
+	private static final Pattern VERTICLE_NAME_PATTERN = Pattern.compile("\\.([^\\.]*)Verticle\\.");
 	
 	private final String mVerticleName;
 	private final Map<String, Pair<Action, Method>> mActionMap;
@@ -135,6 +138,9 @@ public class AbstractServantVerticle extends AbstractVerticle {
 				if (count == 1) {
 					mEventMap.get(action).right.invoke(this, newInstance);
 					
+					//Automatic Reply
+					ReplyBuilder builder = MessageBuilder.createReply();
+					message.reply(builder.build());
 				} else if (count == 2) {
 					mEventMap.get(action).right.invoke(this, newInstance, message);
 				}
@@ -237,14 +243,16 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 
 	private static String resolveVerticleName(String canonicalName) {
-		Pattern pattern = Pattern.compile("\\.([^\\.]*)Verticle\\.");
-		Matcher matcher = pattern.matcher(canonicalName);
+		final Matcher matcher = VERTICLE_NAME_PATTERN.matcher(canonicalName);
 		
 		if (matcher.find()) {
-			return matcher.group(1).toLowerCase()+".verticle";
+			final String verticleName = matcher.group(1).toLowerCase() + ".verticle";
+			LOGGER.debug("verticleName [{}]", verticleName);
+			
+			return verticleName;
 		}
 		
-		throw new RuntimeException("Not found pattern of 'Verticle' into canonicalName:" + canonicalName);
+		throw new RuntimeException("Not found pattern of 'Verticle' into canonicalName: " + canonicalName);
 	}
 
 	protected void supportedEvents(Events...events) {

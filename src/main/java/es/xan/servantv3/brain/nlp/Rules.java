@@ -18,6 +18,7 @@ import es.xan.servantv3.sensors.SensorVerticle.Actions.Sensor;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 
 /**
@@ -37,6 +38,23 @@ import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 public enum Rules {
 //	RESPONSE_YES(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("yes||si"), send("yes")), 
 //	RESPONSE_NO(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("no"), send("no")), 
+	BOILER_AUTOMATIC_ON(ThermostatVerticle.Actions.AUTOMATIC_MODE,
+			messageContains("boiler||caldera||calefacción||calefaccion")
+				.and(messageContains("on||encender||activar||conectar"))
+				.and(messageContains("automático||automatic||automatico")),
+			tokens -> {return new AutomaticMode() {{ this.enabled = true; }};},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			),
+
+	BOILER_AUTOMATIC_OFF(ThermostatVerticle.Actions.AUTOMATIC_MODE,
+			messageContains("boiler||caldera||calefacción||calefaccion")
+				.and(messageContains("off||apagar||desactivar||desconectar"))
+				.and(messageContains("automático||automatic||automatico")),
+			tokens -> {return new AutomaticMode() {{ this.enabled = false; }};},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			),
+
+	
 	BOILER_ON(ThermostatVerticle.Actions.SWITCH_BOILER,
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("on||encender||activar||conectar")),

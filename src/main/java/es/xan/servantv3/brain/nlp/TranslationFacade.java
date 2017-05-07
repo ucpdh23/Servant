@@ -7,8 +7,13 @@ import java.time.ZonedDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 
 public class TranslationFacade {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TranslationFacade.class);
 	
 	public static Translation translate(String text) {
 		Translation translation = new Translation();
@@ -22,6 +27,8 @@ public class TranslationFacade {
 	private static void fillMessageAndAddress(String text, Translation translation) {
 		for (Rules option : Rules.values()) {
 			if (option.mPredicate.test(text)) {
+				LOGGER.debug("Applying rule [{}]", option);
+				
 				translation.action = option.mAddress;
 				translation.message = option.mFunction.apply(tokenizer(text));
 				translation.response = option.mResponse;

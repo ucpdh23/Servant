@@ -23,7 +23,7 @@ public class HomeUtils {
 			Person person = JsonUtils.toBean(item.encode(), Person.class);
 			builder.append(person.name).append(" ");
 			
-			builder.append(person.inHome? "in home" : "outside");
+			builder.append(person.inHome? "at home" : "outside");
 			builder.append("\n");
 		}
 		
