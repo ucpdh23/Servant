@@ -15,9 +15,14 @@ public class MessageUtils {
 		final JsonObject response = (JsonObject) msg.body();
 		return Constant.REPLY_OK.equals(response.getString("status"));
 	}
-
-	public static String getErrorMessage(Message<Object> msg) {
-		JsonObject response = (JsonObject) msg.body();
+	
+	public static boolean hasMessage(Message<Object> msg) {
+		final JsonObject response = (JsonObject) msg.body();
+		return response.fieldNames().contains("message");
+	}
+	
+	public static String getMessage(Message<Object> msg) {
+		final JsonObject response = (JsonObject) msg.body();
 		return response.getString("message");
 	}
 

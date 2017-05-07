@@ -2,6 +2,7 @@ package es.xan.servantv3.brain.nlp;
 
 
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageContains;
+import static es.xan.servantv3.brain.nlp.RuleUtils.messageIs;
 import static es.xan.servantv3.brain.nlp.RuleUtils.nextTokenTo;
 import static es.xan.servantv3.brain.nlp.TranslationUtils.reply;
 import io.vertx.core.eventbus.Message;
@@ -10,6 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import es.xan.servantv3.Action;
+import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
@@ -36,6 +38,12 @@ import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
  *
  */
 public enum Rules {
+	HELP(STSVerticle.Actions.HELP,
+			messageIs("help||ayuda"),
+			tokens -> {return null;},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Information about all the available commands"
+			),
 //	RESPONSE_YES(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("yes||si"), send("yes")), 
 //	RESPONSE_NO(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("no"), send("no")), 
 	BOILER_AUTOMATIC_ON(ThermostatVerticle.Actions.AUTOMATIC_MODE,
@@ -43,7 +51,8 @@ public enum Rules {
 				.and(messageContains("on||encender||activar||conectar"))
 				.and(messageContains("automático||automatic||automatico")),
 			tokens -> {return new AutomaticMode() {{ this.enabled = true; }};},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. automatic boiler on"
 			),
 
 	BOILER_AUTOMATIC_OFF(ThermostatVerticle.Actions.AUTOMATIC_MODE,
@@ -51,7 +60,8 @@ public enum Rules {
 				.and(messageContains("off||apagar||desactivar||desconectar"))
 				.and(messageContains("automático||automatic||automatico")),
 			tokens -> {return new AutomaticMode() {{ this.enabled = false; }};},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. automatic boiler off"
 			),
 
 	
@@ -59,32 +69,37 @@ public enum Rules {
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("on||encender||activar||conectar")),
 			tokens -> {return new NewStatus() {{ this.status = "on"; }};},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. boiler on"
 			),
 			
 	BOILER_OFF(ThermostatVerticle.Actions.SWITCH_BOILER, 
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("off||apagar||desactivar||desconectar")),
 			tokens -> {return new NewStatus() {{ this.status = "off"; }};},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. boiler off"
 			),
 			
 	TEMPERATURE(TemperatureVerticle.Actions.LAST_VALUES,
 			messageContains("temperatura||temperature"),
 			tokens -> {return null;},
-			msg -> { return reply(null, TemperatureUtils.toString(msg));}
+			msg -> { return reply(null, TemperatureUtils.toString(msg));},
+			"Ex. temperature"
 			),
 	
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
 			messageContains("home||casa"),
 			tokens -> {return null;},
-			msg -> { return reply(null, HomeUtils.toString(msg));}
+			msg -> { return reply(null, HomeUtils.toString(msg));},
+			"Ex. home"
 			),
 	
 	RESET_SENSOR(SensorVerticle.Actions.RESET_SENSOR,
 			messageContains("sensor"),
 			tokens -> { return new Sensor() {{ this.sensor = nextTokenTo("sensor").apply(tokens);}};},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));}
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. sensor xxxx"
 			),
 //	REMINDER(Constant.PARRONT_VERTICLE, false, messageContains("reminder"), TranslationType.COPY),
 //	BOILER_STATUS(Constant.OPERATION_BOILER_STATE_CHECKER, true, messageContains("checkBoilerStatus"), TranslationType.OPERATION),
@@ -95,23 +110,19 @@ public enum Rules {
 	final Predicate<String> mPredicate;
 	final Function<String[], Object> mFunction;
 	final Action mAddress;
-	final boolean mForwarding;
 	final Function<Message<Object>, Reply> mResponse;
+	final String mHelpMessage;
 	
-	private Rules(Action address, Predicate<String> predicate, Function<String[],Object> variantFunction) {
+	private Rules(Action address, Predicate<String> predicate, Function<String[],Object> variantFunction, Function<Message<Object>, Reply> response, String helpMessage) {
 		this.mAddress = address;
-		this.mForwarding = false;
-		this.mPredicate = predicate;
-		this.mFunction = variantFunction;
-		this.mResponse = null;
-	}
-	
-	private Rules(Action address, Predicate<String> predicate, Function<String[],Object> variantFunction, Function<Message<Object>, Reply> response) {
-		this.mAddress = address;
-		this.mForwarding = true;
 		this.mPredicate = predicate;
 		this.mFunction = variantFunction;
 		this.mResponse = response;
+		this.mHelpMessage = helpMessage;
+	}
+	
+	public String getHelpMessage() {
+		return this.mHelpMessage;
 	}
 
 }

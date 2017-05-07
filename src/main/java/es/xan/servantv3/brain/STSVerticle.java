@@ -1,19 +1,23 @@
 package es.xan.servantv3.brain;
 
+import es.xan.servantv3.AbstractServantVerticle;
+import es.xan.servantv3.Action;
+import es.xan.servantv3.Constant;
+import es.xan.servantv3.Events;
+import es.xan.servantv3.Events.ParrotMessageReceived;
+import es.xan.servantv3.MessageBuilder;
+import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.brain.nlp.Rules;
+import es.xan.servantv3.brain.nlp.Translation;
+import es.xan.servantv3.brain.nlp.TranslationFacade;
+import es.xan.servantv3.parrot.ParrotVerticle.Actions.CreateChat;
+import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import es.xan.servantv3.AbstractServantVerticle;
-import es.xan.servantv3.Constant;
-import es.xan.servantv3.Events;
-import es.xan.servantv3.Events.ParrotMessageReceived;
-import es.xan.servantv3.brain.nlp.Translation;
-import es.xan.servantv3.brain.nlp.TranslationFacade;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.CreateChat;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
 
 /**
  * Superior temporal sulcus.
@@ -30,9 +34,26 @@ public class STSVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(STSVerticle.class);
 	
 	private JsonArray mMasters;
-
+	
+	public enum Actions implements Action {
+		HELP(null),
+		;
+		
+		Class<?> beanClass;
+		
+		private Actions(Class<?> beanClass) {
+			this.beanClass = beanClass;
+		}
+		
+		@Override
+		public Class<?> getPayloadClass() {
+			return beanClass;
+		}
+		
+	}
+	
 	public STSVerticle() {
-		super(Constant.BRAIN_VERTICLE);
+		super(Constant.STS_VERTICLE);
 		
 		supportedEvents(
 			Events.PARRONT_AVAILABLE,
@@ -55,10 +76,25 @@ public class STSVerticle extends AbstractServantVerticle {
 			JsonObject emailInfo = (JsonObject) item;
 
 			LOGGER.debug("creating chat for user [{}]", emailInfo.getString("email"));
-			publishAction(Actions.CREATE_CHAT, new CreateChat() {{
+			publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.CREATE_CHAT, new CreateChat() {{
 				this.user = emailInfo.getString("email");
 			}});
 		}
+	}
+	
+	public void help(final Message<Object> msg) {
+		ReplyBuilder builder = MessageBuilder.createReply();
+		
+		StringBuilder response = new StringBuilder();
+		for (Rules rule : Rules.values()) {
+			response.append("command:").append(rule.name().toLowerCase()).append("\n");
+			response.append("           ").append(rule.getHelpMessage()).append("\n\n");
+		}
+		
+		builder.setOk();
+		builder.setMessage(response.toString());
+		
+		msg.reply(builder.build());
 	}
 	
 	/**
@@ -72,7 +108,7 @@ public class STSVerticle extends AbstractServantVerticle {
 		
 		if (translation.action != null) {
 			publishAction(translation.action, translation.message, response -> {
-				publishAction(Actions.SEND, new ParrotMessage() {{
+				publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
 					this.message = translation.response.apply(response.result()).msg;
 					this.user = parrotMessage.user;
 				}});

@@ -26,9 +26,13 @@ public class TranslationUtils {
 		if (msg == null) return "Sorry, but something extremally weird happened";
 		
 		if (MessageUtils.isOk(msg)) {
-			return "Your wish is my command";
+			if (MessageUtils.hasMessage(msg)) {
+				return MessageUtils.getMessage(msg);
+			} else {
+				return "Your wish is my command";
+			}
 		} else {
-			final String message = MessageUtils.getErrorMessage(msg);
+			final String message = MessageUtils.getMessage(msg);
 			return "Sorry, something weird happens. " + ((message != null)? message : "");
 		}
 		
