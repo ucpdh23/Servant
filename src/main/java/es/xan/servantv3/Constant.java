@@ -6,7 +6,7 @@ public class Constant {
 	public static final String TEMPERATURE_VERTICLE = "temperature.verticle";
 	public static final String PARROT_VERTICLE = "parrot.verticle";
 	public static final String NETWORK_VERTICLE = "network.verticle";
-	public static final String SENSORS_VERTICLE = "sensors.verticle";
+	public static final String SENSOR_VERTICLE = "sensor.verticle";
 	public static final String HOME_VERTICLE = "home.verticle";
 	public static final String STS_VERTICLE = "sts.verticle";
 	

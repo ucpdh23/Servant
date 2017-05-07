@@ -38,7 +38,7 @@ public class SensorVerticle extends AbstractServantVerticle {
 	private Map<String, String> mSensors;
 	
 	public SensorVerticle() {
-		super(Constant.SENSORS_VERTICLE);
+		super(Constant.SENSOR_VERTICLE);
 		
 		supportedActions(Actions.values());
 	}

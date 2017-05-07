@@ -261,7 +261,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 	
 	protected void supportedActions(Action...actions) {
-		if (actions != null && actions.length > 0) {
+		if (actions.length > 0) {
 			final String actionsVerticleName = resolveVerticleName(actions[0].getClass().getCanonicalName());
 			
 			if (actionsVerticleName.equals(mVerticleName)) {
