@@ -96,6 +96,8 @@ public class SensorVerticle extends AbstractServantVerticle {
 			LOGGER.warn("Sensor [{}] not found", sensor.sensor);
 			
 			builder.setError();
+			builder.setMessage("Allowed options " + mSensors.keySet());
+			
 			message.reply(builder.build());
 		} else {
 			

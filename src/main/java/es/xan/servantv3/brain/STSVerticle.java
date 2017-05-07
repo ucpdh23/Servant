@@ -55,6 +55,8 @@ public class STSVerticle extends AbstractServantVerticle {
 	public STSVerticle() {
 		super(Constant.STS_VERTICLE);
 		
+		supportedActions(Actions.values());
+		
 		supportedEvents(
 			Events.PARRONT_AVAILABLE,
 			Events.PARROT_MESSAGE_RECEIVED

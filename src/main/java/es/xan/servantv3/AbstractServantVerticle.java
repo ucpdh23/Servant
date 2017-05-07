@@ -261,6 +261,19 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 	
 	protected void supportedActions(Action...actions) {
+		if (actions != null && actions.length > 0) {
+			final String actionsVerticleName = resolveVerticleName(actions[0].getClass().getCanonicalName());
+			
+			if (actionsVerticleName.equals(mVerticleName)) {
+				LOGGER.info("adding support for actions of verticleName [{}]", actionsVerticleName);
+			} else {
+				LOGGER.error("actionsVerticleName [{}] is not equals to verticle provided name [{}]", actionsVerticleName, mVerticleName);
+				throw new RuntimeException("verticleName " + mVerticleName + " is not valid");
+			}
+		} else {
+			LOGGER.warn("No actions to support");
+		}
+		
 		for (Action item : actions) {
 			mActionMap.put(item.name(), new Pair<Action, Method>((Action) item, this.mMethodMap.get(item.name().toLowerCase())));
 		}
