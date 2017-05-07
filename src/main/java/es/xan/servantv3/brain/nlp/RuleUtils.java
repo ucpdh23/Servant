@@ -34,10 +34,9 @@ public class RuleUtils {
 	}
 	
 	public static Function<String[],String> nextTokenTo(String input) {
-		
 		return (String[] tokens) -> {
 			for (int i=0; i < tokens.length - 1; i++) {
-				if (input.equals(tokens[i])) {
+				if (input.equals(tokens[i].toLowerCase())) {
 					return tokens[i + 1];
 				}
 			}
