@@ -6,6 +6,7 @@ import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import es.xan.servantv3.webservice.WebServerVerticle;
@@ -40,6 +41,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(SensorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 	}
 
 	private void initializeLogBridges() {
