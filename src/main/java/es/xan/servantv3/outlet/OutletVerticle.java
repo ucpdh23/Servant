@@ -18,14 +18,16 @@ public class OutletVerticle extends AbstractServantVerticle {
 	
 	public OutletVerticle() {
 		super(Constant.OUTLET_VERTICLE);
+		
+		supportedActions(Actions.values());
 	}
 
 	private String mHost = "192.168.1.108";
 	private String mLogin = "ubnt";
 	private String mPassword = "ubnt";
 	
-	private static String ON_COMMAND = "echo '1' > /proc/power/relay1";
-	private static String OFF_COMMAND = "echo '0' > /proc/power/relay1";
+	private static String ON_COMMAND = "echo \"1\" > /proc/power/relay1";
+	private static String OFF_COMMAND = "echo \"0\" > /proc/power/relay1";
 	
 	public enum Actions  implements Action {
 		SWITCHER(Switcher.class),
@@ -48,18 +50,30 @@ public class OutletVerticle extends AbstractServantVerticle {
 		
 	}
 	
-	public void set(Configure conf) {
+	public void set(Configure conf, Message<Object> message) {
+		ReplyBuilder builderOn = MessageBuilder.createReply();
 		switch (conf.field) {
 		case "host":
 			this.mHost = conf.value;
+			builderOn.setOk();
+			builderOn.setMessage(conf.value);
 			break;
 		case "login":
 			this.mLogin= conf.value;
+			builderOn.setOk();
+			builderOn.setMessage(conf.value);
 			break;
 		case "password":
 			this.mPassword= conf.value;
+			builderOn.setOk();
+			builderOn.setMessage(conf.value);
+			break;
+		default:
+			builderOn.setError();
+			builderOn.setMessage("field:" + conf.field + " value" + conf.value);
 			break;
 		}
+		message.reply(builderOn.build());
 	}
 	
 	public void switcher(Switcher switcher, Message<Object> message) {
