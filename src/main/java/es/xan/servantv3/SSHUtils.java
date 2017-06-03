@@ -22,6 +22,8 @@ public class SSHUtils {
 	public static boolean runRemoteCommand(String host, String login, String password, String command) throws JSchException, IOException {
 		JSch jsch = new JSch();
 		
+		LOGGER.info("host [{}] login [{}] password [{}] command [{}]", host, login, password, command);
+		
 		Session session = jsch.getSession(login, host, 22);
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.setPassword(password);
