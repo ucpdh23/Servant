@@ -1,11 +1,5 @@
 package es.xan.servantv3.homeautomation;
 
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +9,21 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
+import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
-import es.xan.servantv3.MessageUtils;
-import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.MessageUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle.Actions.BossMessage;
 import es.xan.servantv3.network.RouterPageManager.Device;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
 import es.xan.servantv3.sensors.SensorVerticle;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Home automation verticle.
@@ -101,7 +100,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		LOGGER.info("Started HomeVerticle");
 	}
-
+	
 	public void no_temperature_info(Room room) {
 		notify_boss(new BossMessage() {{ this.text = "no temperature info since 1 hour for room " + room.room; }});
 		publishAction(SensorVerticle.Actions.RESET_SENSOR, new SensorVerticle.Actions.Sensor() {{ this.sensor = room.room;}},

@@ -15,6 +15,7 @@ public enum Events implements Event {
 	
 	TEMPERATURE_RECEIVED(Temperature.class),
 	NO_TEMPERATURE_INFO(Room.class),
+	TEMPERATURE_OUT_OF_RANGE(TemperatureOOR.class),
 	
 	NEW_NETWORK_DEVICES_MESSAGE(Device.class),
 	REM_NETWORK_DEVICES_MESSAGE(Device.class),
@@ -28,6 +29,7 @@ public enum Events implements Event {
 	public static class NewStatus { public String status; }
 	public static class ParrotMessageReceived { public String user, message; }
 	public static class Room { public String room; }
+	public static class TemperatureOOR { public Boolean toHot; public Temperature temperature; public float rangeMin, rangeMax;}
 	
 	private Class<?> mBeanClass;
 

@@ -32,7 +32,8 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 	}
 	
 	public enum Actions implements Action {
-		CHECK_NETWORK(null)
+		CHECK_NETWORK(null),
+		STOP(null),
 		;
 
 		Class<?> mBeanClass;
@@ -61,7 +62,7 @@ public class NetworkVerticle  extends AbstractServantVerticle {
 		
 		LOGGER.info("started NetworkVerticle");
 	}
-		
+	
 	public void check_network() {
 			try {
 				List<Device> newDevices = mManager.getDevices();
