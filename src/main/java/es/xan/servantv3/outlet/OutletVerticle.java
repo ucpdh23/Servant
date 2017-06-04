@@ -6,12 +6,14 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.SSHUtils;
+import es.xan.servantv3.capabilities.AutoConfigurable;
 import es.xan.servantv3.outlet.OutletVerticle.Actions.Configure;
 import es.xan.servantv3.outlet.OutletVerticle.Actions.Switcher;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+@AutoConfigurable
 public class OutletVerticle extends AbstractServantVerticle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OutletVerticle.class);

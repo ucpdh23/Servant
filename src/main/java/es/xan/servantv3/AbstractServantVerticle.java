@@ -29,8 +29,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private static final Pattern VERTICLE_NAME_PATTERN = Pattern.compile("\\.([^\\.]*)Verticle\\.");
 	
 	private final String mVerticleName;
-	private final Map<String, Pair<Action, Method>> mActionMap;
-	private final Map<String, Pair<Event, Method>> mEventMap;
+	private final Map<String, Pair<Action, Method>> mActionMap = new HashMap<>();
+	private final Map<String, Pair<Event, Method>> mEventMap = new HashMap<>();
 	
 	private final Map<String, Method> mMethodMap;
 	
@@ -55,37 +55,13 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 	
 	protected AbstractServantVerticle(String verticleName) {
-		this(verticleName, null, null);
-	}
-
-	
-	protected AbstractServantVerticle(String verticleName, Class<? extends Enum<?>> actions) {
-		this(verticleName, actions, null);
-	}
-
-	protected AbstractServantVerticle(String verticleName, Class<? extends Enum<?>> actions, Class<? extends Enum<?>> events) {
 		LOGGER.info("Processing verticle [{}]", verticleName);
 		this.mVerticleName = verticleName;
 		
 		this.mMethodMap = createMap(this.getClass().getMethods());
-		
-		this.mActionMap = new HashMap<>();
-		if (actions != null) {
-			for (Enum<?> item : actions.getEnumConstants()) {
-				mActionMap.put(item.name(), new Pair<Action, Method>((Action) item, this.mMethodMap.get(item.name().toLowerCase())));
-			}
-		}
-		
-		this.mEventMap = new HashMap<>();
-		if (events != null) {
-			for (Enum<?> item : events.getEnumConstants()) {
-				mEventMap.put(item.name(), new Pair<Event, Method>((Event) item, this.mMethodMap.get(item.name().toLowerCase())));
-			}
-		}
-		
 	}
 
-	private Map<String, Method> createMap(Method[] declaredMethods) {
+	private static Map<String, Method> createMap(Method[] declaredMethods) {
 		final Map<String, Method> map = new HashMap<>();
 		
 		for (final Method method : declaredMethods) {
