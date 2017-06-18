@@ -1,5 +1,7 @@
 package es.xan.servantv3.brain;
 
+import java.time.temporal.ChronoUnit;
+
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
@@ -7,6 +9,7 @@ import es.xan.servantv3.Events;
 import es.xan.servantv3.Events.ParrotMessageReceived;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.brain.nlp.Translation;
 import es.xan.servantv3.brain.nlp.TranslationFacade;
@@ -34,6 +37,7 @@ public class STSVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(STSVerticle.class);
 	
 	private JsonArray mMasters;
+	private Scheduler mScheduler;
 	
 	public enum Actions implements Action {
 		HELP(null),
@@ -67,6 +71,8 @@ public class STSVerticle extends AbstractServantVerticle {
 		super.start();
 		
 		this.mMasters = Vertx.currentContext().config().getJsonArray("masters");
+		
+		this.mScheduler = new Scheduler(getVertx());
 		LOGGER.info("Started brainVerticle");
 	}
 	
@@ -109,12 +115,25 @@ public class STSVerticle extends AbstractServantVerticle {
 		final Translation translation = TranslationFacade.translate(parrotMessage.message);
 		
 		if (translation.action != null) {
-			publishAction(translation.action, translation.message, response -> {
-				publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
-					this.message = translation.response.apply(response.result()).msg;
-					this.user = parrotMessage.user;
-				}});
-			});
+			if (translation.delayInfo == 0) {
+				publishAction(translation.action, translation.message, response -> {
+					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
+						this.message = translation.response.apply(response.result()).msg;
+						this.user = parrotMessage.user;
+					}});
+				});
+			} else {
+				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+					publishAction(translation.action, translation.message, response -> {
+						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
+							this.message = translation.response.apply(response.result()).msg;
+							this.user = parrotMessage.user;
+						}});
+					});
+					
+					return false;
+				});
+			}
 		}
 	}
 }

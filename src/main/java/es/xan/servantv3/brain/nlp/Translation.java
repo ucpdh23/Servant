@@ -14,7 +14,7 @@ import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
  */
 public class Translation {
 	public boolean everyDay = false;
-	public long delayInfo;
+	public long delayInfo = 0;
 	public Action action;
 	public Object message;
 	public boolean forwarding;
