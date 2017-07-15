@@ -1,11 +1,5 @@
 package es.xan.servantv3.homeautomation;
 
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +9,22 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
+import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
-import es.xan.servantv3.MessageUtils;
-import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
-import es.xan.servantv3.homeautomation.HomeVerticle.Actions.BossMessage;
+import es.xan.servantv3.MessageUtils;
+import es.xan.servantv3.messages.Sensor;
+import es.xan.servantv3.messages.TextMessage;
+import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.network.RouterPageManager.Device;
 import es.xan.servantv3.parrot.ParrotVerticle;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
 import es.xan.servantv3.sensors.SensorVerticle;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Home automation verticle.
@@ -55,11 +55,9 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	public enum Actions implements Action {
 		GET_HOME_STATUS(null),
-		NOTIFY_BOSS(Message.class)
+		NOTIFY_BOSS(TextMessageToTheBoss.class)
 		;
 		
-		public static class BossMessage { public String text; }
-
 		Class<?> beanClass;
 		
 		private Actions(Class<?> beanClass) {
@@ -103,20 +101,18 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void no_temperature_info(Room room) {
-		notify_boss(new BossMessage() {{ this.text = "no temperature info since 1 hour for room " + room.room; }});
-		publishAction(SensorVerticle.Actions.RESET_SENSOR, new SensorVerticle.Actions.Sensor() {{ this.sensor = room.room;}},
+		notify_boss(new TextMessageToTheBoss("no temperature info since 1 hour for room " + room.room));
+		publishAction(SensorVerticle.Actions.RESET_SENSOR, new Sensor(room.room),
 				msg -> {if (MessageUtils.isOk(msg)) {
-						notify_boss(new BossMessage() {{ this.text = "Sensor reseted"; }});
+						notify_boss(new TextMessageToTheBoss("Sensor reseted"));
 					} else {
-						notify_boss(new BossMessage() {{ this.text = "Cannot reset sensor"; }});
+						notify_boss(new TextMessageToTheBoss("Cannot reset sensor"));
 					}});
 	}
 	
 	
-	public void notify_boss(BossMessage content) {
-		ParrotMessage message = new ParrotMessage();
-		message.user = this.mBoss;
-		message.message = content.text;
+	public void notify_boss(TextMessageToTheBoss content) {
+		TextMessage message = new TextMessage(this.mBoss, content.getMessage());
 		publishAction(ParrotVerticle.Actions.SEND, message);
 		
 	}

@@ -5,7 +5,6 @@ import static es.xan.servantv3.brain.nlp.RuleUtils.messageContains;
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageIs;
 import static es.xan.servantv3.brain.nlp.RuleUtils.nextTokenTo;
 import static es.xan.servantv3.brain.nlp.TranslationUtils.reply;
-import io.vertx.core.eventbus.Message;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,16 +14,16 @@ import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
-import es.xan.servantv3.sensors.SensorVerticle;
+import es.xan.servantv3.messages.Configure;
+import es.xan.servantv3.messages.Sensor;
+import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.outlet.OutletVerticle;
-import es.xan.servantv3.outlet.OutletVerticle.Actions.Configure;
-import es.xan.servantv3.outlet.OutletVerticle.Actions.Switcher;
-import es.xan.servantv3.sensors.SensorVerticle.Actions.Sensor;
+import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
-import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
+import io.vertx.core.eventbus.Message;
 
 /**
  * Rules to transform NLM into Actions for the vertx event bus.
@@ -50,27 +49,25 @@ public enum Rules {
 	OUTLET_ON(OutletVerticle.Actions.SWITCHER,
 			messageContains("outlet||enchufe")
 			.and(messageContains("on||encender||activar||conectar")),
-		tokens -> {return new Switcher() {{ this.value = "on"; }};},
+		tokens -> {return new UpdateState("on");},
 		msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 		"Ex. outlet on"
 		),
 	OUTLET_OFF(OutletVerticle.Actions.SWITCHER,
 			messageContains("outlet||enchufe")
 			.and(messageContains("off||apagar||desactivar||desconectar")),
-		tokens -> {return new Switcher() {{ this.value = "off"; }};},
+		tokens -> {return new UpdateState("off");},
 		msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 		"Ex. outlet on"
 		),
 	OUTLET_SET(OutletVerticle.Actions.SET,
 			messageContains("outlet")
 			.and(messageContains("field")),
-		tokens -> {return new Configure() {{ this.field = nextTokenTo("field").apply(tokens); this.value = nextTokenTo("value").apply(tokens); }};},
+		tokens -> {return new Configure(nextTokenTo("field").apply(tokens), nextTokenTo("value").apply(tokens));},
 		msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 		"Ex. outlet on"
 		),
 	
-//	RESPONSE_YES(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("yes||si"), send("yes")), 
-//	RESPONSE_NO(Constant.QUESTIONS_VERTICLE_REPLY, false, messageIs("no"), send("no")), 
 	BOILER_AUTOMATIC_ON(ThermostatVerticle.Actions.AUTOMATIC_MODE,
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("on||encender||activar||conectar"))
@@ -93,7 +90,7 @@ public enum Rules {
 	BOILER_ON(ThermostatVerticle.Actions.SWITCH_BOILER,
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("on||encender||activar||conectar")),
-			tokens -> {return new NewStatus() {{ this.status = "on"; }};},
+			tokens -> {return new UpdateState("on");},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. boiler on"
 			),
@@ -101,7 +98,7 @@ public enum Rules {
 	BOILER_OFF(ThermostatVerticle.Actions.SWITCH_BOILER, 
 			messageContains("boiler||caldera||calefacción||calefaccion")
 				.and(messageContains("off||apagar||desactivar||desconectar")),
-			tokens -> {return new NewStatus() {{ this.status = "off"; }};},
+			tokens -> {return new UpdateState("off");},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. boiler off"
 			),
@@ -122,7 +119,7 @@ public enum Rules {
 	
 	RESET_SENSOR(SensorVerticle.Actions.RESET_SENSOR,
 			messageContains("sensor"),
-			tokens -> { return new Sensor() {{ this.sensor = nextTokenTo("sensor").apply(tokens);}};},
+			tokens -> { return new Sensor(nextTokenTo("sensor").apply(tokens));},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. sensor xxxx"
 			),

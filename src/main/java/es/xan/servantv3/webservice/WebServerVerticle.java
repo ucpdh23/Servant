@@ -15,10 +15,10 @@ import java.util.Date;
 
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Constant;
+import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
-import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 
 
 
@@ -70,9 +70,7 @@ public class WebServerVerticle extends AbstractServantVerticle {
 		});
 	
 		router.get("/boiler/:operation").handler(context -> {
-			this.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new NewStatus() {{
-				this.status = "on";
-			}});
+			this.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("on"));
 			
 			context.response().end("ok");
 		});

@@ -26,8 +26,9 @@ import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.TextMessageToTheBoss;
+import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
-import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.NewStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -58,11 +59,10 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	private UUID mScheduledTask;
 	
 	public enum Actions implements Action {
-		SWITCH_BOILER(NewStatus.class),
+		SWITCH_BOILER(UpdateState.class),
 		AUTOMATIC_MODE(AutomaticMode.class)
 		;
 		
-		public static class NewStatus { public String status; }
 		public static class AutomaticMode { public Boolean enabled; }
 
 		private Class<?> mMessageClass;
@@ -77,9 +77,9 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		}
 	}
 
-	public void switch_boiler(NewStatus status, final Message<Object> msg) {
+	public void switch_boiler(UpdateState status, final Message<Object> msg) {
 		try {
-			switch (status.status.toLowerCase()) {
+			switch (status.getNewStatus().toLowerCase()) {
 			case "on":
 				boolean updatedOn = send("HIGH");
 				
@@ -188,11 +188,8 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 	private void switchBoilerOffAndNotify() {
 		LOGGER.info("Its time to shut the boiler off");
 		
-		publishAction(Actions.SWITCH_BOILER, new NewStatus() {{
-			this.status = "off";
-		}}, msg -> publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new HomeVerticle.Actions.BossMessage() {{
-			this.text = "Automatic boiler off";
-		}}));
+		publishAction(Actions.SWITCH_BOILER, new UpdateState("off"),
+				msg -> publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new TextMessageToTheBoss("Automatic boiler off")));
 		
 	}
 

@@ -1,26 +1,22 @@
 package es.xan.servantv3;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import es.xan.servantv3.MessageBuilder.ActionBuilder;
 import es.xan.servantv3.MessageBuilder.EventBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class AbstractServantVerticle extends AbstractVerticle {
 	
@@ -33,16 +29,6 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private final Map<String, Pair<Event, Method>> mEventMap;
 	
 	private final Map<String, Method> mMethodMap;
-	
-	static {
-		Json.mapper.setVisibility(Json.mapper.getSerializationConfig()
-				.getDefaultVisibilityChecker()
-				.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-				.withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-				.withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-				.withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
-				);
-	}
 	
 	private static class Pair<A,B> {
 		A left;
@@ -133,7 +119,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 			} else {
 				Class<?> beanClass = event.getPayloadClass();
 				JsonObject entity = body.getJsonObject("bean");
-				Object newInstance = Json.decodeValue(entity.encode(), beanClass);
+				Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
 				
 				if (count == 1) {
 					mEventMap.get(action).right.invoke(this, newInstance);
@@ -179,7 +165,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 					Object parameter = message;
 					if (beanClass != null) {
 						final JsonObject entity = json.getJsonObject("bean");
-						parameter = Json.decodeValue(entity.encode(), beanClass);
+						parameter = JsonUtils.toBean(entity.encode(), beanClass);
 					}
 					
 					method.invoke(this, parameter);
@@ -187,7 +173,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 				} else if (parameterCount == 2) {
 					final Class<?> beanClass = action.getPayloadClass();
 					final JsonObject entity = json.getJsonObject("bean");
-					final Object newInstance = Json.decodeValue(entity.encode(), beanClass);
+					final Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
 
 					method.invoke(this, newInstance, message);
 				}
@@ -207,7 +193,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	protected void publishEvent(Events event, Object item) {
 		EventBuilder eventBuilder = MessageBuilder.createEvent();
 		eventBuilder.setAction(event.name());
-		eventBuilder.setBean(new JsonObject(Json.encode(item)));
+		eventBuilder.setBean(new JsonObject(JsonUtils.toJson(item)));
 		vertx.eventBus().publish(Constant.EVENT, eventBuilder.build());
 	}
 	
@@ -220,7 +206,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	protected void publishAction(Action send, Object item) {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.name());
-		builder.setBean(new JsonObject(Json.encode(item)));
+		builder.setBean(new JsonObject(JsonUtils.toJson(item)));
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	
@@ -235,7 +221,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.name());
 		if (item != null)
-			builder.setBean(new JsonObject(Json.encode(item)));
+			builder.setBean(new JsonObject(JsonUtils.toJson(item)));
 		
 		JsonObject object = builder.build();
 		

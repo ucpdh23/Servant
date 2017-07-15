@@ -1,16 +1,16 @@
 package es.xan.servantv3.parrot;
 
-import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.Events.ParrotMessageReceived;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.CreateChat;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
+import es.xan.servantv3.messages.OpenChat;
+import es.xan.servantv3.messages.TextMessage;
+import io.vertx.core.Verticle;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class ParrotVerticle extends AbstractServantVerticle implements CommunicationListener {
@@ -34,15 +34,12 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 		/**
 		 * Creates a communication line between this bot and an user
 		 */
-		CREATE_CHAT(CreateChat.class),
+		CREATE_CHAT(OpenChat.class),
 		/**
 		 * Sends a message to an user
 		 */
-		SEND(ParrotMessage.class); 
+		SEND(TextMessage.class); 
 		
-		public static class CreateChat { public String user; }
-		public static class ParrotMessage { public String user, message; }
-
 		private Class<?> mMessageClass;
 		
 		Actions(Class<?> messageClass) {
@@ -55,16 +52,16 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 		}
 	}
 
-	public void create_chat(CreateChat createChat) {
+	public void create_chat(OpenChat createChat) {
 		try {
-			channel.createChat(createChat.user);
+			channel.createChat(createChat.getUser());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void send(ParrotMessage message) {
-		channel.send(message.user, message.message);
+	public void send(TextMessage message) {
+		channel.send(message.getUser(), message.getMessage());
 	}
 	
 	

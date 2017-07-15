@@ -1,24 +1,10 @@
 package es.xan.servantv3.sensors;
 
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
@@ -26,7 +12,12 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.SSHUtils;
-import es.xan.servantv3.sensors.SensorVerticle.Actions.Sensor;
+import es.xan.servantv3.messages.Sensor;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class SensorVerticle extends AbstractServantVerticle {
 	
@@ -47,8 +38,6 @@ public class SensorVerticle extends AbstractServantVerticle {
 	public enum Actions implements Action {
 		RESET_SENSOR(Sensor.class)
 		;
-		
-		public static class Sensor{ public String sensor; };
 		
 		Class<?> beanClass;
 		
@@ -89,12 +78,12 @@ public class SensorVerticle extends AbstractServantVerticle {
 	}
 
 	public void reset_sensor(Sensor sensor, Message<Object> message) {
-		LOGGER.info("Asking to reset sensor [{}]", sensor.sensor);
-		final String command = mSensors.get(sensor.sensor);
+		LOGGER.info("Asking to reset sensor [{}]", sensor.getSensor());
+		final String command = mSensors.get(sensor.getSensor());
 		
 		final ReplyBuilder builder = MessageBuilder.createReply();
 		if (command == null) {
-			LOGGER.warn("Sensor [{}] not found", sensor.sensor);
+			LOGGER.warn("Sensor [{}] not found", sensor.getSensor());
 			
 			builder.setError();
 			builder.setMessage("Allowed options " + mSensors.keySet());

@@ -13,8 +13,8 @@ import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.brain.nlp.Translation;
 import es.xan.servantv3.brain.nlp.TranslationFacade;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.CreateChat;
-import es.xan.servantv3.parrot.ParrotVerticle.Actions.ParrotMessage;
+import es.xan.servantv3.messages.OpenChat;
+import es.xan.servantv3.messages.TextMessage;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -84,9 +84,7 @@ public class STSVerticle extends AbstractServantVerticle {
 			JsonObject emailInfo = (JsonObject) item;
 
 			LOGGER.debug("creating chat for user [{}]", emailInfo.getString("email"));
-			publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.CREATE_CHAT, new CreateChat() {{
-				this.user = emailInfo.getString("email");
-			}});
+			publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.CREATE_CHAT, new OpenChat(emailInfo.getString("email")));;
 		}
 	}
 	
@@ -117,18 +115,12 @@ public class STSVerticle extends AbstractServantVerticle {
 		if (translation.action != null) {
 			if (translation.delayInfo == 0) {
 				publishAction(translation.action, translation.message, response -> {
-					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
-						this.message = translation.response.apply(response.result()).msg;
-						this.user = parrotMessage.user;
-					}});
+					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.user, translation.response.apply(response.result()).msg));
 				});
 			} else {
 				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
 					publishAction(translation.action, translation.message, response -> {
-						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new ParrotMessage() {{
-							this.message = translation.response.apply(response.result()).msg;
-							this.user = parrotMessage.user;
-						}});
+						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.user, translation.response.apply(response.result()).msg));
 					});
 					
 					return false;

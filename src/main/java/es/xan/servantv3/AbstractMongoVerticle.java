@@ -3,7 +3,6 @@ package es.xan.servantv3;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -73,7 +72,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		LOGGER.debug("saving [{}]", item);
 		
 		final long init = new Date().getTime();
-		mongoClient.save(mCollection, new JsonObject(Json.encode(item)), res -> {
+		mongoClient.save(mCollection, new JsonObject(JsonUtils.toJson(item)), res -> {
 			final long elapsed = new Date().getTime() - init;
 			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Inserting in mongo required [{}] millis", elapsed);
 			
@@ -106,7 +105,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		options.setLimit(query.limit);
 		
 		final long init = new Date().getTime();
-		mongoClient.findWithOptions(mCollection, query.filter != null? new JsonObject(Json.encode(query.filter)) : new JsonObject(), options, res -> {
+		mongoClient.findWithOptions(mCollection, query.filter != null? new JsonObject(JsonUtils.toJson(query.filter)) : new JsonObject(), options, res -> {
 			final long elapsed = new Date().getTime() - init;
 			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Querying in mongo required [{}] millis", elapsed);
 

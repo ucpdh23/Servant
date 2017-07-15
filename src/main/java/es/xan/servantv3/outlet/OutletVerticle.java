@@ -6,8 +6,8 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.SSHUtils;
-import es.xan.servantv3.outlet.OutletVerticle.Actions.Configure;
-import es.xan.servantv3.outlet.OutletVerticle.Actions.Switcher;
+import es.xan.servantv3.messages.Configure;
+import es.xan.servantv3.messages.UpdateState;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -22,7 +22,7 @@ public class OutletVerticle extends AbstractServantVerticle {
 		supportedActions(Actions.values());
 	}
 
-	private String mHost = "192.168.1.108";
+	private String mHost = "192.168.1.100";
 	private String mLogin = "ubnt";
 	private String mPassword = "ubnt";
 	
@@ -30,13 +30,10 @@ public class OutletVerticle extends AbstractServantVerticle {
 	private static String OFF_COMMAND = "echo \"0\" > /proc/power/relay1";
 	
 	public enum Actions  implements Action {
-		SWITCHER(Switcher.class),
+		SWITCHER(UpdateState.class),
 		SET(Configure.class)
 		;
 		
-		public static class Switcher { public String value; }
-		public static class Configure { public String field, value; }
-
 		Class<?> beanClass;
 		
 		private Actions(Class<?> beanClass) {
@@ -52,48 +49,48 @@ public class OutletVerticle extends AbstractServantVerticle {
 	
 	public void set(Configure conf, Message<Object> message) {
 		ReplyBuilder builderOn = MessageBuilder.createReply();
-		switch (conf.field) {
+		switch (conf.getField()) {
 		case "host":
-			this.mHost = conf.value;
+			this.mHost = conf.getValue();
 			builderOn.setOk();
-			builderOn.setMessage(conf.value);
+			builderOn.setMessage(conf.getValue());
 			break;
 		case "login":
-			this.mLogin= conf.value;
+			this.mLogin= conf.getValue();
 			builderOn.setOk();
-			builderOn.setMessage(conf.value);
+			builderOn.setMessage(conf.getValue());
 			break;
 		case "password":
-			this.mPassword= conf.value;
+			this.mPassword= conf.getValue();
 			builderOn.setOk();
-			builderOn.setMessage(conf.value);
+			builderOn.setMessage(conf.getValue());
 			break;
 		default:
 			builderOn.setError();
-			builderOn.setMessage("field:" + conf.field + " value" + conf.value);
+			builderOn.setMessage("field:" + conf.getField() + " value" + conf.getValue());
 			break;
 		}
 		message.reply(builderOn.build());
 	}
 	
-	public void switcher(Switcher switcher, Message<Object> message) {
+	public void switcher(UpdateState switcher, Message<Object> message) {
 		boolean ok = false;
 		try {
-			if ("on".equals(switcher.value)) {
+			if ("on".equals(switcher.getNewStatus())) {
 				ok = SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, ON_COMMAND);
 			} else {
 				ok = SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, OFF_COMMAND);
 			}
 		} catch (Exception e) {
 			LOGGER.warn(e.getMessage(), e);
+		} finally {
+			ReplyBuilder builderOn = MessageBuilder.createReply();
+			if (ok) {
+				builderOn.setOk();
+			} else {
+				builderOn.setError();
+			}
+			message.reply(builderOn.build());
 		}
-		
-		ReplyBuilder builderOn = MessageBuilder.createReply();
-		if (ok) {
-			builderOn.setOk();
-		} else {
-			builderOn.setError();
-		}
-		message.reply(builderOn.build());
 	}
 }

@@ -10,6 +10,7 @@ import es.xan.servantv3.Scheduler.TimeExpression;
 
 public class SchedulerTest {
 
+	@SuppressWarnings("unused")
 	public void scheduleWithRepetitionASecondAgo_tomorrow_ok() {
 		LocalDateTime now = LocalDateTime.now();
 		long nowEpoch = now.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000;
