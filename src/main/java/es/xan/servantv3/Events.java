@@ -1,8 +1,11 @@
 package es.xan.servantv3;
 
-import es.xan.servantv3.homeautomation.HomeVerticle.Person;
+import es.xan.servantv3.messages.NewStatus;
+import es.xan.servantv3.messages.ParrotMessageReceived;
+import es.xan.servantv3.messages.Person;
+import es.xan.servantv3.messages.Room;
+import es.xan.servantv3.messages.Temperature;
 import es.xan.servantv3.network.RouterPageManager.Device;
-import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
 
 /**
  * List of events 
@@ -25,9 +28,6 @@ public enum Events implements Event {
 	BOILER_SWITCHED(NewStatus.class)
 	;
 	
-	public static class NewStatus { public String status; }
-	public static class ParrotMessageReceived { public String user, message; }
-	public static class Room { public String room; }
 	
 	private Class<?> mBeanClass;
 
@@ -40,15 +40,5 @@ public enum Events implements Event {
 		return this.mBeanClass;
 	}
 	
-	public Object createBean() {
-		if (this.mBeanClass != null) {
-			try {
-				return this.mBeanClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return null;
-		}
-	}
+
 }

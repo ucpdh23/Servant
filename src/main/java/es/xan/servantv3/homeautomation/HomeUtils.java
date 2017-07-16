@@ -1,13 +1,12 @@
 package es.xan.servantv3.homeautomation;
 
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.util.List;
 
 import es.xan.servantv3.JsonUtils;
-import es.xan.servantv3.homeautomation.HomeVerticle.Person;
+import es.xan.servantv3.messages.Person;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 
 public class HomeUtils {
@@ -21,9 +20,9 @@ public class HomeUtils {
 		StringBuilder builder = new StringBuilder();
 		for (JsonObject item : items) {
 			Person person = JsonUtils.toBean(item.encode(), Person.class);
-			builder.append(person.name).append(" ");
+			builder.append(person.getName()).append(" ");
 			
-			builder.append(person.inHome? "at home" : "outside");
+			builder.append(person.getInHome()? "at home" : "outside");
 			builder.append("\n");
 		}
 		

@@ -4,8 +4,8 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.Events.ParrotMessageReceived;
 import es.xan.servantv3.messages.OpenChat;
+import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
@@ -81,11 +81,7 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 	
 	@Override
 	public void onMessage(String sender, String message) {
-		final ParrotMessageReceived bean = (ParrotMessageReceived) Events.PARROT_MESSAGE_RECEIVED.createBean();
-		bean.user = sender;
-		bean.message = message;
-		
-		publishEvent(Events.PARROT_MESSAGE_RECEIVED, bean);
+		publishEvent(Events.PARROT_MESSAGE_RECEIVED, new ParrotMessageReceived(sender, message));
 	}
 
 }

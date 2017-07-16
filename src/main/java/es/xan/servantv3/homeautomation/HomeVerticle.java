@@ -9,11 +9,12 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.MessageUtils;
+import es.xan.servantv3.messages.Person;
+import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Sensor;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
@@ -46,11 +47,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NEW_NETWORK_DEVICES_MESSAGE,
 			Events.REM_NETWORK_DEVICES_MESSAGE);
-	}
-	
-	public static class Person {
-		String name;
-		boolean inHome;
 	}
 	
 	public enum Actions implements Action {
@@ -101,8 +97,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void no_temperature_info(Room room) {
-		notify_boss(new TextMessageToTheBoss("no temperature info since 1 hour for room " + room.room));
-		publishAction(SensorVerticle.Actions.RESET_SENSOR, new Sensor(room.room),
+		notify_boss(new TextMessageToTheBoss("no temperature info since 1 hour for room " + room.getName()));
+		publishAction(SensorVerticle.Actions.RESET_SENSOR, new Sensor(room.getName()),
 				msg -> {if (MessageUtils.isOk(msg)) {
 						notify_boss(new TextMessageToTheBoss("Sensor reseted"));
 					} else {
@@ -123,7 +119,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		if (person == null) return;
 		
-		if (!person.inHome) {
+		if (!person.getInHome()) {
 			updatePerson(person, INSIDE_HOME);
 		}
 	}
@@ -133,13 +129,14 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		if (person == null) return;
 		
-		if (person.inHome) {
+		if (person.getInHome()) {
 			updatePerson(person, OUTSIDE_HOME);
 		}
 	}
 		
 	private void updatePerson(Person person, boolean atHome) {
-		person.inHome = atHome;
+		person.setInHome(atHome);
+		
 		if (atHome) {
 			publishEvent(Events.PERSON_AT_HOME, person);
 		} else {
@@ -158,10 +155,9 @@ public class HomeVerticle extends AbstractServantVerticle {
 		l_devices.stream().forEach(it -> {
 			result.put(
 					it.getString("mac"),
-					new Person() {{
-						this.name = it.getString("name");
-						this.inHome = false;
-			}});
+					new Person(
+						it.getString("name"),
+						false));
 		});
 		
 		return result;

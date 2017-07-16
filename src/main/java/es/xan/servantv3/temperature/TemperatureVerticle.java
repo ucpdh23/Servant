@@ -11,11 +11,11 @@ import es.xan.servantv3.AbstractMongoVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.Events.Room;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.Query;
-import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
+import es.xan.servantv3.messages.Room;
+import es.xan.servantv3.messages.Temperature;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -45,11 +45,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		QUERY(Query.class),
 		LAST_VALUES(null);
 		
-		public static class Temperature {
-			public String room;
-			public Float temperature;
-			public Long timestamp; 
-		}
+
 
 		private Class<?> mBeanClass;
 		
@@ -67,7 +63,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	
 	protected BiConsumer<Temperature, String> onSaved() {
 		return (temperature, id) -> {
-			String room = temperature.room;
+			String room = temperature.getRoom();
 			Long timerId = this.mTimers.get(room);
 			if (timerId != null)
 				this.vertx.cancelTimer(timerId);
@@ -87,21 +83,19 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	}
 	
 	protected boolean saveFilter(Temperature item) {
-		final Long lastTimestamp = mLastTimestamp.getOrDefault(item.room, 0L);
+		final Long lastTimestamp = mLastTimestamp.getOrDefault(item.getRoom(), 0L);
 
-		if (item.timestamp - lastTimestamp < MIN_TIME_INTERVAL) {
+		if (item.getTimestamp() - lastTimestamp < MIN_TIME_INTERVAL) {
 			return false;
 		} else {
-			mLastTimestamp.put(item.room, item.timestamp);
+			mLastTimestamp.put(item.getRoom(), item.getTimestamp());
 			return true;
 		}
 	}
 	
 	private Handler<Long> createTimerForRoom(String room) {
 		return (Long event) -> {
-			Room roomInfo = (Room) Events.NO_TEMPERATURE_INFO.createBean();
-			roomInfo.room = room;
-			publishEvent(Events.NO_TEMPERATURE_INFO, roomInfo);
+			publishEvent(Events.NO_TEMPERATURE_INFO,  new Room(room));
 		};
 	}
 	

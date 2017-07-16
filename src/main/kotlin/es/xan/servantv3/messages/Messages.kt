@@ -35,3 +35,24 @@ data class UpdateState(var newStatus: String)
  * Configures a dynamic property of a verticle
  */
 data class Configure(var field: String, var value: String)
+
+/**
+ * DTOs
+ */
+
+
+data class Person(var name: String, var inHome: Boolean)
+data class Room(var name: String)
+
+/**
+ * Events Messages
+ */
+data class NewStatus(var status: String)
+
+data class ParrotMessageReceived(var user: String, var message: String)
+
+
+/**
+ * POJOS
+ */
+data class Temperature(var room: String, var temperature: Float, var timestamp: Long)

@@ -26,6 +26,7 @@ import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
@@ -90,9 +91,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 					builderOn.setOk();
 					msg.reply(builderOn.build());
 					
-					this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
-						this.status = "on";
-					}});
+					this.publishEvent(Events.BOILER_SWITCHED, new NewStatus("on"));
 				} else {
 					ReplyBuilder builderOn = MessageBuilder.createReply();
 					builderOn.setError();
@@ -109,9 +108,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 					ReplyBuilder builderOff = MessageBuilder.createReply();
 					builderOff.setOk();
 					msg.reply(builderOff.build());
-					this.publishEvent(Events.BOILER_SWITCHED, new es.xan.servantv3.Events.NewStatus() {{
-						this.status = "off";
-					}});
+					this.publishEvent(Events.BOILER_SWITCHED, new NewStatus("off"));
 				} else {
 					ReplyBuilder builderOn = MessageBuilder.createReply();
 					builderOn.setError();

@@ -6,7 +6,6 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.Events.ParrotMessageReceived;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.Scheduler;
@@ -14,6 +13,7 @@ import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.brain.nlp.Translation;
 import es.xan.servantv3.brain.nlp.TranslationFacade;
 import es.xan.servantv3.messages.OpenChat;
+import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
@@ -108,19 +108,19 @@ public class STSVerticle extends AbstractServantVerticle {
 	 * @param parrotMessage
 	 */
 	public void parrot_message_received(ParrotMessageReceived parrotMessage) {
-		LOGGER.debug("Received [{}] from user [{}]", parrotMessage.message, parrotMessage.user);
+		LOGGER.debug("Received [{}]", parrotMessage);
 		
-		final Translation translation = TranslationFacade.translate(parrotMessage.message);
+		final Translation translation = TranslationFacade.translate(parrotMessage.getMessage());
 		
 		if (translation.action != null) {
 			if (translation.delayInfo == 0) {
 				publishAction(translation.action, translation.message, response -> {
-					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.user, translation.response.apply(response.result()).msg));
+					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
 				});
 			} else {
 				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
 					publishAction(translation.action, translation.message, response -> {
-						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.user, translation.response.apply(response.result()).msg));
+						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
 					});
 					
 					return false;

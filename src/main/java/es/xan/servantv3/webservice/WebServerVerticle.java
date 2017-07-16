@@ -1,5 +1,13 @@
 package es.xan.servantv3.webservice;
 
+import java.util.Date;
+
+import es.xan.servantv3.AbstractServantVerticle;
+import es.xan.servantv3.Constant;
+import es.xan.servantv3.messages.Temperature;
+import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.temperature.TemperatureVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -10,15 +18,6 @@ import io.vertx.ext.web.handler.sockjs.BridgeEventType;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
-
-import java.util.Date;
-
-import es.xan.servantv3.AbstractServantVerticle;
-import es.xan.servantv3.Constant;
-import es.xan.servantv3.messages.UpdateState;
-import es.xan.servantv3.temperature.TemperatureVerticle;
-import es.xan.servantv3.temperature.TemperatureVerticle.Actions.Temperature;
-import es.xan.servantv3.thermostat.ThermostatVerticle;
 
 
 
@@ -53,11 +52,10 @@ public class WebServerVerticle extends AbstractServantVerticle {
 //		router.mountSubRouter("/api", apiRouter());
 		
 		router.get("/temperature/:room/:value").handler(context -> {
-			this.publishAction(TemperatureVerticle.Actions.SAVE, new Temperature() {{
-				this.room = context.request().params().get("room");
-				this.temperature = Float.parseFloat(context.request().params().get("value"));
-				this.timestamp = new Date().getTime();
-			}});
+			this.publishAction(TemperatureVerticle.Actions.SAVE, new Temperature(
+				context.request().params().get("room"),
+				Float.parseFloat(context.request().params().get("value")),
+				new Date().getTime()));
 			
 			context.response().end("ok");
 		});
