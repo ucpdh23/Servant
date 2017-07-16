@@ -39,5 +39,10 @@
                 {"name" : "", "command" : ""},
                 {"name" : "", "command" : ""}
         ]
+  	},
+  	"OutletVerticle" : {
+        "host":"",
+        "login":"",
+        "password":""
   	}
 }

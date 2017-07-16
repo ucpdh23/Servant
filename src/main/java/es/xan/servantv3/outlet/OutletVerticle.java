@@ -9,6 +9,7 @@ import es.xan.servantv3.SSHUtils;
 import es.xan.servantv3.messages.Configure;
 import es.xan.servantv3.messages.UpdateState;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -22,9 +23,9 @@ public class OutletVerticle extends AbstractServantVerticle {
 		supportedActions(Actions.values());
 	}
 
-	private String mHost = "192.168.1.100";
-	private String mLogin = "ubnt";
-	private String mPassword = "ubnt";
+	private String mHost;
+	private String mLogin;
+	private String mPassword;
 	
 	private static String ON_COMMAND = "echo \"1\" > /proc/power/relay1";
 	private static String OFF_COMMAND = "echo \"0\" > /proc/power/relay1";
@@ -45,6 +46,17 @@ public class OutletVerticle extends AbstractServantVerticle {
 			return beanClass;
 		}
 		
+	}
+	
+	public void start() {
+		super.start();
+		loadConfiguration(vertx.getOrCreateContext().config().getJsonObject("OutletVerticle"));
+	}
+	
+	private void loadConfiguration(JsonObject config) {
+		mHost = config.getString("host", "192.168.1.100");
+		mLogin = config.getString("login", "ubnt");
+		mPassword = config.getString("password", "ubnt");
 	}
 	
 	public void set(Configure conf, Message<Object> message) {
