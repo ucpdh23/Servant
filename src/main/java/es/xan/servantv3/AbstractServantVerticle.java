@@ -22,7 +22,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServantVerticle.class);
 	
-	private static final Pattern VERTICLE_NAME_PATTERN = Pattern.compile("\\.([^\\.]*)Verticle\\.");
+	private static final Pattern VERTICLE_NAME_PATTERN = Pattern.compile("\\.([^\\.]*)Verticle\\d?\\.");
 	
 	private final String mVerticleName;
 	private final Map<String, Pair<Action, Method>> mActionMap;
@@ -199,27 +199,27 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	
 	protected void publishAction(Action send) {
 		ActionBuilder builder = MessageBuilder.createAction();
-		builder.setAction(send.name());
+		builder.setAction(send.getName());
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	
 	protected void publishAction(Action send, Object item) {
 		ActionBuilder builder = MessageBuilder.createAction();
-		builder.setAction(send.name());
+		builder.setAction(send.getName());
 		builder.setBean(new JsonObject(JsonUtils.toJson(item)));
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	
 	protected void publishAction(Action send, Handler<AsyncResult<Message<Object>>> replyHandler) {
 		ActionBuilder builder = MessageBuilder.createAction();
-		builder.setAction(send.name());
+		builder.setAction(send.getName());
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build(), replyHandler);
 	}
 	
 
 	protected void publishAction(Action send, Object item, Handler<AsyncResult<Message<Object>>> replyHandler) {
 		ActionBuilder builder = MessageBuilder.createAction();
-		builder.setAction(send.name());
+		builder.setAction(send.getName());
 		if (item != null)
 			builder.setBean(new JsonObject(JsonUtils.toJson(item)));
 		
@@ -246,6 +246,10 @@ public class AbstractServantVerticle extends AbstractVerticle {
 			mEventMap.put(item.name(), new Pair<Event, Method>((Event) item, this.mMethodMap.get(item.name().toLowerCase())));
 	}
 	
+	protected <T extends Enum<T> & Action> void supportedActions(Class<T> actions) {
+		supportedActions(actions.getEnumConstants());
+	}
+	
 	protected void supportedActions(Action...actions) {
 		if (actions.length > 0) {
 			final String actionsVerticleName = resolveVerticleName(actions[0].getClass().getCanonicalName());
@@ -261,7 +265,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		}
 		
 		for (Action item : actions) {
-			mActionMap.put(item.name(), new Pair<Action, Method>((Action) item, this.mMethodMap.get(item.name().toLowerCase())));
+			mActionMap.put(item.getName(), new Pair<Action, Method>((Action) item, this.mMethodMap.get(item.getName().toLowerCase())));
 		}
 	}
 }

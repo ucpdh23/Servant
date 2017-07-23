@@ -45,6 +45,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(SensorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(OutletVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
+		
 	}
 
 	private void initializeLogBridges() {

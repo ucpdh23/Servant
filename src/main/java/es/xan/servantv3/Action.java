@@ -1,5 +1,7 @@
 package es.xan.servantv3;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * An action represents any operation requested to a verticle.
@@ -18,11 +20,32 @@ public interface Action {
 	 * The name is used to identify the name of the method in charge of resolve the response 
 	 * @return
 	 */
-	String name();
+	default String getName() {
+		if (this.getClass().isEnum()) {
+			return ((Enum<?>) this).name();
+		} else {
+			throw new UnsupportedOperationException();
+		}
+	}
 	
 	/**
 	 * The class of the payload.
 	 * @return
 	 */
-	Class<?> getPayloadClass();
+	default Class<?> getPayloadClass() {
+		if (this.getClass().isEnum()) {
+			try {
+				Method declaredMethod = this.getClass().getDeclaredMethod("getClazz");
+					return (Class<?>) declaredMethod.invoke(this);
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new UnsupportedOperationException(e);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new UnsupportedOperationException(e);
+			}
+		} else {
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
 }
