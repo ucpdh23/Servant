@@ -193,7 +193,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	protected void publishEvent(Events event, Object item) {
 		EventBuilder eventBuilder = MessageBuilder.createEvent();
 		eventBuilder.setAction(event.name());
-		eventBuilder.setBean(new JsonObject(JsonUtils.toJson(item)));
+		eventBuilder.setBean(JsonUtils.toJson(item));
 		vertx.eventBus().publish(Constant.EVENT, eventBuilder.build());
 	}
 	
@@ -203,14 +203,14 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	
-	protected void publishAction(Action send, Object item) {
+	public void publishAction(Action send, Object item) {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
-		builder.setBean(new JsonObject(JsonUtils.toJson(item)));
+		builder.setBean(JsonUtils.toJson(item));
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	
-	protected void publishAction(Action send, Handler<AsyncResult<Message<Object>>> replyHandler) {
+	public void publishAction(Action send, Handler<AsyncResult<Message<Object>>> replyHandler) {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build(), replyHandler);
@@ -221,7 +221,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		if (item != null)
-			builder.setBean(new JsonObject(JsonUtils.toJson(item)));
+			builder.setBean(JsonUtils.toJson(item));
 		
 		JsonObject object = builder.build();
 		

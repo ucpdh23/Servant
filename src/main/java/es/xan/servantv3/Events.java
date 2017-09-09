@@ -1,11 +1,11 @@
 package es.xan.servantv3;
 
+import es.xan.servantv3.messages.Device;
 import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.Person;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Temperature;
-import es.xan.servantv3.network.RouterPageManager.Device;
 
 /**
  * List of events 

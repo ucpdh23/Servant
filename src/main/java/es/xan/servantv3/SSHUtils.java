@@ -19,7 +19,12 @@ public class SSHUtils {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SSHUtils.class);
 	
-	public static boolean runRemoteCommand(String host, String login, String password, String command) throws JSchException, IOException {
+	public static class RemoteComamndResult {
+		public int exitStatus;
+		public String output;
+	}
+	
+	private static RemoteComamndResult runRemoteCommandExtended(String host, String login, String password, String command) throws JSchException, IOException {
 		JSch jsch = new JSch();
 		
 		LOGGER.info("host [{}] login [{}] password [{}] command [{}]", host, login, password, command);
@@ -46,11 +51,11 @@ public class SSHUtils {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line;
 			      
-		List<String> result = new ArrayList<>();
+		List<String> output = new ArrayList<>();
 		//Read each line from the buffered reader and add it to result list
 		// You can also simple print the result here
 		while ((line = reader.readLine()) != null) {
-			result.add(line);
+			output.add(line);
 		}
 		
 		//retrieve the exit status of the remote command corresponding to this channel
@@ -59,14 +64,25 @@ public class SSHUtils {
 		//Safely disconnect channel and disconnect session. If not done then it may cause resource leak
 		channelExec.disconnect();
 		session.disconnect();
-			 
-		if (exitStatus < 0) {
+		
+		RemoteComamndResult result = new RemoteComamndResult();
+		result.exitStatus = exitStatus;
+		result.output = String.join("\n", output);
+		
+		return result;
+	}
+	
+	public static boolean runRemoteCommand(String host, String login, String password, String command) throws JSchException, IOException {
+		final RemoteComamndResult result = runRemoteCommandExtended(host, login, password, command);
+		
+		if (result.exitStatus < 0) {
+			LOGGER.info("proccess yielded [{},{}]", result.exitStatus, result.output);
 			return true;
-		} else if(exitStatus > 0) {
-			LOGGER.warn("proccess yielded [{}]", result);
-			
+		} else if(result.exitStatus > 0) {
+			LOGGER.warn("proccess yielded [{},{}]", result.exitStatus, result.output);
 			return false;
 		} else {
+			LOGGER.debug("proccess yielded [{},{}]", result.exitStatus, result.output);
 			return true;
 		}
 	}

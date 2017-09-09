@@ -13,12 +13,12 @@ import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.MessageUtils;
+import es.xan.servantv3.messages.Device;
 import es.xan.servantv3.messages.Person;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Sensor;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
-import es.xan.servantv3.network.RouterPageManager.Device;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import io.vertx.core.eventbus.Message;
@@ -70,7 +70,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	public void get_home_status(Message<Object> message) {
 		ReplyBuilder builder = MessageBuilder.createReply();
 		
-		List<JsonObject> persons = this.mPopulation.values().stream().map(person -> { return new JsonObject(JsonUtils.toJson(person));}).collect(Collectors.toList());
+		List<JsonObject> persons = this.mPopulation.values().stream().map(person -> { return JsonUtils.toJson(person);}).collect(Collectors.toList());
 		builder.setResult(persons);
 		
 		message.reply(builder.build());
@@ -115,7 +115,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 
 	public void new_network_devices_message(Device device) {
-		Person person = mPopulation.get(device.mac);
+		Person person = mPopulation.get(device.getMac());
 		
 		if (person == null) return;
 		
@@ -125,7 +125,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void rem_network_devices_message(Device device) {
-		Person person = mPopulation.get(device.mac);
+		Person person = mPopulation.get(device.getMac());
 		
 		if (person == null) return;
 		

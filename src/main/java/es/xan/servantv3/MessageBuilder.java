@@ -160,7 +160,7 @@ public class MessageBuilder {
 			}
 			
 			public void setBean(Object obj) {
-				setBean(new JsonObject(JsonUtils.toJson(obj)));
+				setBean(JsonUtils.toJson(obj));
 			}
 			
 			public JsonObject build() {

@@ -44,6 +44,14 @@ data class Configure(var field: String, var value: String)
 data class Person(var name: String, var inHome: Boolean)
 data class Room(var name: String)
 
+enum class DeviceStatus {
+	UP,
+	DOWN,
+	QUARANTINE,
+	NEW
+}
+data class Device(var user: String, var mac: String, var status: DeviceStatus, var timestamp: Long)
+
 /**
  * Events Messages
  */
