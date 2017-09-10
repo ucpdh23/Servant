@@ -209,9 +209,6 @@
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-    				<args>-Xmx1024m</args>
-  				</configuration>
 			</plugin>
 
 			<plugin>
