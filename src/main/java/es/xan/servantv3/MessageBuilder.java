@@ -3,6 +3,7 @@ package es.xan.servantv3;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MessageBuilder {
 	
@@ -93,27 +94,63 @@ public class MessageBuilder {
 		private JsonObject object = new JsonObject();
 		
 		QueryBuilder() {
-			JsonObject options = new JsonObject();
-			object.put("options", options);
+			JsonObject sort = new JsonObject();
+			object.put("sort", sort);
 			
 			JsonObject entity = new JsonObject();
 			object.put("filter", entity);
+			
+			JsonObject fields = new JsonObject();
+			object.put("fields", fields);
 		}
 		
 		void setOperation(String operation) {
 			object.put("operation", operation);
 		}
 		
+		public QueryBuilder filtering(Consumer<JsonObject> lambda) {
+			lambda.accept(this.filter());
+			return this;
+		}
+		
+		public QueryBuilder sorting(Consumer<JsonObject> lambda) {
+			lambda.accept(this.sort());
+			return this;
+		}
+		
+		public QueryBuilder fielding(Consumer<JsonObject> lambda) {
+			lambda.accept(this.fields());
+			return this;
+		}
+		
+		public QueryBuilder limit(int value) {
+			object.put("limit", value);
+			return this;
+		}
+		
 		public JsonObject filter() {
 			return object.getJsonObject("filter");
 		}
 		
-		public JsonObject options() {
-			return object.getJsonObject("options");
+		public JsonObject sort() {
+			return object.getJsonObject("sort");
+		}
+		
+		public JsonObject fields() {
+			return object.getJsonObject("fields");
+		}
+		
+		public int limit() {
+			return object.getInteger("limit");
 		}
 		
 		public JsonObject build() {
 			return object;
+//			JsonObject result = new JsonObject();
+//			
+//			result.put("bean", object);
+//			
+//			return result;
 		}
 	}
 

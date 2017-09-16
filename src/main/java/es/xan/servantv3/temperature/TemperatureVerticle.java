@@ -13,7 +13,7 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
-import es.xan.servantv3.Query;
+import es.xan.servantv3.messages.Query;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Temperature;
 import io.vertx.core.CompositeFuture;

@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.function.BiConsumer;
 
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.messages.Query;
 
 /**
  * 
@@ -102,10 +103,14 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 
 	public void query(Query query, final Message<Object> msg) {
 		final FindOptions options = new FindOptions();
-		options.setLimit(query.limit);
+		options.setLimit(query.getLimit());
+		options.setSort(new JsonObject(query.getSort()));
+		options.setFields(new JsonObject(query.getFields()));
+		
+		JsonObject filter = new JsonObject(query.getFilter());
 		
 		final long init = new Date().getTime();
-		mongoClient.findWithOptions(mCollection, query.filter != null?  JsonUtils.toJson(query.filter) : new JsonObject(), options, res -> {
+		mongoClient.findWithOptions(mCollection, filter, options, res -> {
 			final long elapsed = new Date().getTime() - init;
 			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Querying in mongo required [{}] millis", elapsed);
 

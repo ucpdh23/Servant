@@ -4,12 +4,16 @@ package es.xan.servantv3.brain.nlp;
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageContains;
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageIs;
 import static es.xan.servantv3.brain.nlp.RuleUtils.nextTokenTo;
+import static es.xan.servantv3.brain.nlp.RuleUtils.contains;
 import static es.xan.servantv3.brain.nlp.TranslationUtils.reply;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import es.xan.servantv3.Action;
+import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
 import es.xan.servantv3.homeautomation.HomeUtils;
@@ -24,6 +28,7 @@ import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Rules to transform NLM into Actions for the vertx event bus.
@@ -109,14 +114,42 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. boiler off"
 			),
-			
+
+	
+	TEMPERATURE_QUERY(TemperatureVerticle.Actions.QUERY,
+			messageContains("temperatura||temperature").
+				and(messageContains("minimun||mínima||minima")),
+			tokens -> {return MessageBuilder.createQuery()
+					.filtering(filter -> {
+						if (contains("livingroom").test(tokens)) 
+							filter.put("room", "livingRoom");
+						else if (contains("outside").test(tokens))
+							filter.put("room", "outside");
+						else if (contains("bedroom").test(tokens))
+							filter.put("room", "bedRoom");
+						filter.put("timestamp", new JsonObject(new HashMap<String,Object>() {{this.put("$gte", new Date().getTime() - 1000 * 3600 * 24);}}));
+						})
+					.sorting(sort -> {
+						sort.put("temperature",1);
+					})
+					.fielding(fields -> {
+						fields.put("temperature", 1);
+						fields.put("room", 1);
+						fields.put("timestamp", 1);
+						fields.put("_id", 0);
+					})
+					.limit(1)
+					.build();},
+			msg -> { return reply(null, TemperatureUtils.toString(msg));},
+			"Ex. temperature"
+			),
+	
 	TEMPERATURE(TemperatureVerticle.Actions.LAST_VALUES,
 			messageContains("temperatura||temperature"),
 			tokens -> {return null;},
 			msg -> { return reply(null, TemperatureUtils.toString(msg));},
 			"Ex. temperature"
 			),
-	
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
 			messageContains("home||casa"),
 			tokens -> {return null;},

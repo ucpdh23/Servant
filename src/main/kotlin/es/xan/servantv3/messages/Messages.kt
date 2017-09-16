@@ -1,5 +1,7 @@
 package es.xan.servantv3.messages
 
+import io.vertx.core.json.JsonObject
+
 /**
  * Actions Messages
  */
@@ -64,3 +66,6 @@ data class ParrotMessageReceived(var user: String, var message: String)
  * POJOS
  */
 data class Temperature(var room: String, var temperature: Float, var timestamp: Long)
+
+
+data class Query(var limit: Integer, var sort: Map<String,Object>, var filter: Map<String,Object>, var fields: Map<String,Object>)

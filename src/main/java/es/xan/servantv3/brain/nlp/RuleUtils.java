@@ -44,4 +44,17 @@ public class RuleUtils {
 			return "";
 		};
 	}
+	
+	public static Predicate<String[]> contains(String input) {
+		return (String[] tokens) -> {
+			for (int i=0; i < tokens.length; i++) {
+				if (input.equals(tokens[i].toLowerCase())) {
+					return true;
+				}
+			}
+			
+			return false;
+		};
+		
+	}
 }
