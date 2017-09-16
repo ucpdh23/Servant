@@ -46,6 +46,13 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
 			),
+	OUTLET_STATUS(OutletVerticle.Actions.STATUS,
+			messageContains("outlet||enchufe")
+			.and(messageContains("status||estado")),
+		tokens -> {return null;},
+		msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+		"Ex. outlet status"
+		),
 	OUTLET_ON(OutletVerticle.Actions.SWITCHER,
 			messageContains("outlet||enchufe")
 			.and(messageContains("on||encender||activar||conectar")),

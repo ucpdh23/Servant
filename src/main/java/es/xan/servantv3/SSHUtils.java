@@ -24,7 +24,7 @@ public class SSHUtils {
 		public String output;
 	}
 	
-	private static RemoteComamndResult runRemoteCommandExtended(String host, String login, String password, String command) throws JSchException, IOException {
+	public static RemoteComamndResult runRemoteCommandExtended(String host, String login, String password, String command) throws JSchException, IOException {
 		JSch jsch = new JSch();
 		
 		LOGGER.info("host [{}] login [{}] password [{}] command [{}]", host, login, password, command);

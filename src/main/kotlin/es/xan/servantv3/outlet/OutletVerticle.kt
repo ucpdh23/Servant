@@ -21,6 +21,7 @@ class OutletVerticle : AbstractServantVerticle(Constant.OUTLET_VERTICLE) {
 	
 	enum class Actions(val clazz : Class<*>? ) : Action {
 		SWITCHER(UpdateState::class.java),
+		STATUS(null),
 		SET(Configure::class.java);
 	}
 	
@@ -30,27 +31,39 @@ class OutletVerticle : AbstractServantVerticle(Constant.OUTLET_VERTICLE) {
 	
 	val ON_COMMAND	= "echo \"1\" > /proc/power/relay1"
 	val OFF_COMMAND	= "echo \"0\" > /proc/power/relay1"
+	val STATUS_COMMAND = "grep . /proc/power/*";
 	
 	fun switcher(switcher : UpdateState, message: Message<Any>) {
-		val ok = try { when (switcher.newStatus) {
-			"on" -> SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, ON_COMMAND);
-			else -> SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, OFF_COMMAND);
-			}
-		} catch (e: Throwable) {
-			LOG.warn("Problems trying to manage ssh remote command", e);
-			false
-		}
-		
-		val builderOn = MessageBuilder.createReply().apply {
-			if (ok) {
+		val reply = MessageBuilder.createReply().apply {
+			try {
+				when (switcher.newStatus) {
+					"on" -> SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, ON_COMMAND);
+					else -> SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, OFF_COMMAND);
+				}
 				setOk();
-			} else {
+			} catch (e: Throwable) {
+				LOG.warn("Problems trying to manage ssh remote command", e);
 				setError();
+				setMessage(e.localizedMessage)
 			}
 		}
 		
-		message.reply(builderOn.build());
+		message.reply(reply.build());
+	}
+	
+	fun status(message: Message<Any>) {
+		val reply = MessageBuilder.createReply().apply {
+			try {
+				val response = SSHUtils.runRemoteCommandExtended(mHost, mLogin, mPassword, STATUS_COMMAND);
+				setOk()
+				setMessage(response.output)
+			} catch (e: Throwable) {
+				setError()
+				setMessage(e.message)
+			}
+		}
 		
+		message.reply(reply.build())
 	}
 
 }
