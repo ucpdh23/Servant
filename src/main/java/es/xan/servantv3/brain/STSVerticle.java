@@ -12,13 +12,9 @@ import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.brain.nlp.Translation;
 import es.xan.servantv3.brain.nlp.TranslationFacade;
-import es.xan.servantv3.messages.OpenChat;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -36,7 +32,7 @@ public class STSVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(STSVerticle.class);
 	
-	private JsonArray mMasters;
+	
 	private Scheduler mScheduler;
 	
 	public enum Actions implements Action {
@@ -62,7 +58,6 @@ public class STSVerticle extends AbstractServantVerticle {
 		supportedActions(Actions.values());
 		
 		supportedEvents(
-			Events.PARRONT_AVAILABLE,
 			Events.PARROT_MESSAGE_RECEIVED
 		);
 	}
@@ -70,22 +65,8 @@ public class STSVerticle extends AbstractServantVerticle {
 	public void start() {
 		super.start();
 		
-		this.mMasters = Vertx.currentContext().config().getJsonArray("masters");
-		
 		this.mScheduler = new Scheduler(getVertx());
 		LOGGER.info("Started brainVerticle");
-	}
-	
-	/**
-	 * Activates the chat channels with the stablished users.
-	 */
-	public void parront_available() {
-		for (Object item : mMasters.getList()) {
-			JsonObject emailInfo = (JsonObject) item;
-
-			LOGGER.debug("creating chat for user [{}]", emailInfo.getString("email"));
-			publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.CREATE_CHAT, new OpenChat(emailInfo.getString("email")));;
-		}
 	}
 	
 	public void help(final Message<Object> msg) {

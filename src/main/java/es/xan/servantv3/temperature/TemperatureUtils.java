@@ -2,10 +2,12 @@ package es.xan.servantv3.temperature;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
 import es.xan.servantv3.JsonUtils;
+import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.messages.Temperature;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -35,5 +37,25 @@ public class TemperatureUtils {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss z");
 		sdf.setTimeZone(TimeZone.getDefault());
 		return sdf.format(date);
+	}
+	
+	public static JsonObject buildMinTempQuery(final String room, long interval) {
+		return MessageBuilder.createQuery()
+				.filtering(filter -> {
+					if (room != null)
+						filter.put("room", room);
+					filter.put("timestamp", new JsonObject(new HashMap<String,Object>() {{this.put("$gte", new Date().getTime() - interval);}}));
+					})
+				.sorting(sort -> {
+					sort.put("temperature", 1);
+					})
+				.fielding(fields -> {
+					fields.put("temperature", 1);
+					fields.put("room", 1);
+					fields.put("timestamp", 1);
+					fields.put("_id", 0);
+					})
+				.limit(1)
+				.build();
 	}
 }

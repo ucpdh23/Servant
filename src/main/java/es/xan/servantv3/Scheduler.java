@@ -98,6 +98,10 @@ public class Scheduler {
 		
 
 		protected long resolveDelay() {
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) { }
+			
 			LocalDateTime now = LocalDateTime.now();
 			
 			LocalDateTime target;

@@ -119,29 +119,18 @@ public enum Rules {
 	TEMPERATURE_QUERY(TemperatureVerticle.Actions.QUERY,
 			messageContains("temperatura||temperature").
 				and(messageContains("minimun||mínima||minima")),
-			tokens -> {return MessageBuilder.createQuery()
-					.filtering(filter -> {
-						if (contains("livingroom").test(tokens)) 
-							filter.put("room", "livingRoom");
-						else if (contains("outside").test(tokens))
-							filter.put("room", "outside");
-						else if (contains("bedroom").test(tokens))
-							filter.put("room", "bedRoom");
-						filter.put("timestamp", new JsonObject(new HashMap<String,Object>() {{this.put("$gte", new Date().getTime() - 1000 * 3600 * 24);}}));
-						})
-					.sorting(sort -> {
-						sort.put("temperature",1);
-					})
-					.fielding(fields -> {
-						fields.put("temperature", 1);
-						fields.put("room", 1);
-						fields.put("timestamp", 1);
-						fields.put("_id", 0);
-					})
-					.limit(1)
-					.build();},
+			tokens -> {
+					String room = null;
+					if (contains("livingroom").test(tokens)) 
+						room = "livingRoom";
+					else if (contains("outside").test(tokens))
+						room = "outside";
+					else if (contains("bedroom").test(tokens))
+						room = "bedRoom";
+					
+					return TemperatureUtils.buildMinTempQuery(room, 1000 * 3600 * 24);},
 			msg -> { return reply(null, TemperatureUtils.toString(msg));},
-			"Ex. temperature"
+			"Ex. temperature minumun"
 			),
 	
 	TEMPERATURE(TemperatureVerticle.Actions.LAST_VALUES,

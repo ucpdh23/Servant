@@ -68,4 +68,4 @@ data class ParrotMessageReceived(var user: String, var message: String)
 data class Temperature(var room: String, var temperature: Float, var timestamp: Long)
 
 
-data class Query(var limit: Integer, var sort: Map<String,Object>, var filter: Map<String,Object>, var fields: Map<String,Object>)
+data class Query(var limit: Int, var sort: Map<String,Any>, var filter: Map<String,Any>, var fields: Map<String,Any>)

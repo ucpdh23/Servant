@@ -1,8 +1,13 @@
 package es.xan.servantv3.homeautomation;
 
+import static es.xan.servantv3.Scheduler.at;
+
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import es.xan.servantv3.AbstractServantVerticle;
@@ -13,7 +18,9 @@ import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.MessageUtils;
+import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.messages.Device;
+import es.xan.servantv3.messages.OpenChat;
 import es.xan.servantv3.messages.Person;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Sensor;
@@ -21,6 +28,8 @@ import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
+import es.xan.servantv3.temperature.TemperatureUtils;
+import es.xan.servantv3.temperature.TemperatureVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -44,6 +53,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Actions.values());
 		
 		supportedEvents(
+			Events.PARRONT_AVAILABLE,
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NEW_NETWORK_DEVICES_MESSAGE,
 			Events.REM_NETWORK_DEVICES_MESSAGE);
@@ -51,7 +61,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	public enum Actions implements Action {
 		GET_HOME_STATUS(null),
-		NOTIFY_BOSS(TextMessageToTheBoss.class)
+		NOTIFY_BOSS(TextMessageToTheBoss.class),
+		REPORT_TEMPERATURE(null)
 		;
 		
 		Class<?> beanClass;
@@ -64,9 +75,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		public Class<?> getPayloadClass() {
 			return beanClass;
 		}
-		
 	}
-	
+
 	public void get_home_status(Message<Object> message) {
 		ReplyBuilder builder = MessageBuilder.createReply();
 		
@@ -76,8 +86,19 @@ public class HomeVerticle extends AbstractServantVerticle {
 		message.reply(builder.build());
 	}
 	
+	public void report_temperature(Message<Object> message) {
+		publishAction(TemperatureVerticle.Actions.QUERY, TemperatureUtils.buildMinTempQuery("bedRoom", 24 * 3600 * 1000), response -> {
+			for (String master : this.mMasters) {
+				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, TemperatureUtils.toString(response.result())));
+			}
+		});
+	}
+	
 	private Map<String, Person> mPopulation = new HashMap<>();
+	private List<String> mMasters;
 	private String mBoss;
+	private Scheduler mScheduler;
+	private UUID mScheduledTask;
 	
 	private static final boolean OUTSIDE_HOME = false;
 	private static final boolean INSIDE_HOME = true;
@@ -89,9 +110,13 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		final JsonArray homeConfig = vertx.getOrCreateContext().config().getJsonArray("HomeVerticle");
 		this.mPopulation = loadPopulation(homeConfig.getList());
+
+		JsonArray masters = vertx.getOrCreateContext().config().getJsonArray("masters");
+		this.mMasters = loadMasters(masters.getList());
+		this.mBoss = this.mMasters.get(0);
 		
-		final JsonArray mastersConfig = vertx.getOrCreateContext().config().getJsonArray("masters");
-		this.mBoss = loadBoss(mastersConfig.getList());
+		this.mScheduler = new Scheduler(getVertx());
+		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
 		
 		LOGGER.info("Started HomeVerticle");
 	}
@@ -110,9 +135,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	public void notify_boss(TextMessageToTheBoss content) {
 		TextMessage message = new TextMessage(this.mBoss, content.getMessage());
 		publishAction(ParrotVerticle.Actions.SEND, message);
-		
 	}
-
 
 	public void new_network_devices_message(Device device) {
 		Person person = mPopulation.get(device.getMac());
@@ -133,6 +156,16 @@ public class HomeVerticle extends AbstractServantVerticle {
 			updatePerson(person, OUTSIDE_HOME);
 		}
 	}
+	
+	/**
+	 * Activates the chat channels with the stablished users.
+	 */
+	public void parront_available() {
+		for (String user : mMasters) {
+			LOGGER.debug("creating chat for user [{}]", user);
+			publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.CREATE_CHAT, new OpenChat(user));;
+		}
+	}
 		
 	private void updatePerson(Person person, boolean atHome) {
 		person.setInHome(atHome);
@@ -145,10 +178,15 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 
-	private String loadBoss(List<JsonObject> list) {
-		JsonObject emailInfo = list.get(0);
-		return emailInfo.getString("email");
+	private List<String> loadMasters(List<JsonObject> list) {
+		final List<String> result = new ArrayList<>();
+		for (JsonObject item : list) {
+			result.add(item.getString("email"));
+		}
+		
+		return result;
 	}
+
 
 	private Map<String, Person> loadPopulation(List<JsonObject> l_devices) {
 		final Map<String,Person> result = new HashMap<>();
