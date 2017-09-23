@@ -9,6 +9,11 @@ function initWidget(options) {
     if(options.text) {
       $widget.find('.text').html(options.text);
     }
+    
+    if(options.expander) {
+      $widget.find('.expander').html(options.expander);
+    }
+    
     if(options.switch1_activeAction) {
       initToogle($widget, options.switch1_activeAction, options.switch1_inactiveAction);
     }

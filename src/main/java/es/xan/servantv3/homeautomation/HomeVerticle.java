@@ -87,7 +87,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 	
 	public void report_temperature(Message<Object> message) {
-		publishAction(TemperatureVerticle.Actions.QUERY, TemperatureUtils.buildMinTempQuery("bedRoom", 24 * 3600 * 1000), response -> {
+		publishAction(TemperatureVerticle.Actions.QUERY, TemperatureUtils.buildMinTempQuery("bedRoom", 10 * 3600 * 1000), response -> {
 			for (String master : this.mMasters) {
 				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, TemperatureUtils.toString(response.result())));
 			}

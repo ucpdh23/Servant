@@ -87,11 +87,19 @@ function processMessage(message) {
     initWidget({
       id: "widget-" + bean.room,
       enable: true,
-      text: bean.temperature
+      text: bean.temperature,
+      expander: bean.timestamp
     });
     break;
 
   default:
     console.log('No actions defined to process ' + message);
   }
+}
+
+function expander(item) {
+    $(item).toggleClass('switch-widget-expanded');
+    $(item).toggleClass('switch-widget-condensed');
+    
+    $(item).find('div.switch-widget-expansion').toggle();
 }
