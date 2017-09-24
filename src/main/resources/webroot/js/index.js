@@ -63,7 +63,8 @@ function initWebSocket() {
     			initWidget({
       				id: "widget-" + temperature.room,
       				enable: true,
-      				text: temperature.temperature
+      				text: temperature.temperature,
+      				expander: new Date(temperature.timestamp)
     			})
     		);
     	});
