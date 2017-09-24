@@ -88,7 +88,7 @@ function processMessage(message) {
       id: "widget-" + bean.room,
       enable: true,
       text: bean.temperature,
-      expander: bean.timestamp
+      expander: new Date(bean.timestamp)
     });
     break;
 
