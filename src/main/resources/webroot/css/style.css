@@ -118,7 +118,7 @@ input:checked + label {
 .switch-widget-expansion {
   height: 24vw;
   
-  background: rgb(80, 72, 75);
+
        /* This lines the li's up in a row and will wrap them under each other */
     display: -webkit-box;
     display: -moz-box;
@@ -182,7 +182,7 @@ i.fa.icon.active {
   float: right;
 }
 
-.switch-widget ul li{
+ul.switch-widget-principal li {
   
       /* This is the code responsible for the centering of content */
     display: -webkit-box;
@@ -208,15 +208,17 @@ i.fa.icon.active {
     height: 100%;
 }
 
-.switch-widget ul li:first-child {
+
+
+ul.switch-widget-principal li:first-child {
   width: 40%;
 }
-.switch-widget ul li:last-child {
+ul.switch-widget-principal li:last-child {
   width: 20%;
 }
 
 
-.switch-widget ul {
+ul.switch-widget-principal {
   
      /* This lines the li's up in a row and will wrap them under each other */
     display: -webkit-box;
@@ -238,6 +240,61 @@ i.fa.icon.active {
   
 }
 
+.switch-widget-expansion ul {
+  
+     /* This lines the li's up in a row and will wrap them under each other */
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    
+    -webkit-flex-direction:row;
+    -moz-flex-direction:row;
+    -ms-flex-direction:row;
+    flex-direction:row;
+    
+    -webkit-flex-wrap:wrap;
+    -moz-flex-wrap:wrap;
+    -ms-flex-wrap:wrap;
+    flex-wrap:wrap; 
+  	height: 25vw;
+  
+}
+
+.switch-widget-expansion .expander {
+  font-size: 6vw;
+  text-align: center;
+  line-height: 6vw;
+  font-weight:700;
+  text-shadow: 0 0 0.2vw #fff;
+}
+
+.switch-widget-expansion ul li {
+  
+      /* This is the code responsible for the centering of content */
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    
+    -webkit-flex-pack:center;
+  -webkit-justify-content:center;
+  -moz-justify-content:center;
+  -ms-flex-pack:center;
+  justify-content:center;
+    
+    
+    -webkit-flex-direction:column;
+  -moz-flex-direction:column;
+  -ms-flex-direction:column;
+  flex-direction:column;
+    padding: 0 0.3em;
+    width: 100%;
+    color: #EEE;
+    height: 100%;
+}
 
 /** TOOGLE **/
 
