@@ -42,6 +42,19 @@ function initWidgets() {
     iconClass: "fa-thermometer-three-quarters fa-5x" 
   });
   
+    // boiler
+
+  initWidget({
+    id: "widget-boiler",
+    title: "Caldera",
+    switch_activeAction: function(toogle, icon) {
+      
+    },
+    switch_inactiveAction: function(toogle, icon) {
+      
+    },
+    iconClass: "fa-fire"  
+  });
   
 }
 
