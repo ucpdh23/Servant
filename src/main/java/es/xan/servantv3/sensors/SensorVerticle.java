@@ -79,6 +79,26 @@ public class SensorVerticle extends AbstractServantVerticle {
 
 	public void reset_sensor(Sensor sensor, Message<Object> message) {
 		LOGGER.info("Asking to reset sensor [{}]", sensor.getSensor());
+		
+		if (sensor.getSensor().toLowerCase().equals("all")) {
+			boolean result = false;
+			for (String command : mSensors.values()) {
+				try {
+					result = SSHUtils.runRemoteCommand(mHost, mLogin, mPassword, command);
+				} catch (JSchException | IOException e) {
+					LOGGER.warn(e.getMessage(), e);
+				}
+			}
+			
+			final ReplyBuilder builder = MessageBuilder.createReply();
+			if (result) builder.setOk();
+			else builder.setError();
+			
+			message.reply(builder.build());
+			
+			return;
+		}
+		
 		final String command = mSensors.get(sensor.getSensor());
 		
 		final ReplyBuilder builder = MessageBuilder.createReply();
