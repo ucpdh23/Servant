@@ -4,6 +4,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
@@ -44,6 +45,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(SensorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(OutletVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(LaundryVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 		
 	}

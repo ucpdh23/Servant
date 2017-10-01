@@ -18,6 +18,7 @@ import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.Configure;
 import es.xan.servantv3.messages.Sensor;
 import es.xan.servantv3.messages.UpdateState;
@@ -51,6 +52,13 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
 			),
+	LAUNDRY_STATUS(LaundryVerticle.Actions.CHECK_STATUS,
+			messageContains("laundry||lavadora")
+			.and(messageContains("status||estado")),
+		tokens -> {return null;},
+		msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+		"Ex. laundry status"
+		),
 	OUTLET_STATUS(OutletVerticle.Actions.STATUS,
 			messageContains("outlet||enchufe")
 			.and(messageContains("status||estado")),

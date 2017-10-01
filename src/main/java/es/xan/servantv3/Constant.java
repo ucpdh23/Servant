@@ -10,6 +10,7 @@ public class Constant {
 	public static final String HOME_VERTICLE = "home.verticle";
 	public static final String STS_VERTICLE = "sts.verticle";
 	public static final String OUTLET_VERTICLE = "outlet.verticle";
+	public static final String LAUNDRY_VERTICLE = "laundry.verticle";
 	
 	public static final String EVENT = "event";
 	
