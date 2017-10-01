@@ -14,6 +14,7 @@ import es.xan.servantv3.Action
 import es.xan.servantv3.MessageBuilder
 import es.xan.servantv3.outlet.OutletVerticle
 
+
 class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	companion object {
 		val ACTIVEPWR1 = """active_pwr1:(\d+.\d+)\s*\n""".toRegex()
@@ -22,7 +23,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		
         fun findActivePwr1(text : String) = ACTIVEPWR1.find(text)?.groups?.get(1)?.value?:"0.0"
 		
-		fun isWorking(x : JsonObject) = findActivePwr1(x.getString("message")) !== "0.0"
+		fun isWorking(x : JsonObject) = !findActivePwr1(x.getString("message")).equals("0.0")
 		
     }
 	
@@ -63,8 +64,8 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		STOPPED(
 			Transition({x -> isWorking(x)}, {States.WORKING})),
 		WORKING(
-			Transition({x -> !isWorking(x)}, {States.MAYBE_HAS_STOPED})),
-		MAYBE_HAS_STOPED(
+			Transition({x -> !isWorking(x)}, {States.MAYBE_HAS_STOPPED})),
+		MAYBE_HAS_STOPPED(
 			Transition({x -> isWorking(x)}, {States.WORKING}),
 			Transition({x -> !isWorking(x)},{v -> v.notifyWasStoped(); States.STOPPED})
 			),
