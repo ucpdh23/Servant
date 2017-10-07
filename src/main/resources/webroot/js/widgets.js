@@ -14,7 +14,7 @@ function initWidget(options) {
       $widget.find('.expander').html(options.expander);
     }
     
-    if(options.switch1_activeAction) {
+    if(options.switch_activeAction) {
       initToogle($widget, options.switch1_activeAction, options.switch1_inactiveAction);
     }
     if(options.button1_action) {
@@ -62,7 +62,16 @@ function initButton($button, action) {
   });
 }
 
-// 
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+$("#screen").html(x+'x'+y);
+
 function initToogle($widget, onActive, onInactive) {
   $widget.find('a.toggle').click(function(e) {
     var toggle = this;
@@ -74,10 +83,10 @@ function initToogle($widget, onActive, onInactive) {
       var icon = $(toggle).parents('.switch-widget:first').find('.fa.icon');
       if($(toggle).hasClass('toggle-on')) {
           $(icon).addClass('active');
-          onActive(toggle, icon);
+          onActive(toggle, icon, $widget);
         } else {
           $(icon).removeClass('active');
-          onInactive(toggle, icon);
+          onInactive(toggle, icon, $widget);
         }
       setTimeout(function() {
         $(toggle).removeClass('toggle-moving');
@@ -85,12 +94,3 @@ function initToogle($widget, onActive, onInactive) {
     }
   });
 }
-
-var w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    x = w.innerWidth || e.clientWidth || g.clientWidth,
-    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
-
-$("#screen").html(x+'x'+y);

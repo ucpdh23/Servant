@@ -117,3 +117,4 @@ function expander(item) {
     
     $(item).find('div.switch-widget-expansion').toggle();
 }
+

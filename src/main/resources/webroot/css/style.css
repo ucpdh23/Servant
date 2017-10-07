@@ -349,7 +349,6 @@ ul.switch-widget-principal {
 .toggle-moving { background-color: #1c2429; }
 
 .toggle-moving:after {
-  color: transparent;
   border-color: #435862;
   background-color: #222c31;
   transition: color 0s, transform 500ms, border-radius 500ms, background-color 500ms;
