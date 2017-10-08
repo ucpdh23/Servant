@@ -27,7 +27,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		
     }
 	
-	fun notifyWasStoped() = publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("laundry is off"));
+	fun notifyWasStoped() = publishEvent(Events.LAUNDRY_OFF);
 	
 	init {
 		supportedActions(Actions::class.java)
@@ -53,7 +53,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	override fun start() {
 		super.start();
 		
-		vertx.setPeriodic(300000, { _ -> 
+		vertx.setPeriodic(120000, { _ -> 
 			source()
 		});
 	}
@@ -62,12 +62,12 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	
 	enum class States(vararg val trans : Transition) {
 		STOPPED(
-			Transition({x -> isWorking(x)}, {States.WORKING})),
+			Transition({x -> isWorking(x)}, { _ -> States.WORKING})),
 		WORKING(
-			Transition({x -> !isWorking(x)}, {States.MAYBE_HAS_STOPPED})),
+			Transition({x -> !isWorking(x)},{ _ -> States.MAYBE_HAS_STOPPED})),
 		MAYBE_HAS_STOPPED(
-			Transition({x -> isWorking(x)}, {States.WORKING}),
-			Transition({x -> !isWorking(x)},{v -> v.notifyWasStoped(); States.STOPPED})
+			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ v -> v.notifyWasStoped(); States.STOPPED})
 			),
 		;
 		
@@ -84,12 +84,9 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		
 		LOG.debug("current state [{}]", currState)
 		
-		for (tran : Transition in currState.trans) {
-			if (tran.predicate.invoke(body)) {
-				this.currState = tran.operation.invoke(this);
-				break;
-			}
-		}
+		currState = currState.trans
+				.first { tran -> tran.predicate.invoke(body) }
+				.run   { operation.invoke(this@LaundryVerticle) };
 		
 		LOG.debug("new state [{}]", currState)
 	}

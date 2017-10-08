@@ -56,7 +56,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.PARRONT_AVAILABLE,
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NEW_NETWORK_DEVICES_MESSAGE,
-			Events.REM_NETWORK_DEVICES_MESSAGE);
+			Events.REM_NETWORK_DEVICES_MESSAGE,
+			Events.LAUNDRY_OFF);
 	}
 	
 	public enum Actions implements Action {
@@ -157,8 +158,12 @@ public class HomeVerticle extends AbstractServantVerticle {
 		}
 	}
 	
+	public void laundry_off() {
+		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "laundry is off")));
+	}
+	
 	/**
-	 * Activates the chat channels with the stablished users.
+	 * Activates the chat channels with the established users.
 	 */
 	public void parront_available() {
 		for (String user : mMasters) {
