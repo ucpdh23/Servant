@@ -159,7 +159,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 	
 	public void laundry_off() {
-		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "laundry is off")));
+		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "My laundry just finished")));
 	}
 	
 	/**
