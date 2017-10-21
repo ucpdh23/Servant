@@ -85,8 +85,8 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		LOG.debug("current state [{}]", currState)
 		
 		currState = currState.trans
-				.first { tran -> tran.predicate.invoke(body) }
-				.run   { operation.invoke(this@LaundryVerticle) };
+				.firstOrNull { tran -> tran.predicate.invoke(body) }
+				?.run   { operation.invoke(this@LaundryVerticle) } ?: currState;
 		
 		LOG.debug("new state [{}]", currState)
 	}
