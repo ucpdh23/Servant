@@ -3,6 +3,7 @@ package es.xan.servantv3;
 public class Constant {
 	public static final String WEBSERVER_VERTICLE = "webserver.verticle";
 	public static final String THERMOSTAT_VERTICLE 	= "thermostat.verticle";
+	public static final String LAMP_VERTICLE 	= "lamp.verticle";
 	public static final String TEMPERATURE_VERTICLE = "temperature.verticle";
 	public static final String PARROT_VERTICLE = "parrot.verticle";
 	public static final String NETWORK_VERTICLE = "network.verticle";

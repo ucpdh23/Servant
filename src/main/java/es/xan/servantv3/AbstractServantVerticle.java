@@ -217,7 +217,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 	
 
-	protected void publishAction(Action send, Object item, Handler<AsyncResult<Message<Object>>> replyHandler) {
+	public void publishAction(Action send, Object item, Handler<AsyncResult<Message<Object>>> replyHandler) {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		if (item != null)

@@ -26,6 +26,7 @@ public enum Events implements Event {
 	PERSON_LEAVE_HOME(Person.class),
 	
 	BOILER_SWITCHED(NewStatus.class),
+	LAMP_SWITCHED(NewStatus.class),
 	
 	LAUNDRY_OFF(null)
 	;

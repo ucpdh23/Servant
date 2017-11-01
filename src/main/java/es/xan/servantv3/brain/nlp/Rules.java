@@ -18,6 +18,7 @@ import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.Configure;
 import es.xan.servantv3.messages.Sensor;
@@ -121,6 +122,22 @@ public enum Rules {
 			tokens -> {return new UpdateState("off");},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. boiler off"
+			),
+	
+	LAMP_ON(LampVerticle.Actions.SWITCH_LAMP,
+			messageContains("lamp||lampara||lámpara")
+				.and(messageContains("on||encender||activar||conectar")),
+			tokens -> {return new UpdateState("on");},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. lamp on"
+			),
+			
+	LAMP_OFF(LampVerticle.Actions.SWITCH_LAMP, 
+			messageContains("lamp||lampara||lámpara")
+				.and(messageContains("off||apagar||desactivar||desconectar")),
+			tokens -> {return new UpdateState("off");},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. lamp off"
 			),
 
 	
