@@ -26,10 +26,12 @@ import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Sensor;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
+import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -100,6 +102,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	private String mBoss;
 	private Scheduler mScheduler;
 	private UUID mScheduledTask;
+	private UUID mScheduledStartBoilerTask;
 	
 	private static final boolean OUTSIDE_HOME = false;
 	private static final boolean INSIDE_HOME = true;
@@ -118,6 +121,11 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		this.mScheduler = new Scheduler(getVertx());
 		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
+		this.mScheduledStartBoilerTask = mScheduler.scheduleTask(at(LocalTime.of(15,0)), (UUID id) -> { publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("on"), response -> {
+			for (String master : this.mMasters) {
+				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Boiler switched on " + response.result().toString()));
+			}
+		});  return true; });
 		
 		LOGGER.info("Started HomeVerticle");
 	}
