@@ -13,8 +13,16 @@ import es.xan.servantv3.messages.TextMessageToTheBoss
 import es.xan.servantv3.Action
 import es.xan.servantv3.MessageBuilder
 import es.xan.servantv3.outlet.OutletVerticle
+import es.xan.servantv3.api.Transition
+import es.xan.servantv3.api.State
 
-
+/**
+ * This verticle checks the current state of the outlet in order to determine whether the laundry has finished.
+ * The secuence of steps is:
+ *   1.- Every 60 seconds, this verticle publish the STATUS action of the outlet, and the result is send to the stream method.
+ *   2.- The stream  method updates the state machine (currState field)
+ *   3.- When the state is STOPPED, a event of LAUNDRY_OFF is published, this event is readed by the homeautomation module in order to notify
+ */
 class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	companion object {
 		val ACTIVEPWR1 = """active_pwr1:(\d+.\d+)\s*\n""".toRegex()
@@ -53,27 +61,28 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	override fun start() {
 		super.start();
 		
-		vertx.setPeriodic(120000, { _ -> 
+		vertx.setPeriodic(60000, { _ -> 
 			source()
 		});
 	}
 	
 	var currState : States = States.STOPPED;
 	
-	enum class States(vararg val trans : Transition) {
+	enum class States(vararg val trans : Transition<LaundryVerticle, States>) : State {
 		STOPPED(
 			Transition({x -> isWorking(x)}, { _ -> States.WORKING})),
 		WORKING(
-			Transition({x -> !isWorking(x)},{ _ -> States.MAYBE_HAS_STOPPED})),
-		MAYBE_HAS_STOPPED(
+			Transition({x -> !isWorking(x)},{ _ -> States.FIRST_CONFIRMATION})),
+		FIRST_CONFIRMATION(
+			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ _ -> States.SECOND_CONFIRMATION})
+			),
+		SECOND_CONFIRMATION(
 			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
 			Transition({x -> !isWorking(x)},{ v -> v.notifyWasStoped(); States.STOPPED})
 			),
 		;
-		
 	}
-	
-	class Transition(val predicate : (JsonObject) -> Boolean, val operation: (LaundryVerticle) -> States)
 	
 	fun source() {
 		publishAction(OutletVerticle.Actions.STATUS, {e -> stream(e.result())})
@@ -82,13 +91,18 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	fun stream(message : Message<Any>) {
 		val body = message.body() as JsonObject;
 		
-		LOG.debug("current state [{}]", currState)
+		val lastState = currState;
 		
 		currState = currState.trans
 				.firstOrNull { tran -> tran.predicate.invoke(body) }
 				?.run   { operation.invoke(this@LaundryVerticle) } ?: currState;
+
+		if (lastState != currState)	{
+			LOG.trace("previous state [{}]", lastState)
+			LOG.debug("new state [{}]", currState)
+		}
+
 		
-		LOG.debug("new state [{}]", currState)
 	}
 	
 }
