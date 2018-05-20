@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +38,7 @@ public class GCalendarUtils {
      * If modifying these scopes, delete your previously saved credentials/ folder.
      */
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
-
+    
     /**
      * Notifications en the next 5 hours
      * @param secret
@@ -82,7 +83,7 @@ public class GCalendarUtils {
                 .execute();
         List<Event> items = events.getItems();
         if (items.isEmpty()) {
-            System.out.println("No upcoming events found.");
+            LOGGER.debug("No upcoming events found.");
             
             return Collections.emptyList();
         } else {
@@ -94,14 +95,18 @@ public class GCalendarUtils {
                 if (start == null) {
                     start = event.getStart().getDate();
                 }
-                System.out.printf("%s - %s (%s)\n", event.getId(), event.getSummary(), start);
+                LOGGER.debug("%s - %s (%s)\n", event.getId(), event.getSummary(), start);
                 
                 Notification notification = new Notification();
                 notification.id = event.getId();
                 notification.text = event.getSummary();
                 notification.date = Instant.ofEpochMilli(start.getValue()).atZone(ZoneId.systemDefault()).toLocalDateTime();
                 
-                notifications.add(notification);
+                if (notification.date.isBefore(LocalDateTime.now())) {
+                	LOGGER.debug("rejected notification [{}], [{}] is before than now", notification.text, notification.date);
+                } else {
+                	notifications.add(notification);
+                }
             }
             
             return notifications;
