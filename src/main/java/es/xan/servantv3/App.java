@@ -3,6 +3,7 @@ package es.xan.servantv3;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import es.xan.servantv3.brain.STSVerticle;
+import es.xan.servantv3.calendar.CalendarVerticle;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
@@ -48,6 +49,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(OutletVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(LaundryVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 	}
 

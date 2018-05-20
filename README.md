@@ -26,7 +26,7 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Web interface that allows the creation of a web application.
 
-* Includes a Jabber (XMPP) chat bot.
+* Includes a Jabber (XMPP) chatbot.
 
 **Smart**
 * Based on a events and actions systems. It is easy to create advanced algorithms interacting devices together (sensors and/or actuators) or with external systems.

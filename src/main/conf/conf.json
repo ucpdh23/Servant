@@ -49,5 +49,9 @@
         "host":"",
         "login":"",
         "password":""
+  	},
+  	"CalendarVerticle" : {
+  		"calendar" : "",
+  		"secret" : ""
   	}
 }
