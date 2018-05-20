@@ -45,7 +45,7 @@ public class CalendarVerticle extends AbstractServantVerticle {
 		calendar = config.getString("calendar");
 		secretFile = new File(config.getString("secret"));
 
-		vertx.setPeriodic(TimeUnit.MINUTES.toMillis(15), id -> {publishAction(Actions.CHECK_CALENDAR);});
+		vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), id -> {publishAction(Actions.CHECK_CALENDAR);});
 		
 		this.mScheduler = new Scheduler(getVertx());
 
@@ -73,13 +73,19 @@ public class CalendarVerticle extends AbstractServantVerticle {
 			
 			nextNotifications.forEach(notif -> {
 				if (!watcher.containsKey(notif.id)) {
+					LOGGER.info("adding event [{}-{}-{}]", notif.id, notif.date, notif.text);
+					
 					UUID scheduleTask = mScheduler.scheduleTask(
 							at(notif.date),
 							(UUID id) -> {
+								LOGGER.info("performing event [{}-{}-{}]", notif.id, notif.date, notif.text);
 								Notification notification = GCalendarUtils.getNotification(notif.id, secretFile, calendar);
 								
 								if (notification != null) {
 									publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new TextMessageToTheBoss(notification.text));
+									LOGGER.info("performed event with current data [{}-{}-{}]", notification.id, notification.date, notification.text);
+								} else {
+									LOGGER.warn("not found event [{}-{}-{}]", notif.id, notif.date, notif.text);
 								}
 								
 								watcher.remove(notif.id);

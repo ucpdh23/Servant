@@ -81,6 +81,7 @@ public class GCalendarUtils {
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
+        
         List<Event> items = events.getItems();
         if (items.isEmpty()) {
             LOGGER.debug("No upcoming events found.");
@@ -95,14 +96,14 @@ public class GCalendarUtils {
                 if (start == null) {
                     start = event.getStart().getDate();
                 }
-                LOGGER.debug("%s - %s (%s)\n", event.getId(), event.getSummary(), start);
+                LOGGER.debug("{} - {} ({})", event.getId(), event.getSummary(), start);
                 
                 Notification notification = new Notification();
                 notification.id = event.getId();
                 notification.text = event.getSummary();
                 notification.date = Instant.ofEpochMilli(start.getValue()).atZone(ZoneId.systemDefault()).toLocalDateTime();
                 
-                if (notification.date.isBefore(LocalDateTime.now())) {
+                if (startOffset == 0 && notification.date.isBefore(LocalDateTime.now())) {
                 	LOGGER.debug("rejected notification [{}], [{}] is before than now", notification.text, notification.date);
                 } else {
                 	notifications.add(notification);
@@ -115,7 +116,7 @@ public class GCalendarUtils {
     
     public static Notification getNotification(String id, File secret, String calendar) {
 		try {
-			List<Notification> notificationsInWindow = getNotificationsInWindow(secret, calendar, -TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(5));
+			List<Notification> notificationsInWindow = getNotificationsInWindow(secret, calendar, -TimeUnit.MINUTES.toMillis(2), TimeUnit.MINUTES.toMillis(2));
 			
 			for (Notification notification : notificationsInWindow) {
 				if (notification.id.equals(id)) {
@@ -125,7 +126,8 @@ public class GCalendarUtils {
 		} catch (IOException | GeneralSecurityException e) {
 			LOGGER.error(e.getMessage(), e);
 		}
-    	
+		
+		LOGGER.warn("Not found notification with id [{}]", id);
     	return null;
     }
 
