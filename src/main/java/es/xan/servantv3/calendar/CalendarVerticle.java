@@ -15,7 +15,7 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Scheduler;
-import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -82,7 +82,7 @@ public class CalendarVerticle extends AbstractServantVerticle {
 								Notification notification = GCalendarUtils.getNotification(notif.id, secretFile, calendar);
 								
 								if (notification != null) {
-									publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new TextMessageToTheBoss(notification.text));
+									publishAction(STSVerticle.Actions.PERFORM, new TextMessageToTheBoss(notification.text));
 									LOGGER.info("performed event with current data [{}-{}-{}]", notification.id, notification.date, notification.text);
 								} else {
 									LOGGER.warn("not found event [{}-{}-{}]", notif.id, notif.date, notif.text);

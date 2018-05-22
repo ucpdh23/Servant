@@ -12,8 +12,10 @@ import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.brain.nlp.Translation;
 import es.xan.servantv3.brain.nlp.TranslationFacade;
+import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
+import es.xan.servantv3.messages.TextMessageToTheBoss;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -23,7 +25,9 @@ import io.vertx.core.logging.LoggerFactory;
  * 
  * This verticle handles the events from the conversational channel system and transform then into actions to be performed into the vertx event bus.
  * 
- * Further information, please see the javadoc of the nlp package. 
+ * Further information, please see the javadoc of the nlp package.
+ * 
+ *  A new PERFORM Action has been included to run operations   
  * 
  * @author alopez
  * @see https://en.wikipedia.org/wiki/Superior_temporal_sulcus
@@ -37,6 +41,7 @@ public class STSVerticle extends AbstractServantVerticle {
 	
 	public enum Actions implements Action {
 		HELP(null),
+		PERFORM(TextMessageToTheBoss.class)
 		;
 		
 		Class<?> beanClass;
@@ -84,6 +89,28 @@ public class STSVerticle extends AbstractServantVerticle {
 		msg.reply(builder.build());
 	}
 	
+	public void perform(TextMessageToTheBoss parrotMessage) {
+		LOGGER.debug("perform [{}]", parrotMessage);
+		
+		final Translation translation = TranslationFacade.translate(parrotMessage.getMessage());
+		
+		if (translation.action != null) {
+			if (translation.delayInfo == 0) {
+				publishAction(translation.action, translation.message, response -> {
+					publishAction(HomeVerticle.Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss(translation.response.apply(response.result()).msg));
+				});
+			} else {
+				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+					publishAction(translation.action, translation.message, response -> {
+						publishAction(HomeVerticle.Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss(translation.response.apply(response.result()).msg));
+					});
+					
+					return false;
+				});
+			}
+		}
+	}
+	
 	/**
 	 * Process a incoming message performing whatever action recovered from the nlp system. 
 	 * @param parrotMessage
@@ -109,4 +136,5 @@ public class STSVerticle extends AbstractServantVerticle {
 			}
 		}
 	}
+	
 }

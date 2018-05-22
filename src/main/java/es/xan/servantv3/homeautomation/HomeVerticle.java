@@ -65,6 +65,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	public enum Actions implements Action {
 		GET_HOME_STATUS(null),
 		NOTIFY_BOSS(TextMessageToTheBoss.class),
+		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
 		REPORT_TEMPERATURE(null)
 		;
 		
@@ -150,6 +151,13 @@ public class HomeVerticle extends AbstractServantVerticle {
 	public void notify_boss(TextMessageToTheBoss content) {
 		TextMessage message = new TextMessage(this.mBoss, content.getMessage());
 		publishAction(ParrotVerticle.Actions.SEND, message);
+	}
+	
+	public void notify_all_boss(TextMessageToTheBoss content) {
+		this.mMasters.forEach( master -> {
+			TextMessage message = new TextMessage(master, content.getMessage());
+			publishAction(ParrotVerticle.Actions.SEND, message);
+		});
 	}
 
 	public void new_network_devices_message(Device device) {
