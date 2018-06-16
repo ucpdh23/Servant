@@ -25,6 +25,22 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * Registered and returns information about the temperature.
+ * <p>
+ * Emits:<br>
+ * {@link Events#TEMPERATURE_RECEIVED} when a new value is stored<br>
+ * {@link Events#NO_TEMPERATURE_INFO} When more than one hour has passed since the last sample<br>
+ * <p>
+ * Actions:<br>
+ * {@link Actions#QUERY} to ask for a stored value<br>
+ * {@link Actions#LAST_VALUES} to ask for the current temperature (last samples)<br>
+ * {@link Actions#SAVE} to store a sample<br>
+ * 
+ * 
+ * @author alopez
+ *
+ */
 public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TemperatureVerticle.class);
@@ -111,7 +127,8 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		
 		JsonObject command = new JsonObject()
 		  .put("aggregate", TEMPERATURES_COLLECTION)
-		  .put("pipeline", array);
+		  .put("pipeline", array)
+		  .put("cursor", new JsonObject());
 		
 		LOGGER.debug("performing command on mongo [{}]", command);
 		mongoClient.runCommand("aggregate", command, res -> {

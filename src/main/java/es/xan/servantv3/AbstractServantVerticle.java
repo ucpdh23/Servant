@@ -18,6 +18,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * Base class for all the verticles of this application.
+ * 
+ * In order to register some actions or handle events, call the {@link AbstractServantVerticle#supportedActions(Action...)} and {@link AbstractServantVerticle#supportedEvents(Events...)}
+ * in the constructor of the child class.
+ * 
+ * 
+ * 
+ * 
+ * @author alopez
+ *
+ */
 public class AbstractServantVerticle extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServantVerticle.class);
@@ -41,34 +53,13 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 	
 	protected AbstractServantVerticle(String verticleName) {
-		this(verticleName, null, null);
-	}
-
-	
-	protected AbstractServantVerticle(String verticleName, Class<? extends Enum<?>> actions) {
-		this(verticleName, actions, null);
-	}
-
-	protected AbstractServantVerticle(String verticleName, Class<? extends Enum<?>> actions, Class<? extends Enum<?>> events) {
 		LOGGER.info("Processing verticle [{}]", verticleName);
 		this.mVerticleName = verticleName;
 		
 		this.mMethodMap = createMap(this.getClass().getMethods());
 		
 		this.mActionMap = new HashMap<>();
-		if (actions != null) {
-			for (Enum<?> item : actions.getEnumConstants()) {
-				mActionMap.put(item.name(), new Pair<Action, Method>((Action) item, this.mMethodMap.get(item.name().toLowerCase())));
-			}
-		}
-		
 		this.mEventMap = new HashMap<>();
-		if (events != null) {
-			for (Enum<?> item : events.getEnumConstants()) {
-				mEventMap.put(item.name(), new Pair<Event, Method>((Event) item, this.mMethodMap.get(item.name().toLowerCase())));
-			}
-		}
-		
 	}
 
 	private Map<String, Method> createMap(Method[] declaredMethods) {
@@ -88,6 +79,12 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		return map;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *  
+	 *  this method registers this verticle into the vertx's event bus in order to consume actions and events.
+	 */
+	@Override
 	public void start() {
 		final EventBus eb = vertx.eventBus();
 		if (!this.mActionMap.isEmpty())
@@ -97,24 +94,29 @@ public class AbstractServantVerticle extends AbstractVerticle {
 			eb.consumer(Constant.EVENT).handler(event -> processEvent(event));
 	}
 	
+	/**
+	 * Process the incoming event, determining whether it must be consumed.
+	 * The event name is searched into the internal events maps of this class, if found, calls the handler
+	 * @param message
+	 */
 	private void processEvent(Message<Object> message) {
 		JsonObject body = (JsonObject) message.body();
-		String action = body.getString("action");
-		LOGGER.debug("Processing action [{}]", action);
+		String eventName = body.getString("action");
+		LOGGER.debug("Processing event [{}]", eventName);
 		
-		if (!mEventMap.containsKey(action)) {
-			LOGGER.debug("Not processed event [{}] in verticle [{}]", action, this.mVerticleName);
+		if (!mEventMap.containsKey(eventName)) {
+			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
 			return;
 		}
 		
-		Event event = mEventMap.get(action).left;
+		Event event = mEventMap.get(eventName).left;
 		
 		try {
-			int count = mEventMap.get(action).right.getParameterCount();
-			LOGGER.trace("trying to execute method [{}] with [{}] parameters", mEventMap.get(action).right.getName(), count);
+			int count = mEventMap.get(eventName).right.getParameterCount();
+			LOGGER.trace("trying to execute method [{}] with [{}] parameters", mEventMap.get(eventName).right.getName(), count);
 			
 			if (count == 0) {
-				mEventMap.get(action).right.invoke(this);
+				mEventMap.get(eventName).right.invoke(this);
 				
 			} else {
 				Class<?> beanClass = event.getPayloadClass();
@@ -122,13 +124,13 @@ public class AbstractServantVerticle extends AbstractVerticle {
 				Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
 				
 				if (count == 1) {
-					mEventMap.get(action).right.invoke(this, newInstance);
+					mEventMap.get(eventName).right.invoke(this, newInstance);
 					
 					//Automatic Reply
 					ReplyBuilder builder = MessageBuilder.createReply();
 					message.reply(builder.build());
 				} else if (count == 2) {
-					mEventMap.get(action).right.invoke(this, newInstance, message);
+					mEventMap.get(eventName).right.invoke(this, newInstance, message);
 				}
 			}
 		} catch (Exception e) {
@@ -186,10 +188,6 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		}, res -> {
 			LOGGER.trace("[{}]", res);
 		});
-		
-		
-
-		
 	}
 
 	protected void publishEvent(Events event) {

@@ -29,7 +29,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 /**
- * Manages the boiler, switching it on or off 
+ * Turns on and off the bedroom's lamp 
  * @author Xan
  *
  */
