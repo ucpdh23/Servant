@@ -14,3 +14,4 @@ ipse
 # Maven
 log/
 target/
+/.vertx/
