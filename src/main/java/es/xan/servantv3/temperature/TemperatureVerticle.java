@@ -113,6 +113,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		  .put("aggregate", TEMPERATURES_COLLECTION)
 		  .put("pipeline", array);
 		
+		LOGGER.debug("performing command on mongo [{}]", command);
 		mongoClient.runCommand("aggregate", command, res -> {
 			if (res.succeeded()) {
 				LOGGER.debug(res.result().toString());
@@ -153,6 +154,13 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 						msg.reply(builder.build());
 					}
 				});
+			} else {
+				LOGGER.warn("something weird happends when calling database [{}]", res);
+				
+				ReplyBuilder builder = MessageBuilder.createReply();
+				builder.setError();
+
+				msg.reply(builder.build());
 			}
 		});
 	}
