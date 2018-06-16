@@ -134,7 +134,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 		mongoClient.runCommand("aggregate", command, res -> {
 			if (res.succeeded()) {
 				LOGGER.debug(res.result().toString());
-				List<JsonObject> items = res.result().getJsonArray("result").getList();
+				List<JsonObject> items = res.result().getJsonObject("cursor").getJsonArray("firstBatch").getList();
 				
 				List<Future> futures = new ArrayList<>();
 				for (JsonObject item : items) {
