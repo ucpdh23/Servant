@@ -1,0 +1,40 @@
+#!/bin/bash
+# /etc/init.d/vertxd
+
+### BEGIN INIT INFO
+# Provides:          vertxController
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Example initscript
+# Description:       This service is used to manage a vertx
+### END INIT INFO
+
+export JAVA_HOME=/opt/controller/jdk1.8.0_111/
+export SERVANT_PATH=/opt/servant
+export ARTIFACT=${SERVANT_PATH}/servantV3-0.0.1-SNAPSHOT-fat.jar
+export CONFIG=${SERVANT_PATH}/app.json
+export PROCESS=${SERVANT_PATH}/.servant.pid
+
+export JMX_ARGS="-Dcom.sun.management.jmxremote.port=8787 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+export JVM_ARGS="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory -Dsentry.dsn=https://xxxx:yyyy@sentry.io/zzzz"
+
+case "$1" in
+    start)
+            echo "Starting servant"
+            cd $SERVANT_PATH
+            $JAVA_HOME/bin/java $JVM_ARGS $JMX_ARGS -jar $ARTIFACT --conf $CONFIG &
+            echo "$!" > $PROCESS
+            ;;
+    stop)
+            echo "Stopping servant"
+            kill `cat $PROCESS`
+            ;;
+    *)
+            echo "Usage: /etc/init.d/vertxd start|stop"
+            exit 1
+            ;;
+esac
+
+exit 0
