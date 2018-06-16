@@ -2,7 +2,7 @@
 
 **My Smart Home System**
 
-     Servant is a home automation platform based on vertx V3 and 100% pure Java.
+     Servant is a home automation platform based on vertx V3 and 100% pure JVM.
      
 
 ##**Introduction**
@@ -14,7 +14,7 @@ The main goal of Servant is to provide a generic software architecture to integr
 
 **Extensibility**
 
-Servant provides a extensible framework, implemented in Java, that allows the integration of new connectors to sensors or actuators.
+Servant provides a extensible framework, implemented in Java and Kotlin, that allows the integration of new elements like sensors and actuators.
 
 Integration of any kind of device into the Internet of Things technology is easy. Thanks to a distributed messaging system and Java, interfacing with any system in order to send or receive data from/to the cloud never will be a hard work. Integration with systems like IFTTT 
 
@@ -28,6 +28,9 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Includes a Jabber (XMPP) chatbot.
 
+* Google Calendar integration in order to schedule and run operations.
+
+
 **Smart**
 * Based on a events and actions systems. It is easy to create advanced algorithms interacting devices together (sensors and/or actuators) or with external systems.
 
@@ -35,12 +38,15 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Scheduler for automatic actions and events triggering.
 
-
-
 **Extra functionalities**
 
 * Includes mongodb integration
 * Easy json <=> java transformation.
 
 
+**Implementation Details**
+
+* Java and Kotlin project, based on Vertx as the basement for all the system
+
+* Vertx event bus can become a nightmare rapidly. In order to keep all the communications under control, a small layer has been created over Vertx. Actions and Events provide a easy way to interchange information between verticles. Further details, please visit the javadoc documentation of this project.
 
