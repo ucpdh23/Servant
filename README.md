@@ -1,11 +1,11 @@
-#**Servant**
+# **Servant**
 
 **My Smart Home System**
 
      Servant is a home automation platform based on vertx V3 and 100% pure JVM.
      
 
-##**Introduction**
+## **Introduction**
 
 
 The main goal of Servant is to provide a generic software architecture to integrate in just one place any kind of sensor or actuator you want. 
