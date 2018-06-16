@@ -61,7 +61,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	override fun start() {
 		super.start();
 		
-		vertx.setPeriodic(60000, { _ -> 
+		vertx.setPeriodic(45000, { _ -> 
 			source()
 		});
 	}
@@ -78,6 +78,10 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 			Transition({x -> !isWorking(x)},{ _ -> States.SECOND_CONFIRMATION})
 			),
 		SECOND_CONFIRMATION(
+			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ _ -> States.THIRD_CONFIRMATION})
+			),
+		THIRD_CONFIRMATION(
 			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
 			Transition({x -> !isWorking(x)},{ v -> v.notifyWasStoped(); States.STOPPED})
 			),

@@ -153,34 +153,42 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		
 		LOGGER.debug("mapped [{}-{}]", action, method.getName());
 		
-		try {
-			final int parameterCount = method.getParameterCount();
-			if (parameterCount == 0) {
-				method.invoke(this);
-				
-			} else {
-				if (parameterCount == 1) {
-					final Class<?> beanClass = action.getPayloadClass();
-
-					Object parameter = message;
-					if (beanClass != null) {
-						final JsonObject entity = json.getJsonObject("bean");
-						parameter = JsonUtils.toBean(entity.encode(), beanClass);
-					}
+		// Actions are executed as very hard code.
+		vertx.executeBlocking(future -> {
+			try {
+				final int parameterCount = method.getParameterCount();
+				if (parameterCount == 0) {
+					method.invoke(this);
 					
-					method.invoke(this, parameter);
-				
-				} else if (parameterCount == 2) {
-					final Class<?> beanClass = action.getPayloadClass();
-					final JsonObject entity = json.getJsonObject("bean");
-					final Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
+				} else {
+					if (parameterCount == 1) {
+						final Class<?> beanClass = action.getPayloadClass();
 
-					method.invoke(this, newInstance, message);
+						Object parameter = message;
+						if (beanClass != null) {
+							final JsonObject entity = json.getJsonObject("bean");
+							parameter = JsonUtils.toBean(entity.encode(), beanClass);
+						}
+						
+						method.invoke(this, parameter);
+					
+					} else if (parameterCount == 2) {
+						final Class<?> beanClass = action.getPayloadClass();
+						final JsonObject entity = json.getJsonObject("bean");
+						final Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
+
+						method.invoke(this, newInstance, message);
+					}
 				}
+			} catch (Exception e) {
+				LOGGER.warn("Action: [{}]", action, e);
 			}
-		} catch (Exception e) {
-			LOGGER.warn("Action: [{}]", action, e);
-		}
+		}, res -> {
+			LOGGER.trace("[{}]", res);
+		});
+		
+		
+
 		
 	}
 
