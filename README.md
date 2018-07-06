@@ -1,5 +1,7 @@
 # **Servant**
 
+[![Build Status](https://travis-ci.org/ucpdh23/Servant.svg?branch=master)](https://travis-ci.org/ucpdh23/Servant)
+
 **My Smart Home System**
 
      Servant is a home automation platform based on vertx V3 and 100% pure JVM.
