@@ -15,6 +15,7 @@ import es.xan.servantv3.MessageBuilder
 import es.xan.servantv3.outlet.OutletVerticle
 import es.xan.servantv3.api.Transition
 import es.xan.servantv3.api.State
+import es.xan.servantv3.api.StateMachine
 
 /**
  * This verticle checks the current state of the outlet in order to determine whether the laundry has finished.
@@ -52,7 +53,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	fun check_status(message : Message<Any>) {
 		val reply = MessageBuilder.createReply().apply {
 			setOk()
-			setMessage(currState.name)
+			setMessage(machineState.getCurrentState())
 		}
 		
 		message.reply(reply.build())
@@ -65,10 +66,10 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 			source()
 		});
 	}
+
+	val machineState = StateMachine(States.STOPPED, this);
 	
-	var currState : States = States.STOPPED;
-	
-	enum class States(vararg val trans : Transition<LaundryVerticle, States>) : State {
+	enum class States(override vararg val trans : Transition<LaundryVerticle, out State<LaundryVerticle>>) : State<LaundryVerticle> {
 		STOPPED(
 			Transition({x -> isWorking(x)}, { _ -> States.WORKING})),
 		WORKING(
@@ -95,18 +96,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	fun stream(message : Message<Any>) {
 		val body = message.body() as JsonObject;
 		
-		val lastState = currState;
-		
-		currState = currState.trans
-				.firstOrNull { tran -> tran.predicate.invoke(body) }
-				?.run   { operation.invoke(this@LaundryVerticle) } ?: currState;
-
-		if (lastState != currState)	{
-			LOG.trace("previous state [{}]", lastState)
-			LOG.debug("new state [{}]", currState)
-		}
-
-		
+		machineState.process(body)
 	}
 	
 }

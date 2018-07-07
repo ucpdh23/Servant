@@ -48,6 +48,12 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 **Implementation Details**
 
+* In order to simplify development, a [Conventions over configurations](https://en.wikipedia.org/wiki/Convention_over_configuration) policy has been adopted. This project implement abstract some concepts, providing a mini-framework to simplify development:
+       - Providing almost a 99% object oriented friendly static way to map and use jsons.
+       - communication between verticles based on java enums values.
+       - State machines based on enums.
+       - Mixing java with kotlin code.
+
 * Java and Kotlin project, based on Vertx as the basement for all the system
 
 * Vertx event bus can become a nightmare rapidly. In order to keep all the communications under control, a small layer has been created over Vertx. Actions and Events provide a easy way to interchange information between verticles. Further details, please visit the javadoc documentation of this project.
