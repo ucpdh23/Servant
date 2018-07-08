@@ -4,6 +4,7 @@ import es.xan.servantv3.messages.Device;
 import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.Person;
+import es.xan.servantv3.messages.Power;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Temperature;
 
@@ -28,7 +29,9 @@ public enum Events implements Event {
 	BOILER_SWITCHED(NewStatus.class),
 	LAMP_SWITCHED(NewStatus.class),
 	
-	LAUNDRY_OFF(null)
+	LAUNDRY_OFF(Power.class)
+	
+	
 	;
 	
 	

@@ -16,6 +16,7 @@ import es.xan.servantv3.outlet.OutletVerticle
 import es.xan.servantv3.api.Transition
 import es.xan.servantv3.api.State
 import es.xan.servantv3.api.StateMachine
+import es.xan.servantv3.messages.Power
 
 /**
  * This verticle checks the current state of the outlet in order to determine whether the laundry has finished.
@@ -27,16 +28,27 @@ import es.xan.servantv3.api.StateMachine
 class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	companion object {
 		val ACTIVEPWR1 = """active_pwr1:(\d+.\d+)\s*\n""".toRegex()
+		val SUMPWR1 = """energy_sum1:(\d+.\d+)\s*\n""".toRegex()
 		
         val LOG = LoggerFactory.getLogger(LaundryVerticle::class.java.name)
 		
         fun findActivePwr1(text : String) = ACTIVEPWR1.find(text)?.groups?.get(1)?.value?:"0.0"
+		fun findSumPwr1(text : String) = SUMPWR1.find(text)?.groups?.get(1)?.value?:"0.0"
+		
 		
 		fun isWorking(x : JsonObject) = !findActivePwr1(x.getString("message")).equals("0.0")
 		
+		fun sumPower1(x : JsonObject) = findSumPwr1(x.getString("message")).toFloat()
+		
     }
 	
-	fun notifyWasStoped() = publishEvent(Events.LAUNDRY_OFF);
+	fun notifyWasStoped(x : JsonObject) {
+		val newPower = sumPower1(x);
+		
+		publishEvent(Events.LAUNDRY_OFF, Power(newPower - power));
+		
+		power = 0F
+	} 
 	
 	init {
 		supportedActions(Actions::class.java)
@@ -71,23 +83,29 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	
 	enum class States(override vararg val trans : Transition<LaundryVerticle, out State<LaundryVerticle>>) : State<LaundryVerticle> {
 		STOPPED(
-			Transition({x -> isWorking(x)}, { _ -> States.WORKING})),
+			Transition({x -> isWorking(x)}, { v, b -> v.storePower(b); States.WORKING})),
 		WORKING(
-			Transition({x -> !isWorking(x)},{ _ -> States.FIRST_CONFIRMATION})),
+			Transition({x -> !isWorking(x)},{ _,_ -> States.FIRST_CONFIRMATION})),
 		FIRST_CONFIRMATION(
-			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
-			Transition({x -> !isWorking(x)},{ _ -> States.SECOND_CONFIRMATION})
+			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ _,_ -> States.SECOND_CONFIRMATION})
 			),
 		SECOND_CONFIRMATION(
-			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
-			Transition({x -> !isWorking(x)},{ _ -> States.THIRD_CONFIRMATION})
+			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ _,_ -> States.THIRD_CONFIRMATION})
 			),
 		THIRD_CONFIRMATION(
-			Transition({x -> isWorking(x)}, { _ -> States.WORKING}),
-			Transition({x -> !isWorking(x)},{ v -> v.notifyWasStoped(); States.STOPPED})
+			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
+			Transition({x -> !isWorking(x)},{ v, b -> v.notifyWasStoped(b); States.STOPPED})
 			),
 		;
 	}
+	
+	var power : Float = 0F;
+	
+	fun storePower(x : JsonObject) {
+		power = sumPower1(x);
+	} 
 	
 	fun source() {
 		publishAction(OutletVerticle.Actions.STATUS, {e -> stream(e.result())})

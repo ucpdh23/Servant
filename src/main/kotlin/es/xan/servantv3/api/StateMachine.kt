@@ -23,7 +23,7 @@ interface State<V> {
 	val trans : Array<out Transition<V, out State<V>>>
 }
 
-class Transition<V, S : State<V>>(val predicate : (JsonObject) -> Boolean, val operation: (V) -> S)
+class Transition<V, S : State<V>>(val predicate : (JsonObject) -> Boolean, val operation: (V, JsonObject) -> S)
 
 class EventTransition<V, S : State<V>>(val predicate : (Events, JsonObject) -> Boolean, val operation: (V) -> S)
 
@@ -39,7 +39,7 @@ class StateMachine<V>(firstState: State<V>, val instance: V) {
 		
 		currentState = currentState.trans
 				.firstOrNull { tran -> tran.predicate.invoke(data) }
-				?.run   { operation.invoke(instance) } ?: currentState;
+				?.run   { operation.invoke(instance, data) } ?: currentState;
 		
 		LOG.debug("Moving from state [{}] to [{}]", lastState, currentState)
 		

@@ -59,6 +59,8 @@ data class Device(var user: String, var mac: String, var status: DeviceStatus, v
  */
 data class NewStatus(var status: String)
 
+data class Power(var power: Float)
+
 data class ParrotMessageReceived(var user: String, var message: String)
 
 

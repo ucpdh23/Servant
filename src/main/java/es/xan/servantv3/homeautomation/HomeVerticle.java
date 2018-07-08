@@ -22,6 +22,7 @@ import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.messages.Device;
 import es.xan.servantv3.messages.OpenChat;
 import es.xan.servantv3.messages.Person;
+import es.xan.servantv3.messages.Power;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Sensor;
 import es.xan.servantv3.messages.TextMessage;
@@ -180,8 +181,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		}
 	}
 	
-	public void laundry_off() {
-		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "My laundry just finished")));
+	public void laundry_off(Power power) {
+		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "My laundry just finished: " + power)));
 	}
 	
 	/**
