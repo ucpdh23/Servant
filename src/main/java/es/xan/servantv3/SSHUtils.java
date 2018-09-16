@@ -45,7 +45,7 @@ public class SSHUtils {
 		channelExec.setCommand(command);
 			 
 		// Execute the command
-		channelExec.connect();
+		channelExec.connect(10000);
 		
 		// Read the output from the input stream we set above
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
