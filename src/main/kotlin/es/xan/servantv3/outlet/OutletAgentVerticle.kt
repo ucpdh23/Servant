@@ -45,6 +45,8 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	fun notifyWasStoped(x : JsonObject) {
 		val newPower = sumPower1(x);
 		
+		//https://api.esios.ree.es/archives/70/download_json?locale=es
+		
 		publishEvent(Events.LAUNDRY_OFF, Power(newPower - power));
 		
 		power = 0F
@@ -85,14 +87,14 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		STOPPED(
 			Transition({x -> isWorking(x)}, { v, b -> v.storePower(b); States.WORKING})),
 		WORKING(
-			Transition({x -> !isWorking(x)},{ _,_ -> States.FIRST_CONFIRMATION})),
+			Transition({x -> !isWorking(x)},{ v, b -> v.storeTempPower(b); States.FIRST_CONFIRMATION})),
 		FIRST_CONFIRMATION(
 			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
-			Transition({x -> !isWorking(x)},{ _,_ -> States.SECOND_CONFIRMATION})
+			Transition({x -> !isWorking(x)},{ v, b -> if (v.storedTempAsChanged(b)) States.WORKING else States.SECOND_CONFIRMATION})
 			),
 		SECOND_CONFIRMATION(
 			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
-			Transition({x -> !isWorking(x)},{ _,_ -> States.THIRD_CONFIRMATION})
+			Transition({x -> !isWorking(x)},{ v, b -> if (v.storedTempAsChanged(b)) States.WORKING else States.THIRD_CONFIRMATION})
 			),
 		THIRD_CONFIRMATION(
 			Transition({x -> isWorking(x)}, { _,_ -> States.WORKING}),
@@ -105,7 +107,19 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	
 	fun storePower(x : JsonObject) {
 		power = sumPower1(x);
-	} 
+	}
+	
+	var tmpPower : Float = 0F
+	
+	fun storeTempPower(x : JsonObject) {
+		tmpPower = sumPower1(x)
+	}
+	
+	fun storedTempAsChanged(x : JsonObject): Boolean {
+		val currTmpPower = sumPower1(x)
+		
+		return !currTmpPower.equals(tmpPower);
+	}
 	
 	fun source() {
 		publishAction(OutletVerticle.Actions.STATUS, {e -> stream(e.result())})
