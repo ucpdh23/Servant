@@ -23,7 +23,7 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 		supportedActions(Actions.values());
 	}
 
-	private GTalkService channel;
+	private TelegramService channel;
 	
 	private static final int WAITING_TIME = 1000; // 1 seg
 
@@ -54,7 +54,8 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 
 	public void create_chat(OpenChat createChat) {
 		try {
-			channel.createChat(createChat.getUser());
+//			channel.createChat(createChat.getUser());
+			channel.send(createChat.getUser(), "Greetings! Sir");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -68,13 +69,13 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 	public void start() {
 		super.start();
 		
-		channel = new GTalkService(Vertx.currentContext().config().getJsonObject("ParrotVerticle"));
+		channel = TelegramService.build(Vertx.currentContext().config().getJsonObject("ParrotVerticle"));
 		channel.setCommunicationListener(this);
-				
+		
 		vertx.setTimer(WAITING_TIME, t -> {
-			channel.start();
 			publishEvent(Events.PARRONT_AVAILABLE);
 		});
+		
 		
 		LOGGER.info("Started ParrotVerticle");
 	}

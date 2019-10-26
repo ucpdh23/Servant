@@ -14,16 +14,20 @@
 
 		<vertx.version>3.4.2</vertx.version>
 		<vertx.kotlin.version>3.4.2</vertx.kotlin.version>
-		<kotlin.version>1.1.3</kotlin.version>
+		<kotlin.version>1.2.71</kotlin.version>
 		<kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+		
+		<kotlin.coroutines>0.30.1</kotlin.coroutines>
 
 		<smack.version>4.0.5</smack.version>
 
-		<httpclient.version>4.3.3</httpclient.version>
+		<httpclient.version>4.5</httpclient.version>
 
 		<commons.io.version>2.5</commons.io.version>
 		<commons.collections.version>4.0</commons.collections.version>
 		<commons.lang.version>3.4</commons.lang.version>
+		
+		<org.telegram.version>4.4.0.1</org.telegram.version>
 
 		<jsch.version>0.1.54</jsch.version>
 
@@ -35,6 +39,7 @@
 
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+
 	</properties>
 
 	<dependencies>
@@ -63,29 +68,12 @@
 			<artifactId>vertx-mongo-client</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
-
+		
+		<!-- https://mvnrepository.com/artifact/org.telegram/telegrambots -->
 		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
-			<artifactId>smack-core</artifactId>
-			<version>${smack.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
-			<artifactId>smack-tcp</artifactId>
-			<version>${smack.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
-			<artifactId>smack-extensions</artifactId>
-			<version>${smack.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
-			<artifactId>smack-debug</artifactId>
-			<version>${smack.version}</version>
+    		<groupId>org.telegram</groupId>
+    		<artifactId>telegrambots</artifactId>
+    		<version>${org.telegram.version}</version>
 		</dependency>
 
 		<dependency>
@@ -146,7 +134,7 @@
 
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-stdlib</artifactId>
+			<artifactId>kotlin-stdlib-jdk8</artifactId>
 			<version>${kotlin.version}</version>
 		</dependency>
 
