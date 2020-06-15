@@ -24,7 +24,7 @@
 		<httpclient.version>4.5</httpclient.version>
 
 		<commons.io.version>2.5</commons.io.version>
-		<commons.collections.version>4.0</commons.collections.version>
+		<commons.collections.version>4.1</commons.collections.version>
 		<commons.lang.version>3.4</commons.lang.version>
 		
 		<org.telegram.version>4.4.0.1</org.telegram.version>
