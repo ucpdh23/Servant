@@ -21,7 +21,7 @@
 
 		<smack.version>4.0.5</smack.version>
 
-		<httpclient.version>4.5</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 
 		<commons.io.version>2.5</commons.io.version>
 		<commons.collections.version>4.0</commons.collections.version>
