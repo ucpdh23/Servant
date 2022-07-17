@@ -1,5 +1,6 @@
 package es.xan.servantv3.parrot;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,6 +9,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import io.vertx.core.json.JsonObject;
@@ -20,6 +22,8 @@ public class TelegramService extends TelegramLongPollingBot {
 
 	private JsonObject mConfiguration;
 	private String mToken;
+	private String mWitToken;
+	private Boolean mModeDebug;
 	private CommunicationListener mListener;
 	private Map<String, Object> mConversations;
 
@@ -27,7 +31,9 @@ public class TelegramService extends TelegramLongPollingBot {
 		this.mConfiguration = configuration.getJsonObject("telegram");
 		
 		this.mToken = this.mConfiguration.getString("token");
+		this.mWitToken = this.mConfiguration.getString("witToken");
 		this.mConversations = this.mConfiguration.getJsonObject("conversations").getMap();
+		this.mModeDebug = this.mConfiguration.getString("modeDebug") != null? Boolean.parseBoolean(this.mConfiguration.getString("modeDebug")) : false;
 	}
 
 	@Override
@@ -41,7 +47,7 @@ public class TelegramService extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		final String messageTextReceived = update.getMessage().getText();
+		final String messageTextReceived = resolveMessage(update);
 
 		Long chatId = update.getMessage().getChatId();
 		
@@ -49,6 +55,19 @@ public class TelegramService extends TelegramLongPollingBot {
 			if (entry.getValue().toString().equals(chatId.toString())) {
 				mListener.onMessage(entry.getKey(), messageTextReceived);
 			}
+		}
+	}
+
+	private String resolveMessage(Update update) {
+		final String messageTextReceived = update.getMessage().getText();
+
+		if (messageTextReceived == null) {
+			Voice voice = update.getMessage().getVoice();
+
+			File file = AudioUtils.downloadAudio("https://api.telegram.org", this.mToken, voice.getFileId(), this.mModeDebug);
+			return AudioUtils.transcribe("https://api.wit.ai", this.mWitToken, file);
+		} else {
+			return messageTextReceived;
 		}
 	}
 	
@@ -76,9 +95,9 @@ public class TelegramService extends TelegramLongPollingBot {
 		ApiContextInitializer.init();
 		
 		final TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-		
+
 		TelegramService telegramService = new TelegramService(config);
-		
+
 		try {
 			telegramBotsApi.registerBot(telegramService);
 		} catch (TelegramApiException e) {
