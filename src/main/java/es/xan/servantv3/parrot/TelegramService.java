@@ -47,13 +47,13 @@ public class TelegramService extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		final String messageTextReceived = resolveMessage(update);
-
 		Long chatId = update.getMessage().getChatId();
 		
 		for (Entry<String, Object> entry : this.mConversations.entrySet()) {
 			if (entry.getValue().toString().equals(chatId.toString())) {
+				final String messageTextReceived = resolveMessage(update);
 				mListener.onMessage(entry.getKey(), messageTextReceived);
+				return;
 			}
 		}
 	}
