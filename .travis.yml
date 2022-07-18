@@ -1,9 +1,0 @@
-language: java
-deploy:
-  provider: releases
-  api_key:
-    secure: $GITHUB_KEY
-  file: target/servantV3-0.0.1-SNAPSHOT-fat.jar
-  skip_cleanup: true
-  on:
-    repo: ucpdh23/Servant
