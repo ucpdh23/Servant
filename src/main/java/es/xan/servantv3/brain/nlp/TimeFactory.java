@@ -92,7 +92,7 @@ public class TimeFactory {
                             i.addHour(15);
                             return TimeDetector.SEPARATOR;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "dieciseis"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "dieciséis"), (i, s) -> {
                             i.addHour(16);
                             return TimeDetector.SEPARATOR;
                         }),
@@ -120,11 +120,11 @@ public class TimeFactory {
                             i.addHour(21);
                             return TimeDetector.SEPARATOR;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidos"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidés"), (i, s) -> {
                             i.addHour(22);
                             return TimeDetector.SEPARATOR;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintitres"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintitrés"), (i, s) -> {
                             i.addHour(23);
                             return TimeDetector.SEPARATOR;
                         }),
@@ -220,7 +220,7 @@ public class TimeFactory {
                             i.addMinutes(15);
                             return TimeDetector.FINALIZE;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "dieciseis"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "dieciséis"), (i, s) -> {
                             i.addMinutes(16);
                             return TimeDetector.FINALIZE;
                         }),
@@ -248,11 +248,11 @@ public class TimeFactory {
                             i.addMinutes(21);
                             return TimeDetector.FINALIZE;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidos"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidós"), (i, s) -> {
                             i.addMinutes(22);
                             return TimeDetector.FINALIZE;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintitres"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintitrés"), (i, s) -> {
                             i.addMinutes(23);
                             return TimeDetector.FINALIZE;
                         }),
@@ -264,7 +264,7 @@ public class TimeFactory {
                             i.addMinutes(25);
                             return TimeDetector.FINALIZE;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintiseis"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintiséis"), (i, s) -> {
                             i.addMinutes(26);
                             return TimeDetector.FINALIZE;
                         }),
