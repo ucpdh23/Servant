@@ -26,7 +26,7 @@ steps:
   inputs:
     gitHubConnection: ucpdh23_repo
     repositoryName: ucpdh23/servant
-    assets: $(Build.ArtifactStagingDirectory)/target/servantV3-0.0.1-SNAPSHOT.jar
+    assets: /home/vsts/.m2/repository/es/xan/servantV3/0.0.1-SNAPSHOT/servantV3-0.0.1-SNAPSHOT.jar
     action: edit
     target: '$(Build.SourceVersion)'
     tag: $(Build.BuildNumber)
