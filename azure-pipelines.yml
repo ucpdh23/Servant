@@ -24,7 +24,7 @@ steps:
 - task: GithubRelease@0
   displayName: 'Publishing artifact'
   inputs:
-    gitHubConnection: ucpdh23
+    gitHubConnection: ucpdh23_repo
     repositoryName: ucpdh23/servant
     assets: $(Build.ArtifactStagingDirectory)/target/servantV3-0.0.1-SNAPSHOT.jar
     action: edit
