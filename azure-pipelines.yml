@@ -20,3 +20,13 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
+
+- task: GithubRelease@0
+  displayName: 'Publishing artifact'
+  inputs:
+    gitHubConnection: ucpdh23
+    repositoryName: ucpdh23/servant
+    assets: $(Build.ArtifactStagingDirectory)/target/servantV3-0.0.1-SNAPSHOT.jar
+    action: edit
+    target: '$(Build.SourceVersion)'
+    tag: $(Build.BuildNumber)
