@@ -1,5 +1,6 @@
 package es.xan.servantv3;
 
+import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import es.xan.servantv3.brain.STSVerticle;
@@ -50,6 +51,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(LaundryVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 	}
 

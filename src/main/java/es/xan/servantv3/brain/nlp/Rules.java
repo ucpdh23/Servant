@@ -3,6 +3,8 @@ package es.xan.servantv3.brain.nlp;
 
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageContains;
 import static es.xan.servantv3.brain.nlp.RuleUtils.messageIs;
+import static es.xan.servantv3.brain.nlp.RuleUtils.messageStartsWith;
+import static es.xan.servantv3.brain.nlp.RuleUtils.concatStrings;
 import static es.xan.servantv3.brain.nlp.RuleUtils.nextTokenTo;
 import static es.xan.servantv3.brain.nlp.RuleUtils.contains;
 import static es.xan.servantv3.brain.nlp.TranslationUtils.reply;
@@ -22,6 +24,7 @@ import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.Configure;
 import es.xan.servantv3.messages.Sensor;
+import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
@@ -29,8 +32,10 @@ import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle.Actions.AutomaticMode;
+import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.util.Strings;
 
 /**
  * Rules to transform NLM into Actions for the vertx event bus.
@@ -53,6 +58,12 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
 			),
+	PRINT_ACTION(WhiteboardVerticle.Actions.PRINT,
+			messageStartsWith("imprimir"),
+			tokens -> {return new TextMessage(null, concatStrings(tokens));},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. imprimir hola"
+	),
 	LAUNDRY_STATUS(LaundryVerticle.Actions.CHECK_STATUS,
 			messageContains("laundry||lavadora")
 			.and(messageContains("status||estado")),

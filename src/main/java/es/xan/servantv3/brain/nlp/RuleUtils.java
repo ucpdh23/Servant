@@ -1,6 +1,7 @@
 package es.xan.servantv3.brain.nlp;
 
 import java.util.Arrays;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -16,6 +17,19 @@ public class RuleUtils {
 					parallel().
 					anyMatch(it -> text.toLowerCase().equals(it));
 		};
+	}
+
+	public static Predicate<String> messageStartsWith(String expected) {
+		return (String text) -> text.toLowerCase().startsWith(expected);
+	}
+
+	public static String concatStrings(String[] tokens) {
+		StringJoiner joiner = new StringJoiner(" ");
+		for(int i = 0; i < tokens.length; i++) {
+			joiner.add(tokens[i]);
+		}
+
+		return joiner.toString();
 	}
 	
 	public static Predicate<String> messageContains(String...options) {
