@@ -4,6 +4,7 @@ package es.xan.servantv3.parrot;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import kotlin.text.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
@@ -16,6 +17,7 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.File;
@@ -108,7 +110,7 @@ public class AudioUtils {
             LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
             final HttpEntity entity = response.getEntity();
 
-            String content = EntityUtils.toString(entity);
+            String content = EntityUtils.toString(entity, Charsets.UTF_8);
             LOGGER.info(content);
 
             String[] jsons = content.split("\n}");
