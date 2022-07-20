@@ -1,10 +1,7 @@
 package es.xan.servantv3.whiteboard;
 
 import es.xan.servantv3.*;
-import es.xan.servantv3.lamp.LampVerticle;
-import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.TextMessage;
-import es.xan.servantv3.messages.UpdateState;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 
 public class WhiteboardVerticle extends AbstractServantVerticle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LampVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WhiteboardVerticle.class);
 
     public WhiteboardVerticle() {
         super(Constant.WHITEBOARD_VERTICLE);
@@ -98,7 +95,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
             LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
             final HttpEntity responseBody = response.getEntity();
 
-            String content = EntityUtils.toString(entity);
+            String content = EntityUtils.toString(responseBody);
             LOGGER.info(content);
 
             return true;
