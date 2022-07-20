@@ -60,7 +60,7 @@ public enum Rules {
 			),
 	PRINT_ACTION(WhiteboardVerticle.Actions.PRINT,
 			messageStartsWith("imprimir"),
-			tokens -> {return new TextMessage(null, concatStrings(tokens));},
+			tokens -> {return new TextMessage("dummy", concatStrings(tokens));},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. imprimir hola"
 	),
