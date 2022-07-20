@@ -120,7 +120,7 @@ public class TimeFactory {
                             i.addHour(21);
                             return TimeDetector.SEPARATOR;
                         }),
-                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidés"), (i, s) -> {
+                        new Transition<TimeBuilder, TimeDetector>(x -> matches(x, "veintidós"), (i, s) -> {
                             i.addHour(22);
                             return TimeDetector.SEPARATOR;
                         }),

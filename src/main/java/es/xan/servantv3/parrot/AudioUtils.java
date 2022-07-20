@@ -4,6 +4,7 @@ package es.xan.servantv3.parrot;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -119,7 +120,12 @@ public class AudioUtils {
 
             file.delete();
 
-            return json.getString("text");
+            String received = json.getString("text");
+            if (received.endsWith(".")) {
+                return StringUtils.chop(received);
+            } else {
+                return received;
+            }
         } catch (Exception e) {
             LOGGER.warn("Cannot setting boiler to [{}]", e);
         }
