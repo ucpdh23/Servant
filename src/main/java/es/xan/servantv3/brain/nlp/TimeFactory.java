@@ -5,6 +5,8 @@ import es.xan.servantv3.api.StateMachine;
 import es.xan.servantv3.api.Transition;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -17,6 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TimeFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeFactory.class);
 
     enum TimeDetector implements State<TimeBuilder> {
         _INIT() {
@@ -361,14 +365,24 @@ public class TimeFactory {
                 min = 60 - min;
             }
 
+            LOGGER.info("computed: {}[{}:{}]", this.positive, this.mHour, this.mMinutes);
+
             final LocalDateTime localNow = LocalDateTime.now();
             final ZoneId currentZone = ZoneId.of("Europe/Madrid");
             final ZonedDateTime zonedNow = ZonedDateTime.of(localNow, currentZone);
             ZonedDateTime zonedNextScheduled = zonedNow.withHour(hour).withMinute(min).withSecond(0);
-            if(zonedNow.compareTo(zonedNextScheduled) > 0)
+            LOGGER.info("zonedNow: [{}]", zonedNow);
+            LOGGER.info("zonedNextScheduled: [{}]", zonedNextScheduled);
+
+            if(zonedNow.compareTo(zonedNextScheduled) > 0) {
+                LOGGER.info("compared: [{}]", zonedNow.compareTo(zonedNextScheduled) );
                 zonedNextScheduled = zonedNextScheduled.plusDays(1);
+                LOGGER.info("zonedNextScheduled: [{}]", zonedNextScheduled);
+            }
 
             final Duration duration = Duration.between(zonedNow, zonedNextScheduled);
+
+            LOGGER.info("duration: [{}]", duration.getSeconds());
             return duration.getSeconds();
         }
     }
@@ -438,10 +452,18 @@ public class TimeFactory {
             final ZoneId currentZone = ZoneId.of("Europe/Madrid");
             final ZonedDateTime zonedNow = ZonedDateTime.of(localNow, currentZone);
             ZonedDateTime zonedNextScheduled = zonedNow.withHour(hour).withMinute(min).withSecond(0);
-            if(zonedNow.compareTo(zonedNextScheduled) > 0)
+            LOGGER.info("zonedNow: [{}]", zonedNow);
+            LOGGER.info("zonedNextScheduled: [{}]", zonedNextScheduled);
+
+            if(zonedNow.compareTo(zonedNextScheduled) > 0) {
+                LOGGER.info("compared: [{}]", zonedNow.compareTo(zonedNextScheduled));
                 zonedNextScheduled = zonedNextScheduled.plusDays(1);
+                LOGGER.info("new zonedNextScheduled: [{}]", zonedNextScheduled);
+            }
+
 
             final Duration duration = Duration.between(zonedNow, zonedNextScheduled);
+            LOGGER.info("duration: [{}]", duration.getSeconds());
             return duration.getSeconds();
         }
 
