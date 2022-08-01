@@ -53,8 +53,8 @@ public enum Rules {
 			),
 	VIDEO(HomeVerticle.Actions.RECORD_VIDEO,
 			isContextFree()
-					.and(messageIs("record||grabar||graba"))
-					.and(messageIs("video")),
+					.and(messageContains("record||grabar||graba"))
+					.and(messageContains("video")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Video"
