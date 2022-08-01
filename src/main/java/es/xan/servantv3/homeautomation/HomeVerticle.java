@@ -97,18 +97,30 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void _event_(Event event) {
+		LOGGER.debug("proceesing event");
+
+		LOGGER.debug("event. [{}-{}]", event.getName(), event.getStatus());
 		if ("door".equals(event.getName()) && event.getStatus().startsWith("BUTTONON")) {
+			LOGGER.info("processing door...");
 			try {
 				Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
+				LOGGER.info("WaitingVideo [{}]", waitingVideo);
 
 				if (!waitingVideo) {
+					LOGGER.info("publishing event");
+
 					this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
+					LOGGER.debug("Waiting video");
 					memory.put("WAITING_VIDEO", "true");
+				} else {
+					LOGGER.info("cannot publish RECORD_VIDEO action");
 				}
 			} catch (ExecutionException e) {
 				LOGGER.warn(e);
 			}
 
+		} else {
+			LOGGER.debug("unsupported event");
 		}
 	}
 
