@@ -6,6 +6,11 @@ import io.vertx.core.json.JsonObject
  * Actions Messages
  */
 
+
+data class Recording(var time: Integer, var code: String)
+
+data class Recorded(var filepath: String, var code: String)
+
 /**
  * Message used to send a text to a user through gtalk
  */

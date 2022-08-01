@@ -211,6 +211,14 @@ public class AbstractServantVerticle extends AbstractVerticle {
 
 		vertx.eventBus().send(raw_action, builder.build());
 	}
+
+	protected void publishRawAction(String raw_action, Object item) {
+		ActionBuilder builder = MessageBuilder.createAction();
+		builder.setAction(raw_action);
+		builder.setBean(JsonUtils.toJson(item));
+
+		vertx.eventBus().send(raw_action, builder.build());
+	}
 	
 	protected void publishAction(Action send) {
 		ActionBuilder builder = MessageBuilder.createAction();

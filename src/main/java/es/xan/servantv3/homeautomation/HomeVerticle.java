@@ -60,7 +60,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		GET_HOME_STATUS(null),
 		NOTIFY_BOSS(TextMessageToTheBoss.class),
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
-		REPORT_TEMPERATURE(null)
+		REPORT_TEMPERATURE(null),
+		MANAGE_VIDEO(Recorded.class)
 		;
 		
 		Class<?> beanClass;
@@ -75,13 +76,18 @@ public class HomeVerticle extends AbstractServantVerticle {
 		}
 	}
 
+	public void manage_video(Recorded recorded) {
+		LOGGER.debug("recorded [{}-{}]", recorded.getFilepath(), recorded.getCode());
+
+	}
+
 	public void _event_(Event event) {
-		if ("door".equals(event.getName())) {
+		if ("door".equals(event.getName()) || event.getStatus().startsWith("BUTTONON")) {
 			for (String master : this.mMasters) {
 				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, event.getName() + "-" + event.getStatus()));
 			}
 
-			this.publishRawAction("RECORD_VIDEO");
+			this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
 		}
 	}
 

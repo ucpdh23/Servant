@@ -1,36 +1,26 @@
 package es.xan.servantv3.webservice
 
-import es.xan.servantv3.Events
-import es.xan.servantv3.messages.Event
-import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.StaticHandler
+import es.xan.servantv3.homeautomation.HomeVerticle
+import es.xan.servantv3.messages.Recorded
+import es.xan.servantv3.messages.Recording
 import io.vertx.core.logging.LoggerFactory
-import java.io.FileNotFoundException
-import java.lang.NullPointerException
-import io.netty.handler.codec.http.HttpResponseStatus
-import io.vertx.core.http.HttpMethod
-import io.vertx.core.json.JsonObject
-import io.vertx.core.json.Json
-import es.xan.servantv3.temperature.TemperatureVerticle
-import es.xan.servantv3.messages.Temperature
-import java.util.Date
-
+import io.vertx.ext.web.FileUpload
+import io.vertx.ext.web.Router
 
 
 class SecurityController constructor(override val router: Router, var publisher : WebServerVerticle) : Controller({
 	
 	val log = LoggerFactory.getLogger(SecurityController::class.java.name)
 	
-	get("/security/door/:status").handler {
-		publisher.publishEvent(Events._EVENT_, Event(
-			"door",
-			it.request().params().get("status").toString(),
-			Date().getTime()));
-			
-		it.response().end("ok");
-	};
-	
-	post("/security/video").handler { context ->
+	post("/security/video/:code").handler { context ->
+		log.debug("video " + context.request().params().get("code"))
+
+		val uploads: Set<FileUpload> = context.fileUploads()
+
+		uploads.forEach {
+			var info = Recorded(it.uploadedFileName(), context.request().params().get("code"))
+			publisher.publishAction(HomeVerticle.Actions.MANAGE_VIDEO, info)
+		}
 	};
 
 })

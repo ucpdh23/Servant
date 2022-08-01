@@ -9,6 +9,7 @@ import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEventType
 import io.vertx.core.Vertx
+import io.vertx.ext.web.handler.BodyHandler
 
 class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 	
@@ -22,6 +23,7 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		super.start();
 		
 		var router = Router.router(vertx);
+		router.route().handler(BodyHandler.create());
 		
 		webSocketConfiguration(router);
 		
