@@ -204,6 +204,13 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		eventBuilder.setBean(JsonUtils.toJson(item));
 		vertx.eventBus().publish(Constant.EVENT, eventBuilder.build());
 	}
+
+	protected void publishRawAction(String raw_action) {
+		ActionBuilder builder = MessageBuilder.createAction();
+		builder.setAction(raw_action);
+
+		vertx.eventBus().send(raw_action, builder.build());
+	}
 	
 	protected void publishAction(Action send) {
 		ActionBuilder builder = MessageBuilder.createAction();
@@ -252,8 +259,10 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 
 	protected void supportedEvents(Events...events) {
-		for (Events item : events)
+		for (Events item : events) {
+			LOGGER.debug("adding event [{}->{}]", item.name(), this.mMethodMap.get(item.name().toLowerCase()));
 			mEventMap.put(item.name(), new Pair<Event, Method>((Event) item, this.mMethodMap.get(item.name().toLowerCase())));
+		}
 	}
 	
 	protected <T extends Enum<T> & Action> void supportedActions(Class<T> actions) {

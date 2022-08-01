@@ -80,6 +80,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 			for (String master : this.mMasters) {
 				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, event.getName() + "-" + event.getStatus()));
 			}
+
+			this.publishRawAction("RECORD_VIDEO");
 		}
 	}
 
