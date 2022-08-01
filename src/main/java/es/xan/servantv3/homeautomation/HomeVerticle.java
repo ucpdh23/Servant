@@ -19,15 +19,7 @@ import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.MessageUtils;
 import es.xan.servantv3.Scheduler;
-import es.xan.servantv3.messages.Device;
-import es.xan.servantv3.messages.OpenChat;
-import es.xan.servantv3.messages.Person;
-import es.xan.servantv3.messages.Power;
-import es.xan.servantv3.messages.Room;
-import es.xan.servantv3.messages.Sensor;
-import es.xan.servantv3.messages.TextMessage;
-import es.xan.servantv3.messages.TextMessageToTheBoss;
-import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.messages.*;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
@@ -60,7 +52,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NEW_NETWORK_DEVICES_MESSAGE,
 			Events.REM_NETWORK_DEVICES_MESSAGE,
-			Events.LAUNDRY_OFF);
+			Events.LAUNDRY_OFF,
+			Events._EVENT_);
 	}
 	
 	public enum Actions implements Action {
@@ -79,6 +72,14 @@ public class HomeVerticle extends AbstractServantVerticle {
 		@Override
 		public Class<?> getPayloadClass() {
 			return beanClass;
+		}
+	}
+
+	public void _event_(Event event) {
+		if ("door".equals(event.getName())) {
+			for (String master : this.mMasters) {
+				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, event.getName() + "-" + event.getStatus()));
+			}
 		}
 	}
 

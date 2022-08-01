@@ -3,8 +3,12 @@ package es.xan.servantv3.brain.nlp;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.MessageUtils;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class TranslationUtils {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TranslationUtils.class);
 	
 	public static boolean isEveryDay(Translation item) {
 		return item.everyDay;
@@ -23,7 +27,10 @@ public class TranslationUtils {
 	}
 	
 	public static String forwarding(Message<Object> msg) {
-		if (msg == null) return "Sorry, but something extremally weird happened";
+		if (msg == null) {
+			LOGGER.debug("no message provided");
+			return "Sorry, but something extremally weird happened";
+		}
 		
 		if (MessageUtils.isOk(msg)) {
 			if (MessageUtils.hasMessage(msg)) {

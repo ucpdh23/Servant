@@ -5,6 +5,8 @@ public class Constant {
 	public static final String THERMOSTAT_VERTICLE 	= "thermostat.verticle";
 	public static final String LAMP_VERTICLE 	= "lamp.verticle";
 	public static final String WHITEBOARD_VERTICLE 	= "whiteboard.verticle";
+	public static final String SHOPPINGLIST_VERTICLE 	= "shoppinglist.verticle";
+	public static final String KNOWLEDGE_VERTICLE 	= "knowledge.verticle";
 	public static final String CALENDAR_VERTICLE 	= "calendar.verticle";
 	public static final String TEMPERATURE_VERTICLE = "temperature.verticle";
 	public static final String PARROT_VERTICLE = "parrot.verticle";

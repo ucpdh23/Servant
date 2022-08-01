@@ -28,6 +28,7 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		router = TemperatureController(router, this).create();
 		router = DevicesController(router, this).create();
 		router = MainController(router, this).create();
+		router = SecurityController(router, this).create();
 		
 		vertx.createHttpServer().requestHandler(router::accept).listen(mPort);
 		

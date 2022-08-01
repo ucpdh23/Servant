@@ -42,6 +42,7 @@ data class Configure(var field: String, var value: String)
  * DTOs
  */
 
+data class Event(var name: String, var status: String, var timestamp: Long)
 
 data class Person(var name: String, var inHome: Boolean)
 data class Room(var name: String)
@@ -68,6 +69,9 @@ data class ParrotMessageReceived(var user: String, var message: String)
  * POJOS
  */
 data class Temperature(var room: String, var temperature: Float, var timestamp: Long)
+
+
+data class Knowledge(var _what: String, var _who: String, var _when: String, var _how: String, var _where: String, var _why: String, var _whose: String)
 
 
 data class Query(var limit: Int, var sort: Map<String,Any>, var filter: Map<String,Any>, var fields: Map<String,Any>)

@@ -1,5 +1,8 @@
 package es.xan.servantv3.brain.nlp;
 
+import es.xan.servantv3.brain.UserContext;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -9,18 +12,30 @@ import java.util.regex.Pattern;
 public class RuleUtils {
 	
 	private static final String I18NS_SEPARATOR = "\\|\\|";
-	
-	public static Predicate<String> messageIs(String...options) {
-		return (String text) -> {
-			return Arrays.stream(options).
-					flatMap(Pattern.compile(I18NS_SEPARATOR)::splitAsStream).
-					parallel().
-					anyMatch(it -> text.toLowerCase().equals(it));
+
+	public static Predicate<Pair<String, UserContext>> isContextFree() {
+		return (Pair<String, UserContext> pair) -> {
+			return "".equals(pair.getRight().getAttention());
 		};
 	}
 
-	public static Predicate<String> messageStartsWith(String expected) {
-		return (String text) -> text.toLowerCase().startsWith(expected);
+	public static Predicate<Pair<String, UserContext>> isContext(String context) {
+		return (Pair<String, UserContext> pair) -> {
+			return context.equals(pair.getRight().getAttention());
+		};
+	}
+	
+	public static Predicate<Pair<String, UserContext>> messageIs(String...options) {
+		return (Pair<String, UserContext> pair) -> {
+			return Arrays.stream(options).
+					flatMap(Pattern.compile(I18NS_SEPARATOR)::splitAsStream).
+					parallel().
+					anyMatch(it -> pair.getLeft().toLowerCase().equals(it));
+		};
+	}
+
+	public static Predicate<Pair<String, UserContext>> messageStartsWith(String expected) {
+		return (Pair<String, UserContext> text) -> text.getLeft().toLowerCase().startsWith(expected);
 	}
 
 	public static String concatStrings(String[] tokens) {
@@ -32,12 +47,12 @@ public class RuleUtils {
 		return joiner.toString();
 	}
 	
-	public static Predicate<String> messageContains(String...options) {
-		return (String text) -> {
+	public static Predicate<Pair<String, UserContext>> messageContains(String...options) {
+		return (Pair<String, UserContext> text) -> {
 			return Arrays.stream(options).
 					flatMap(Pattern.compile(I18NS_SEPARATOR)::splitAsStream).
 					parallel().
-					anyMatch(it -> text.toLowerCase().contains(it));
+					anyMatch(it -> text.getLeft().toLowerCase().contains(it));
 		};
 	}
 

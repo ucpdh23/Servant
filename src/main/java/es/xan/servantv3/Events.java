@@ -29,7 +29,9 @@ public enum Events implements Event {
 	BOILER_SWITCHED(NewStatus.class),
 	LAMP_SWITCHED(NewStatus.class),
 	
-	LAUNDRY_OFF(Power.class)
+	LAUNDRY_OFF(Power.class),
+
+	_EVENT_(es.xan.servantv3.messages.Event.class)
 	
 	
 	;

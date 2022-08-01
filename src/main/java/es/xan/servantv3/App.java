@@ -1,6 +1,10 @@
 package es.xan.servantv3;
 
+import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.whiteboard.WhiteboardVerticle;
+import io.vertx.ext.bridge.BridgeOptions;
+import io.vertx.ext.bridge.PermittedOptions;
+import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import es.xan.servantv3.brain.STSVerticle;
@@ -26,14 +30,36 @@ public class App extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
+	TcpEventBusBridge bridge;
+
 	@Override
 	public void start() {
 		LOGGER.info("Starting servant app");
 		
 		initializeLogBridges();
 		initializeVerticles();
+		initializeEventBusBridge();
 		
 		LOGGER.info("Started :)");
+	}
+
+	private void initializeEventBusBridge() {
+		bridge = TcpEventBusBridge.create(
+				vertx,
+				new BridgeOptions()
+						.addInboundPermitted(new PermittedOptions().setAddress("in"))
+						.addOutboundPermitted(new PermittedOptions().setAddress("out")));
+
+		LOGGER.info("Opening eventbus port 7000...");
+		bridge.listen(7000, res -> {
+			if (res.succeeded()) {
+				// succeed...
+				LOGGER.info("Starting connection...");
+			} else {
+				// fail...
+				LOGGER.info("Failing connection...");
+			}
+		});
 	}
 
 	private void initializeVerticles() {
@@ -52,6 +78,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 	}
 

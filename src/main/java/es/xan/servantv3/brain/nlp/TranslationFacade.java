@@ -7,30 +7,32 @@ import java.time.ZonedDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import es.xan.servantv3.brain.UserContext;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.tuple.Pair;
 
 
 public class TranslationFacade {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TranslationFacade.class);
 	
-	public static Translation translate(String text) {
+	public static Translation translate(String text, UserContext context) {
 		Translation translation = new Translation();
 		
 		fillTimeInformation(text, translation);
-		fillMessageAndAddress(text, translation);
+		fillMessageAndAddress(text, translation, context);
 		
 		return translation;
 	}
 
-	private static void fillMessageAndAddress(String text, Translation translation) {
+	private static void fillMessageAndAddress(String text, Translation translation, UserContext context) {
 		for (Rules option : Rules.values()) {
-			if (option.mPredicate.test(text)) {
+			if (option.mPredicate.test(Pair.of(text, context))) {
 				LOGGER.debug("Applying rule [{}]", option);
 				
 				translation.action = option.mAddress;
-				translation.message = option.mFunction.apply(tokenizer(text));
+				translation.message = option.mFunction.apply(tokenizer(text), context);
 				translation.response = option.mResponse;
 				
 				return;

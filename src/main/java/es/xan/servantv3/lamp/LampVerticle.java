@@ -122,10 +122,10 @@ public class LampVerticle extends AbstractServantVerticle {
 		}
 		
 		final HttpPost httpPost = new HttpPost(url);
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+/*		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("access_token", token));
 		nvps.add(new BasicNameValuePair("params", "empty"));
-		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+		httpPost.setEntity(new UrlEncodedFormEntity(nvps));*/
 
 		try (CloseableHttpResponse response = mHttpclient.execute(httpPost)) {
 			LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());

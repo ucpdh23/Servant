@@ -1,0 +1,38 @@
+<configuration>
+
+	<property name="LOGS_PATH" value="/var/log/servant" />
+
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGS_PATH}/backend.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOGS_PATH}/backend.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+			<maxFileSize>100MB</maxFileSize>    
+			<maxHistory>60</maxHistory>
+			<totalSizeCap>2GB</totalSizeCap>
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%date [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+    <appender name="SENTRY" class="com.getsentry.raven.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+	<logger name="es.xan" level="INFO">
+		<appender-ref ref="SENTRY" />
+	</logger>
+	
+	<logger name="es.xan.servantv3" level="DEBUG" />
+
+	<root level="WARN">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,6 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class TelegramService extends TelegramLongPollingBot {
 	
@@ -78,9 +78,12 @@ public class TelegramService extends TelegramLongPollingBot {
 	
 	public boolean send(String user, String text) {
 		String chatId = (String) this.mConversations.get(user);
-		
-		SendMessage message = new SendMessage().setChatId(chatId).setText(text);
-		
+
+		SendMessage message = SendMessage.builder()
+								.chatId(chatId)
+								.text(text)
+								.build();
+
 		try {
 			execute(message);
 		} catch (TelegramApiException e) {
@@ -97,19 +100,15 @@ public class TelegramService extends TelegramLongPollingBot {
 	}
 
 	public static TelegramService build(JsonObject config) {
-		ApiContextInitializer.init();
-		
-		final TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-
-		TelegramService telegramService = new TelegramService(config);
-
 		try {
+			final TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+			TelegramService telegramService = new TelegramService(config);
 			telegramBotsApi.registerBot(telegramService);
+
+			return telegramService;
 		} catch (TelegramApiException e) {
 			throw new RuntimeException(e);
 		}
-		
-		return telegramService;
 	}
 
 }

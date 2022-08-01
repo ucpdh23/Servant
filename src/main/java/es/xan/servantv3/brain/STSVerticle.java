@@ -1,7 +1,11 @@
 package es.xan.servantv3.brain;
 
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
@@ -30,13 +34,17 @@ import io.vertx.core.logging.LoggerFactory;
  *  A new PERFORM Action has been included to run operations   
  * 
  * @author alopez
- * @see https://en.wikipedia.org/wiki/Superior_temporal_sulcus
+ * see https://en.wikipedia.org/wiki/Superior_temporal_sulcus
  */
 public class STSVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(STSVerticle.class);
-	
-	
+
+	private Cache<String, UserContext> mContext = CacheBuilder.newBuilder()
+			.maximumSize(10000)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.build();
+
 	private Scheduler mScheduler;
 	
 	public enum Actions implements Action {
@@ -91,23 +99,28 @@ public class STSVerticle extends AbstractServantVerticle {
 	
 	public void perform(TextMessageToTheBoss parrotMessage) {
 		LOGGER.debug("perform [{}]", parrotMessage);
-		
-		final Translation translation = TranslationFacade.translate(parrotMessage.getMessage());
-		
-		if (translation.action != null) {
-			if (translation.delayInfo == 0) {
-				publishAction(translation.action, translation.message, response -> {
-					publishAction(HomeVerticle.Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss(translation.response.apply(response.result()).msg));
-				});
-			} else {
-				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+		try {
+			UserContext bossContext = this.mContext.get("boss", () -> new UserContext("boss"));
+			final Translation translation = TranslationFacade.translate(parrotMessage.getMessage(), bossContext);
+
+			if (translation.action != null) {
+				if (translation.delayInfo == 0) {
 					publishAction(translation.action, translation.message, response -> {
+						LOGGER.debug("processing boss response from [{}-{}]", translation.action, translation.message);
 						publishAction(HomeVerticle.Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss(translation.response.apply(response.result()).msg));
 					});
-					
-					return false;
-				});
+				} else {
+					this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+						publishAction(translation.action, translation.message, response -> {
+							publishAction(HomeVerticle.Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss(translation.response.apply(response.result()).msg));
+						});
+
+						return false;
+					});
+				}
 			}
+		} catch ( ExecutionException e) {
+			LOGGER.warn(e);
 		}
 	}
 	
@@ -115,26 +128,37 @@ public class STSVerticle extends AbstractServantVerticle {
 	 * Process a incoming message performing whatever action recovered from the nlp system. 
 	 * @param parrotMessage
 	 */
-	public void parrot_message_received(ParrotMessageReceived parrotMessage) {
+	public void parrot_message_received(final ParrotMessageReceived parrotMessage) {
 		LOGGER.debug("Received [{}]", parrotMessage);
-		
-		final Translation translation = TranslationFacade.translate(parrotMessage.getMessage());
-		
-		if (translation.action != null) {
-			if (translation.delayInfo == 0) {
-				publishAction(translation.action, translation.message, response -> {
-					publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
-				});
-			} else {
-				this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+
+		try {
+			UserContext userContext = this.mContext.get(parrotMessage.getUser(), () -> new UserContext(parrotMessage.getUser()));
+			final Translation translation = TranslationFacade.translate(parrotMessage.getMessage(), userContext);
+
+			if (translation.action != null) {
+				if (translation.delayInfo == 0) {
 					publishAction(translation.action, translation.message, response -> {
+						LOGGER.debug("processing boss response from [{}-{}]", translation.action, translation.message);
+						LOGGER.debug(" response: [{}]", response);
+						LOGGER.debug(" response.result: [{}]", response.result());
+						LOGGER.debug(" response.succeded: [{}]", response.succeeded());
+						LOGGER.debug(" response.failed: [{}]", response.failed());
+
 						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
 					});
-					
-					return false;
-				});
+				} else {
+					this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
+						publishAction(translation.action, translation.message, response -> {
+							publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
+						});
+
+						return false;
+					});
+				}
 			}
+		} catch (ExecutionException e) {
+			LOGGER.warn(e);
 		}
 	}
-	
+
 }
