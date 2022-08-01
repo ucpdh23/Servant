@@ -47,17 +47,17 @@ public class App extends AbstractVerticle {
 		bridge = TcpEventBusBridge.create(
 				vertx,
 				new BridgeOptions()
-						.addInboundPermitted(new PermittedOptions().setAddress("in"))
-						.addOutboundPermitted(new PermittedOptions().setAddress("out")));
+						.addInboundPermitted(new PermittedOptions().setAddress(".*"))
+						.addOutboundPermitted(new PermittedOptions().setAddress(".*")));
 
 		LOGGER.info("Opening eventbus port 7000...");
 		bridge.listen(7000, res -> {
 			if (res.succeeded()) {
 				// succeed...
-				LOGGER.info("Starting connection...");
+				LOGGER.info("Starting eventbus connection...");
 			} else {
 				// fail...
-				LOGGER.info("Failing connection...");
+				LOGGER.info("Failing eventbus connection...");
 			}
 		});
 	}
