@@ -105,6 +105,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		LOGGER.debug("Processing event [{}]", eventName);
 		
 		if (!mEventMap.containsKey(eventName)) {
+			LOGGER.debug("mEventMap:" + mEventMap.keySet());
 			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
 			return;
 		}
