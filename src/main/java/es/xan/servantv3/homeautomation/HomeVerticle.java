@@ -9,8 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
@@ -42,7 +46,10 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
-	private Boolean mWaitingVideo = false;
+	protected Cache<String, String> memory = CacheBuilder.newBuilder()
+			.expireAfterAccess(10, TimeUnit.MINUTES)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.build();
 	
 	public HomeVerticle() {
 		super(Constant.HOME_VERTICLE);
@@ -81,21 +88,27 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	public void manage_video(Recorded recorded) {
 		LOGGER.debug("recorded [{}-{}-{}]", recorded.getFilepath(), new File(recorded.getFilepath()).exists(), recorded.getCode());
+		memory.put("WAITING_VIDEO", "false");
 
-		this.mWaitingVideo = false;
+		this.mMasters.forEach( master -> {
+			VideoMessage message = new VideoMessage(master, "", recorded.getFilepath());
+			publishAction(ParrotVerticle.Actions.SEND_VIDEO, message);
+		});
 	}
 
 	public void _event_(Event event) {
-		if ("door".equals(event.getName()) || event.getStatus().startsWith("BUTTONON")) {
-			for (String master : this.mMasters) {
-				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, event.getName() + "-" + event.getStatus()));
+		if ("door".equals(event.getName()) && event.getStatus().startsWith("BUTTONON")) {
+			try {
+				Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
+
+				if (!waitingVideo) {
+					this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
+					memory.put("WAITING_VIDEO", "true");
+				}
+			} catch (ExecutionException e) {
+				LOGGER.warn(e);
 			}
 
-
-			if (!mWaitingVideo) {
-				this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
-				mWaitingVideo = true;
-			}
 		}
 	}
 

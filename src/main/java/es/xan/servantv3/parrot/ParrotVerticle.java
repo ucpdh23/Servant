@@ -7,10 +7,13 @@ import es.xan.servantv3.Events;
 import es.xan.servantv3.messages.OpenChat;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
+import es.xan.servantv3.messages.VideoMessage;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import java.io.File;
 
 
 public class ParrotVerticle extends AbstractServantVerticle implements CommunicationListener {
@@ -38,7 +41,9 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 		/**
 		 * Sends a message to an user
 		 */
-		SEND(TextMessage.class); 
+		SEND(TextMessage.class),
+		SEND_VIDEO(VideoMessage.class),
+		;
 		
 		private Class<?> mMessageClass;
 		
@@ -63,6 +68,10 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 	
 	public void send(TextMessage message) {
 		channel.send(message.getUser(), message.getMessage());
+	}
+
+	public void send_video(VideoMessage message) {
+		channel.sendVideo(message.getUser(), message.getMessage(), new File(message.getFilepath()));
 	}
 	
 	

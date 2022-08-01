@@ -16,6 +16,8 @@ data class Recorded(var filepath: String, var code: String)
  */
 data class TextMessage(var user: String, var message: String)
 
+data class VideoMessage(var user: String, var message: String, var filepath: String)
+
 /**
  * like textmessage but using the default user defined in the configuration file
  */

@@ -8,6 +8,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -74,6 +76,26 @@ public class TelegramService extends TelegramLongPollingBot {
 		} else {
 			return Pair.of(messageTextReceived, Boolean.FALSE);
 		}
+	}
+
+	public boolean sendVideo(String user, String text, File file) {
+		String chatId = (String) this.mConversations.get(user);
+
+		SendVideo message = SendVideo.builder()
+				.chatId(chatId)
+				.supportsStreaming(Boolean.FALSE)
+				.caption(text)
+				.video(new InputFile(file))
+				.build();
+
+		try {
+			execute(message);
+		} catch (TelegramApiException e) {
+			LOGGER.warn(e.getMessage(), e);
+			return false;
+		}
+
+		return true;
 	}
 	
 	public boolean send(String user, String text) {
