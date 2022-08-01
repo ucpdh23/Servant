@@ -100,7 +100,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		LOGGER.debug("proceesing event");
 
 		LOGGER.debug("event. [{}-{}]", event.getName(), event.getStatus());
-		if ("door".equals(event.getName()) && event.getStatus().startsWith("BUTTONON")) {
+		if ("door".equals(event.getName()) && event.getStatus().startsWith("BUTTON")) {
 			LOGGER.info("processing door...");
 			try {
 				Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
