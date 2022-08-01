@@ -21,6 +21,8 @@ class SecurityController constructor(override val router: Router, var publisher 
 			var info = Recorded(it.uploadedFileName(), context.request().params().get("code"))
 			publisher.publishAction(HomeVerticle.Actions.MANAGE_VIDEO, info)
 		}
+
+		context.response().end("ok");
 	};
 
 })

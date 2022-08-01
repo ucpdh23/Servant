@@ -2,6 +2,7 @@ package es.xan.servantv3.homeautomation;
 
 import static es.xan.servantv3.Scheduler.at;
 
+import java.io.File;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ import io.vertx.core.logging.LoggerFactory;
 public class HomeVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
+
+	private Boolean mWaitingVideo = false;
 	
 	public HomeVerticle() {
 		super(Constant.HOME_VERTICLE);
@@ -77,8 +80,9 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 
 	public void manage_video(Recorded recorded) {
-		LOGGER.debug("recorded [{}-{}]", recorded.getFilepath(), recorded.getCode());
+		LOGGER.debug("recorded [{}-{}-{}]", recorded.getFilepath(), new File(recorded.getFilepath()).exists(), recorded.getCode());
 
+		this.mWaitingVideo = false;
 	}
 
 	public void _event_(Event event) {
@@ -87,7 +91,11 @@ public class HomeVerticle extends AbstractServantVerticle {
 				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, event.getName() + "-" + event.getStatus()));
 			}
 
-			this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
+
+			if (!mWaitingVideo) {
+				this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
+				mWaitingVideo = true;
+			}
 		}
 	}
 
