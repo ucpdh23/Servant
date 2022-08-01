@@ -47,8 +47,8 @@ public class App extends AbstractVerticle {
 		bridge = TcpEventBusBridge.create(
 				vertx,
 				new BridgeOptions()
-						.addInboundPermitted(new PermittedOptions().setAddress(".*"))
-						.addOutboundPermitted(new PermittedOptions().setAddress(".*")));
+						.addInboundPermitted(new PermittedOptions().setAddressRegex(".*"))
+						.addOutboundPermitted(new PermittedOptions().setAddressRegex(".*")));
 
 		LOGGER.info("Opening eventbus port 7000...");
 		bridge.listen(7000, res -> {
