@@ -71,7 +71,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		NOTIFY_BOSS(TextMessageToTheBoss.class),
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
 		REPORT_TEMPERATURE(null),
-		MANAGE_VIDEO(Recorded.class)
+		MANAGE_VIDEO(Recorded.class),
+		RECORD_VIDEO(null)
 		;
 		
 		Class<?> beanClass;
@@ -84,6 +85,29 @@ public class HomeVerticle extends AbstractServantVerticle {
 		public Class<?> getPayloadClass() {
 			return beanClass;
 		}
+	}
+
+	public void record_video(final Message<Object> msg) {
+		try {
+			Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
+			LOGGER.info("WaitingVideo [{}]", waitingVideo);
+
+			if (!waitingVideo) {
+				LOGGER.info("publishing event");
+
+				this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
+				LOGGER.debug("Waiting video");
+				memory.put("WAITING_VIDEO", "true");
+			} else {
+				LOGGER.info("cannot publish RECORD_VIDEO action");
+			}
+		} catch (ExecutionException e) {
+			LOGGER.warn(e);
+		}
+
+		MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+		builderOn.setOk();
+		msg.reply(builderOn.build());
 	}
 
 	public void manage_video(Recorded recorded) {

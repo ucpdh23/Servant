@@ -9,11 +9,9 @@ import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
-import es.xan.servantv3.messages.Configure;
-import es.xan.servantv3.messages.Sensor;
-import es.xan.servantv3.messages.TextMessage;
-import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.messages.*;
 import es.xan.servantv3.outlet.OutletVerticle;
+import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
@@ -53,6 +51,14 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
 			),
+	VIDEO(HomeVerticle.Actions.RECORD_VIDEO,
+			isContextFree()
+					.and(messageIs("record||grabar||graba"))
+					.and(messageIs("video")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Video"
+	),
 	START_SHOPPING_LIST(ShoppingListVerticle.Actions.START_LIST,
 			isContextFree()
 					.and(messageContains("comenzar"))
