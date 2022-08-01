@@ -47,8 +47,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
 	protected Cache<String, String> memory = CacheBuilder.newBuilder()
-			.expireAfterAccess(10, TimeUnit.MINUTES)
-			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.expireAfterAccess(5, TimeUnit.MINUTES)
+			.expireAfterWrite(5, TimeUnit.MINUTES)
 			.build();
 	
 	public HomeVerticle() {
