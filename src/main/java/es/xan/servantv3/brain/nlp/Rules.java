@@ -57,7 +57,15 @@ public enum Rules {
 					.and(messageContains("video")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
-			"Video"
+			"graba video"
+	),
+	SHUTDOWN_SECURITY(HomeVerticle.Actions.SHUTDOWN_SECURITY,
+			isContextFree()
+					.and(messageContains("apagar"))
+					.and(messageContains("security")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"apagar security"
 	),
 	START_SHOPPING_LIST(ShoppingListVerticle.Actions.START_LIST,
 			isContextFree()

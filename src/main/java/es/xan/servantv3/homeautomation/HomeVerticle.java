@@ -47,8 +47,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
 	protected Cache<String, String> memory = CacheBuilder.newBuilder()
-			.expireAfterAccess(5, TimeUnit.MINUTES)
-			.expireAfterWrite(5, TimeUnit.MINUTES)
+			.expireAfterAccess(2, TimeUnit.MINUTES)
+			.expireAfterWrite(2, TimeUnit.MINUTES)
 			.build();
 	
 	public HomeVerticle() {
@@ -72,7 +72,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
 		REPORT_TEMPERATURE(null),
 		MANAGE_VIDEO(Recorded.class),
-		RECORD_VIDEO(null)
+		RECORD_VIDEO(null),
+		SHUTDOWN_SECURITY(null)
 		;
 		
 		Class<?> beanClass;
@@ -85,6 +86,10 @@ public class HomeVerticle extends AbstractServantVerticle {
 		public Class<?> getPayloadClass() {
 			return beanClass;
 		}
+	}
+
+	public void shutdown_security(final Message<Object> msg) {
+		this.publishRawAction("SHUTDOWN_SECURITY");
 	}
 
 	public void record_video(final Message<Object> msg) {
@@ -142,7 +147,17 @@ public class HomeVerticle extends AbstractServantVerticle {
 			} catch (ExecutionException e) {
 				LOGGER.warn(e);
 			}
+		} else if ("door".equals(event.getName()) && event.getStatus().startsWith("temp")) {
+			String data = event.getStatus().split("=")[1];
+			String s_securityTemp = data.substring(0, data.indexOf("'"));
+			LOGGER.debug("Computed temperature [{}]", s_securityTemp);
 
+			Float temperature = Float.parseFloat(s_securityTemp);
+			if (temperature > 45) {
+				for (String master : this.mMasters) {
+					publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Temperature de rasp de seguridad muy alta " + temperature));
+				}
+			}
 		} else {
 			LOGGER.debug("unsupported event");
 		}
