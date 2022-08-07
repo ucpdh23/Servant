@@ -1,9 +1,11 @@
 package es.xan.servantv3.homeautomation;
 
 import static es.xan.servantv3.Scheduler.at;
+import static es.xan.servantv3.Scheduler.in;
 
 import java.io.File;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.MessageUtils;
 import es.xan.servantv3.Scheduler;
+import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
@@ -47,8 +50,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
 	protected Cache<String, String> memory = CacheBuilder.newBuilder()
-			.expireAfterAccess(2, TimeUnit.MINUTES)
-			.expireAfterWrite(2, TimeUnit.MINUTES)
+			.expireAfterAccess(1, TimeUnit.MINUTES)
+			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build();
 	
 	public HomeVerticle() {
@@ -123,7 +126,14 @@ public class HomeVerticle extends AbstractServantVerticle {
 			VideoMessage message = new VideoMessage(master, "", recorded.getFilepath());
 			publishAction(ParrotVerticle.Actions.SEND_VIDEO, message);
 		});
+
+		publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
+		if (mLampOffScheduledTask != null) {
+			this.mScheduler.removeScheduledTask(this.mLampOffScheduledTask);
+		}
 	}
+
+	UUID mLampOffScheduledTask = null;
 
 	public void _event_(Event event) {
 		LOGGER.debug("proceesing event");
@@ -137,6 +147,13 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 				if (!waitingVideo) {
 					LOGGER.info("publishing event");
+
+					this.publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("on"));
+					if (mLampOffScheduledTask != null) mScheduler.removeScheduledTask(mLampOffScheduledTask);
+					this.mLampOffScheduledTask = mScheduler.scheduleTask(in(1, ChronoUnit.MINUTES), (UUID id) -> {
+						publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
+						return false;
+					});
 
 					this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
 					LOGGER.debug("Waiting video");
@@ -153,7 +170,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 			LOGGER.debug("Computed temperature [{}]", s_securityTemp);
 
 			Float temperature = Float.parseFloat(s_securityTemp);
-			if (temperature > 45) {
+			if (temperature > 60) {
 				for (String master : this.mMasters) {
 					publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Temperature de rasp de seguridad muy alta " + temperature));
 				}
