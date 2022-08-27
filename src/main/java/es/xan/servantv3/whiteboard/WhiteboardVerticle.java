@@ -10,11 +10,13 @@ import io.vertx.core.logging.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 
 public class WhiteboardVerticle extends AbstractServantVerticle {
@@ -33,7 +35,8 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
 
     public enum Actions implements Action {
-        PRINT(TextMessage.class)
+        PRINT(TextMessage.class),
+        PRINT_IMAGE(TextMessage.class)
         ;
 
         private Class<?> mMessageClass;
@@ -58,8 +61,27 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                 MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
                 builderOn.setOk();
                 msg.reply(builderOn.build());
+            } else {
+                MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+                builderOn.setError();
+                builderOn.setMessage("Please, try it back in 5 minutes");
+                msg.reply(builderOn.build());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("cannot process message [{}]", msg.body(), e);
+        }
+    }
 
-//                this.publishEvent(Events.LAMP_SWITCHED, new NewStatus(on?"on":"off"));
+    public void print_image(TextMessage message, final Message<Object> msg) {
+        String filename = message.getMessage();
+
+        try {
+            boolean updatedOn = printImage(new File(filename));
+
+            if (updatedOn) {
+                MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+                builderOn.setOk();
+                msg.reply(builderOn.build());
             } else {
                 MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
                 builderOn.setError();
@@ -101,6 +123,29 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
             return true;
         } catch (Exception e) {
             LOGGER.warn("Cannot print text [{}]", message, e);
+            return false;
+        }
+    }
+
+    private boolean printImage(File file) {
+        LOGGER.info("printing image [{}]", file);
+
+        String url = mConfiguration.getString("url") + "/img";
+
+        final HttpPost httpPost = new HttpPost(url);
+        FileEntity entity = new FileEntity(file);
+        httpPost.setEntity(entity);
+
+        try (CloseableHttpResponse response = mHttpclient.execute(httpPost)) {
+            LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
+            final HttpEntity responseBody = response.getEntity();
+
+            String content = EntityUtils.toString(responseBody);
+            LOGGER.info(content);
+
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Cannot print img [{}]", file, e);
             return false;
         }
     }

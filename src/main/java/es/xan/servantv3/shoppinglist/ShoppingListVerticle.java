@@ -5,6 +5,7 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.messages.TextMessage;
+import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -12,6 +13,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +35,10 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
 
     public enum Actions implements Action {
         START_LIST(null),
+        CONTINUE_LIST(null),
         SAVE_ITEM(TextMessage.class),
         GET_LIST(null),
+        PRINT_LIST(null),
         END_LIST(null)
         ;
 
@@ -48,6 +52,28 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
         public Class<?> getPayloadClass() {
             return mMessageClass;
         }
+    }
+
+    public void print_list( final Message<Object> msg) {
+        File img = createImage();
+        publishAction(WhiteboardVerticle.Actions.PRINT_IMAGE, new TextMessage(null, img.getAbsolutePath()));
+
+
+        MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+        builderOn.setOk();
+        builderOn.setMessage("Continue list...");
+        msg.reply(builderOn.build());
+    }
+
+    private File createImage() {
+        return null;
+    }
+
+    public void continue_list( final Message<Object> msg) {
+        MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+        builderOn.setOk();
+        builderOn.setMessage("Continue list...");
+        msg.reply(builderOn.build());
     }
 
     public void end_list( final Message<Object> msg) {

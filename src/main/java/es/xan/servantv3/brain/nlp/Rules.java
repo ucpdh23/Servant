@@ -50,7 +50,7 @@ public enum Rules {
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
-			),
+	),
 	VIDEO(HomeVerticle.Actions.RECORD_VIDEO,
 			isContextFree()
 					.and(messageContains("record||grabar||graba"))
@@ -75,13 +75,21 @@ public enum Rules {
 			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
 			"Ex. comenzar lista"
 	),
+	CONTINUE_SHOPPING_LIST(ShoppingListVerticle.Actions.CONTINUE_LIST,
+			isContextFree()
+					.and(messageContains("continuar"))
+					.and(messageContains("lista")),
+			(tokens, userContext) -> {userContext.setAttention("Shopping"); return null; },
+			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
+			"Ex. continuar lista"
+	),
 	END_SHOPPING_LIST(ShoppingListVerticle.Actions.END_LIST,
 			isContext("Shopping")
 				.and(messageContains("finalizar"))
 				.and(messageContains("lista")),
 			(tokens, userContext) -> {userContext.setAttention(""); return null; },
 			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
-			"Ex. comenzar lista"
+			"Ex. finalizar lista"
 	),
 	ADD_TO_SHOPPING_LIST(ShoppingListVerticle.Actions.SAVE_ITEM,
 			isContext("Shopping"),
