@@ -50,8 +50,13 @@ public class GCalendarUtils {
     public static List<Notification> nextNotifications(File secret, String calendar) throws IOException, GeneralSecurityException {
     	return getNotificationsInWindow(secret, calendar, 0, TimeUnit.HOURS.toMillis(5));
     }
-    	
-    
+
+    public static List<Notification> nextNotificationsInWeek(File secret, String calendar) throws IOException, GeneralSecurityException {
+        return getNotificationsInWindow(secret, calendar, 0, TimeUnit.DAYS.toMillis(7));
+    }
+
+
+
     private static List<Notification> getNotificationsInWindow(File secret, String calendar, long startOffset, long endOffset) throws IOException, GeneralSecurityException {
     	
     	

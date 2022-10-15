@@ -6,6 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -22,6 +26,25 @@ public class SSHUtils {
 	public static class RemoteComamndResult {
 		public int exitStatus;
 		public String output;
+	}
+
+	public static RemoteComamndResult runLocalCommand(String command) throws IOException, InterruptedException, ExecutionException {
+		String homeDirectory = System.getProperty("user.home");
+		Process process = Runtime.getRuntime()
+					.exec(String.format("sh -c ls %s", homeDirectory));
+
+		StreamGobbler streamGobbler =
+				new StreamGobbler(process.getInputStream(), System.out::println);
+		Future<?> future = Executors.newSingleThreadExecutor().submit(streamGobbler);
+
+		int exitCode = process.waitFor();
+
+		RemoteComamndResult output = new RemoteComamndResult();
+		output.exitStatus = exitCode;
+
+		future.get(); // waits for streamGobbler to finish
+
+		return output;
 	}
 	
 	public static RemoteComamndResult runRemoteCommandExtended(String host, String login, String password, String command) throws JSchException, IOException {
@@ -84,6 +107,22 @@ public class SSHUtils {
 		} else {
 			LOGGER.debug("proccess yielded [{},{}]", result.exitStatus, result.output);
 			return true;
+		}
+	}
+
+	private static class StreamGobbler implements Runnable {
+		private InputStream inputStream;
+		private Consumer<String> consumer;
+
+		public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+			this.inputStream = inputStream;
+			this.consumer = consumer;
+		}
+
+		@Override
+		public void run() {
+			new BufferedReader(new InputStreamReader(inputStream)).lines()
+					.forEach(consumer);
 		}
 	}
 }
