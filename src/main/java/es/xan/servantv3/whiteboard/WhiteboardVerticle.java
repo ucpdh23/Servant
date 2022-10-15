@@ -87,13 +87,13 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                         LOGGER.error("cannot create dashboard", e);
                         throw new RuntimeException(e);
                     }
-/*
+
                     try {
                         SSHUtils.runLocalCommand("xvfb-run --server-args=\"-screen 0, 800x600x24\"  cutycapt --url=" + output.toURI() + " --out=dashboard.bmp");
                     } catch (Exception e) {
                         LOGGER.error("Error", e);
                     }
-*/
+
                 } else {
                     LOGGER.error("cannot create dashboard");
                 }
@@ -160,7 +160,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         calendar = config.getString("calendar");
         secretFile = new File(config.getString("secret"));
         */
-        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(1), id -> { publishAction(WhiteboardVerticle.Actions.CREATE_DASHBOARD);});
+        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), id -> { publishAction(WhiteboardVerticle.Actions.CREATE_DASHBOARD);});
 
         this.mScheduler = new Scheduler(getVertx());
 

@@ -22,6 +22,14 @@ class DashboardController constructor(override val router: Router, var publisher
 		val response: HttpServerResponse = context.response()
 		response.sendFile(input.absolutePath)
 	}
+
+	get("/dashboard_bmp").handler { context ->
+		val input: File = File("dashboard.bmp")
+		log.warn("processing input [{}]", input.absolutePath)
+
+		val response: HttpServerResponse = context.response()
+		response.sendFile(input.absolutePath)
+	}
 	
 
 })
