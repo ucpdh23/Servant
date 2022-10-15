@@ -29,8 +29,10 @@ public class SSHUtils {
 	}
 
 	public static RemoteComamndResult runLocalCommand(String command) throws IOException, InterruptedException, ExecutionException {
+		LOGGER.info("executing [{}]", String.format("sh -c %s", command));
+
 		Process process = Runtime.getRuntime()
-					.exec(command);
+					.exec(String.format("sh -c %s", command));
 
 		StreamGobbler streamGobbler =
 				new StreamGobbler(process.getInputStream(), System.out::println);
@@ -42,6 +44,8 @@ public class SSHUtils {
 		output.exitStatus = exitCode;
 
 		future.get(); // waits for streamGobbler to finish
+
+		LOGGER.info("command output [{}]", output.exitStatus);
 
 		return output;
 	}
