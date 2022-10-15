@@ -29,9 +29,8 @@ public class SSHUtils {
 	}
 
 	public static RemoteComamndResult runLocalCommand(String command) throws IOException, InterruptedException, ExecutionException {
-		String homeDirectory = System.getProperty("user.home");
 		Process process = Runtime.getRuntime()
-					.exec(String.format("sh -c ls %s", homeDirectory));
+					.exec(command);
 
 		StreamGobbler streamGobbler =
 				new StreamGobbler(process.getInputStream(), System.out::println);
