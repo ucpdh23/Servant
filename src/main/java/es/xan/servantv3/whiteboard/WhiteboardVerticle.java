@@ -89,7 +89,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                     }
 
                     try {
-                        SSHUtils.runLocalCommand("xvfb-run --server-args=\"-screen 0, 800x600x24\"  cutycapt --url=" + output.toURI() + " --out=dashboard.bmp");
+                        SSHUtils.runLocalCommand("xvfb-run --server-args=\"-screen 0, 800x600x24\"  cutycapt --url=file:///opt/servant/dashboard.html --out=/opt/servant/dashboard.bmp");
                     } catch (Exception e) {
                         LOGGER.error("Error", e);
                     }
