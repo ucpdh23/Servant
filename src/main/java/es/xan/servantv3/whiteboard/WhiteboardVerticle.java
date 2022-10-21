@@ -80,7 +80,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                     Buffer buffer = res.result();
 
                     File output = new File("dashboard.html");
-                    LOGGER.warn("creating file [{}-{}]", output.getAbsolutePath(), output.toURI());
+                    LOGGER.info("creating file [{}-{}]", output.getAbsolutePath(), output.toURI());
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(output))) {
                         writer.write(buffer.toString());
                     } catch (IOException e) {
