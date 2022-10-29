@@ -27,34 +27,10 @@ td {
 </head>
 <body>
 <span th:text="${now}">13 february 2011</span>
-<table>
-    <tr>
-        <th style='width: 80px'>-</th>
-        <th style='width: 100px'>Lunes</th>
-        <th style='width: 100px'>Martes</th>
-        <th style='width: 100px'>Miercoles</th>
-        <th style='width: 100px'>Jueves</th>
-        <th style='width: 100px'>Viernes</th>
-        <th style='width: 100px'>Finde</th>
-    </tr>
-    <tr>
-        <td>Mañana</td>
-        <td>Eva en casa<br/>08:00 Oftalmologo Leo</td>
-        <td>Maria Anders</td>
-        <td>Germany</td>
-        <td>10:00 Examen Lengua Leo</td>
-        <td>Alfreds Futterkiste</td>
-        <td>Alfreds Futterkiste</td>
-    </tr>
-    <tr>
-        <td>Tarde</td>
-        <td>Futbol Leo</td>
-        <td>Musica Leo</td>
-        <td>Mexico</td>
-        <td>Centro comercial Moctezuma</td>
-        <td>Francisco Chang</td>
-        <td>Mexico</td>
-    </tr>
-</table>
+            <ul>
+                <li th:each="notif: ${notifications}">
+                    <span th:text="${notif.date} - ${notif.text}"></span>
+                </li>
+            </ul>
 </body>
 </html>

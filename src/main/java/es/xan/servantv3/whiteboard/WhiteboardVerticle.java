@@ -75,11 +75,11 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
     public void create_dashboard(Message<Object> message) {
         try {
             LOGGER.info("creating dashboard...");
-            //List<Notification> nextNotifications = GCalendarUtils.nextNotificationsInWeek(secretFile, calendar);
+            List<Notification> nextNotifications = GCalendarUtils.nextNotificationsInWeek(secretFile, calendar);
             final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
 
             Map<String, Object> data = new HashMap<>();
-            //data.put("notifications", nextNotifications);
+            data.put("notifications", nextNotifications);
             data.put("now", new Date().toString());
 
             RoutingContextImpl routingContext = new RoutingContextImpl(this.vertx, data);
