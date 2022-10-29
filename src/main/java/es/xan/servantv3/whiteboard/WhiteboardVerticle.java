@@ -28,6 +28,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,9 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
             final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
 
             Map<String, Object> data = new HashMap<>();
+            //data.put("notifications", nextNotifications);
+            data.put("now", new Date().toString());
+
             RoutingContextImpl routingContext = new RoutingContextImpl(this.vertx, data);
 
             engine.render(routingContext, "templates/", "dashboard.html", res -> {
