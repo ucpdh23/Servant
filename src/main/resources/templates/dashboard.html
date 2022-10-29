@@ -29,7 +29,7 @@ td {
 <span th:text="${now}">13 february 2011</span>
             <ul>
                 <li th:each="notif: ${notifications}">
-                    <span th:text="${notif.date} - ${notif.text}"></span>
+                    <span th:text="|${notif.date} - ${notif.text}|"></span>
                 </li>
             </ul>
 </body>
