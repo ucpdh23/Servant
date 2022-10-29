@@ -261,12 +261,11 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         this.mHttpclient = HttpClients.createDefault();
 
         // Check Calendar
-        /*
         JsonObject config = vertx.getOrCreateContext().config().getJsonObject("CalendarVerticle");
         calendar = config.getString("calendar");
         secretFile = new File(config.getString("secret"));
-        */
-        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(5), id -> { publishAction(WhiteboardVerticle.Actions.CREATE_DASHBOARD);});
+
+        vertx.setPeriodic(TimeUnit.MINUTES.toMillis(1), id -> { publishAction(WhiteboardVerticle.Actions.CREATE_DASHBOARD);});
 
         this.mScheduler = new Scheduler(getVertx());
 
