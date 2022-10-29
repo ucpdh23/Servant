@@ -12,15 +12,20 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -90,6 +95,16 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
                     try {
                         SSHUtils.runLocalCommand("xvfb-run -e /opt/servant/error cutycapt --url=file:///opt/servant/dashboard.html --out=/opt/servant/dashboard.bmp");
+
+                        String pre_md5 = resolveMD5("/opt/servant/dashboard.bin");
+                        File binFile = createBinFile(new File("/opt/servant/dashboard.bmp"));
+                        String post_md5 = resolveMD5("/opt/servant/dashboard.bin");
+
+                        if (!pre_md5.equals(post_md5)) {
+                            printImage(binFile);
+                        }
+
+
                     } catch (Exception e) {
                         LOGGER.error("Error", e);
                     }
@@ -103,6 +118,93 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
             LOGGER.error(e.getMessage(), e);
         }
     }
+
+    private String resolveMD5(String filePath) {
+        try (FileInputStream fis = new FileInputStream(new File(filePath));) {
+            byte data[] = org.apache.commons.codec.digest.DigestUtils.md5(fis);
+            char md5Chars[] = Hex.encodeHex(data);
+            return String.valueOf(md5Chars);
+        } catch (IOException e) {
+            LOGGER.error(e);
+        }
+
+        return "";
+    }
+
+    private File createBinFile(File input) {
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(input);
+        } catch (IOException e) {
+
+        }
+        int height = img.getHeight();
+        int width = img.getWidth();
+
+        int rgb;
+        int red;
+        int green;
+        int blue;
+
+        boolean components[] = {false, false, false, false, false, false, false, false};
+        int position = 0;
+
+        File output = new File("/opt/servant/dashboard.bin");
+        try (OutputStream outputStream = new FileOutputStream(output, false)) {
+            for (int h = 0; h < 480; h++)
+            {
+                for (int w = 0; w < width; w++)
+                {
+                    rgb = img.getRGB(w,  h);
+
+                    red = (rgb >> 16 ) & 0x000000FF;
+                    green = (rgb >> 8 ) & 0x000000FF;
+                    blue = (rgb) & 0x000000FF;
+
+                    if (red < 126 && green < 126 && blue < 126) {
+                        components[position] = true;
+                    } else {
+                        components[position] = false;
+                    }
+
+
+                    if (position == components.length -1) {
+//                        System.out.print(" 0x" + _byte(components[0], components[1], components[2], components[3]) + _byte(components[4], components[5], components[6], components[7]) + ",");
+
+                        String bits = "";
+                        for (int i=0;i<8;i++)
+                            bits = bits + (components[i]? "1" : "0");
+
+                        byte b = (byte) Integer.parseInt(bits, 2);
+                        byte[] byte_array = {b};
+                        outputStream.write(byte_array);
+
+                        position = 0;
+                    } else {
+                        position++;
+                    }
+                }
+  //              System.out.println("");
+            }
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return output;
+    }
+
+    public static String _byte(boolean c1, boolean c2, boolean c3, boolean c4) {
+        byte result = 0;
+        result += c4? 1 : 0;
+        result += c3? 2 : 0;
+        result += c2? 4 : 0;
+        result += c1? 8 : 0;
+
+        return Integer.toHexString(result);
+    }
+
 
     public void print(TextMessage message, final Message<Object> msg) {
         String text = message.getMessage();
@@ -194,10 +296,15 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
     private boolean printImage(File file) {
         LOGGER.info("printing image [{}]", file);
 
-        String url = mConfiguration.getString("url") + "/img";
+        String url = mConfiguration.getString("url") + "/upload";
 
         final HttpPost httpPost = new HttpPost(url);
-        FileEntity entity = new FileEntity(file);
+
+        HttpEntity entity = MultipartEntityBuilder
+                .create()
+                .addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, "dashboard.bin")
+                .build();
+
         httpPost.setEntity(entity);
 
         try (CloseableHttpResponse response = mHttpclient.execute(httpPost)) {
