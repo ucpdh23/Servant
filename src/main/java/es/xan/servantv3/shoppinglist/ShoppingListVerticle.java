@@ -11,18 +11,15 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class ShoppingListVerticle extends AbstractServantVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingListVerticle.class);
 
-    private static final List<String> mItems = new ArrayList<>();
 
     public ShoppingListVerticle() {
         super(Constant.SHOPPINGLIST_VERTICLE);
@@ -84,7 +81,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
     }
 
     public void get_list( final Message<Object> msg) {
-        String output = StringUtils.join(this.mItems, ",\n");
+        String output = ShoppingListUtils.listToString();
 
         MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
         builderOn.setOk();
@@ -93,7 +90,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
     }
 
     public void start_list( final Message<Object> msg) {
-        this.mItems.clear();
+        ShoppingListUtils.clearList();
 
         MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
         builderOn.setOk();
@@ -134,7 +131,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
     private boolean saveText(String message) throws UnsupportedEncodingException {
         LOGGER.info("saving message [{}]", message);
 
-        this.mItems.add(message);
+        ShoppingListUtils.addToList(message);
 
         return true;
     }

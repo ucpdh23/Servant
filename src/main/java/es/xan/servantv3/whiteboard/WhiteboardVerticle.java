@@ -4,6 +4,7 @@ import es.xan.servantv3.*;
 import es.xan.servantv3.calendar.GCalendarUtils;
 import es.xan.servantv3.calendar.Notification;
 import es.xan.servantv3.messages.TextMessage;
+import es.xan.servantv3.shoppinglist.ShoppingListUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -80,6 +81,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
             Map<String, Object> data = new HashMap<>();
             data.put("notifications", nextNotifications);
+            data.put("shoppingList", ShoppingListUtils.list());
             data.put("now", new Date().toString());
 
             RoutingContextImpl routingContext = new RoutingContextImpl(this.vertx, data);

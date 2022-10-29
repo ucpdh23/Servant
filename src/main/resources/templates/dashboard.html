@@ -26,11 +26,17 @@ td {
 </style>
 </head>
 <body>
-<span th:text="${now}">13 february 2011</span>
             <ul>
                 <li th:each="notif: ${notifications}">
                     <span th:text="|${notif.date} - ${notif.text}|"></span>
                 </li>
             </ul>
+
+<ul>
+    <li th:each="item: ${shoppingList}">
+        <span th:text="|${item}|"></span>
+    </li>
+</ul>
+
 </body>
 </html>
