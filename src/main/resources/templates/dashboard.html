@@ -10,6 +10,10 @@
     box-sizing: border-box;
 }
 
+ul {
+  list-style-type: none;
+}
+
 body {
 	width: 800px;
 	height: 480px;
@@ -54,7 +58,7 @@ td {
         <td>
             <ul>
                 <li th:each="notif: ${notificationsRestOfWeek}">
-                    <span th:text="|${#temporals.dayOfWeek(notif.date)} - ${notif.text}|"></span>
+                    <span th:text="|${#temporals.dayOfWeekName(notif.date)} - ${notif.text}|"></span>
                 </li>
             </ul>
         </td>
