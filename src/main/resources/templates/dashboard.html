@@ -35,6 +35,9 @@ td {
     </tr>
     <tr>
         <td>
+            <div th:if="${#lists.isEmpty(notificationsToday)}">
+                -
+            </div>
             <ul>
                 <li th:each="notif: ${notificationsToday}">
                     <span th:text="|${notif.date} - ${notif.text}|"></span>
@@ -44,17 +47,17 @@ td {
         <td>
             <ul>
                 <li th:each="notif: ${notificationsTomorrow}">
-                    <span th:text="|${notif.date} - ${notif.text}|"></span>
+                    <span th:text="|${#temporals.format(notif.date, 'HH:mm')} - ${notif.text}|"></span>
                 </li>
             </ul>
         </td>
-        <th>
+        <td>
             <ul>
                 <li th:each="notif: ${notificationsRestOfWeek}">
-                    <span th:text="|${notif.date} - ${notif.text}|"></span>
+                    <span th:text="|${#temporals.dayOfWeek(notif.date)} - ${notif.text}|"></span>
                 </li>
             </ul>
-        </th>
+        </td>
     </tr>
 </table>
 
