@@ -55,6 +55,11 @@
 			<artifactId>vertx-web-templ-thymeleaf</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-java8time</artifactId>
+			<version>3.0.4.RELEASE</version>
+		</dependency>
 
 		<!-- Add hazelcast deps if you want it clusterable -->
 		<dependency>
