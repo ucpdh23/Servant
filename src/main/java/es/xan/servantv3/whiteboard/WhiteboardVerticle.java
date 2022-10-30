@@ -24,6 +24,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -81,6 +82,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
             LOGGER.info("creating dashboard...");
             List<Notification> nextNotifications = GCalendarUtils.nextNotificationsInWeek(secretFile, calendar);
             final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+            engine.getThymeleafTemplateEngine().addDialect(new Java8TimeDialect());
 
             Map<String, Object> data = new HashMap<>();
             data.put("notifications", nextNotifications);
