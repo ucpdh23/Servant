@@ -7,8 +7,11 @@ import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -55,6 +58,13 @@ public class GCalendarUtils {
         return getNotificationsInWindow(secret, calendar, 0, TimeUnit.DAYS.toMillis(7));
     }
 
+    public static String resolveTime(Notification notification) {
+        return notification.date.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    public static String resolveDateOfWeek(Notification notification) {
+        return notification.date.getDayOfWeek().getDisplayName(TextStyle.NARROW_STANDALONE, new Locale("es", "ES"));
+    }
 
 
     private static List<Notification> getNotificationsInWindow(File secret, String calendar, long startOffset, long endOffset) throws IOException, GeneralSecurityException {

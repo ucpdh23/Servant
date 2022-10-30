@@ -31,7 +31,7 @@ td {
     <tr>
         <th>Hoy </th>
         <th>Mañana</th>
-        <th>Proximos 7 dias</th>
+        <th>7 dias</th>
     </tr>
     <tr>
         <td>
@@ -40,21 +40,21 @@ td {
             </div>
             <ul>
                 <li th:each="notif: ${notificationsToday}">
-                    <span th:text="|${notif.date} - ${notif.text}|"></span>
+                    <span th:text="|${T(es.xan.servantv3.calendar.GCalendarUtils).resolveTime(notif)} - ${notif.text}|"></span>
                 </li>
             </ul>
         </td>
         <td>
             <ul>
                 <li th:each="notif: ${notificationsTomorrow}">
-                    <span th:text="|${#temporals.format(notif.date, 'HH:mm')} - ${notif.text}|"></span>
+                    <span th:text="|${T(es.xan.servantv3.calendar.GCalendarUtils).resolveTime(notif)} - ${notif.text}|"></span>
                 </li>
             </ul>
         </td>
         <td>
             <ul>
                 <li th:each="notif: ${notificationsRestOfWeek}">
-                    <span th:text="|${#temporals.dayOfWeek(notif.date)} - ${notif.text}|"></span>
+                    <span th:text="|${T(es.xan.servantv3.calendar.GCalendarUtils).resolveDateOfWeek(notif)} - ${notif.text}|"></span>
                 </li>
             </ul>
         </td>
