@@ -29,11 +29,14 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.GeneralSecurityException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class WhiteboardVerticle extends AbstractServantVerticle {
 
@@ -81,6 +84,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
             Map<String, Object> data = new HashMap<>();
             data.put("notifications", nextNotifications);
+            data.putAll(separateNotifications(nextNotifications));
             data.put("shoppingList", ShoppingListUtils.list());
             data.put("now", new Date().toString());
 
@@ -115,6 +119,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                         LOGGER.error("Error", e);
                     }
 
+
                 } else {
                     LOGGER.error("cannot create dashboard");
                 }
@@ -123,6 +128,43 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+
+    public static void main(String args[]) {
+        LocalDate todayDate = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        now = now.plus(7, ChronoUnit.HOURS);
+
+
+        System.out.println(DAYS.between(todayDate, now));
+
+    }
+
+    private Map<String, List<Notification>> separateNotifications(List<Notification> nextNotifications) {
+        List<Notification> today = new ArrayList<>();
+        List<Notification> tomorrow = new ArrayList<>();
+        List<Notification> restOfWeek = new ArrayList<>();
+
+        LocalDate todayDate = LocalDate.now();
+        for (Notification notif : nextNotifications) {
+            LocalDateTime date = notif.date;
+
+            long daysBetween = DAYS.between(todayDate, date);
+            if (daysBetween <= 0) {
+                today.add(notif);
+            } else if (daysBetween == 1) {
+                tomorrow.add(notif);
+            } else {
+                restOfWeek.add(notif);
+            }
+        }
+
+        Map<String, List<Notification>> output = new HashMap<>();
+        output.put("notificationsToday", today);
+        output.put("notificationsTomorrow", tomorrow);
+        output.put("notificationsRestOfWeek", restOfWeek);
+
+        return output;
     }
 
     private String resolveMD5(String filePath) {

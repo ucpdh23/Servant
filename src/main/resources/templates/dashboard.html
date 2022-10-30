@@ -21,17 +21,47 @@ table, th, td {
 }
 
 td {
-  font-size: 10px;
+  font-size: 20px;
+  font-weight: 500;
 }
 </style>
 </head>
 <body>
+<table>
+    <tr>
+        <th>Hoy </th>
+        <th>Mañana</th>
+        <th>Proximos 7 dias</th>
+    </tr>
+    <tr>
+        <td>
             <ul>
-                <li th:each="notif: ${notifications}">
+                <li th:each="notif: ${notificationsToday}">
                     <span th:text="|${notif.date} - ${notif.text}|"></span>
                 </li>
             </ul>
+        </td>
+        <td>
+            <ul>
+                <li th:each="notif: ${notificationsTomorrow}">
+                    <span th:text="|${notif.date} - ${notif.text}|"></span>
+                </li>
+            </ul>
+        </td>
+        <th>
+            <ul>
+                <li th:each="notif: ${notificationsRestOfWeek}">
+                    <span th:text="|${notif.date} - ${notif.text}|"></span>
+                </li>
+            </ul>
+        </th>
+    </tr>
+</table>
 
+
+<div th:if="${#lists.isEmpty(shoppingList)}">
+    --Shopping List está vacia--
+</div>
 <ul>
     <li th:each="item: ${shoppingList}">
         <span th:text="|${item}|"></span>
