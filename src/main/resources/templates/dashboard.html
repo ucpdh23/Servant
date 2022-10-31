@@ -29,52 +29,127 @@ td {
   font-weight: 500;
   width: 220px;
 }
+
+.cl_calendar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    font-weight: 600;
+}
+.cl_day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    border: 1px solid black;
+    justify-content: flex-start;
+}
+
+.cl_day_item {
+    display:flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.cl_day_item_time {
+    font-size: 10px;
+    width: 40px;
+    text-align: center;
+}
+
+.cl_day_item_content {
+    font-weight: 500;
+    width: 100%;
+}
+
+.cl_table {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.cl_shopping_list {
+    border: 1px solid black;
+    flex: 2;
+}
+
+.cl_hourly {
+    border: 1px solid black;
+    flex: 1;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
 </style>
 </head>
 <body>
-<table>
-    <tr>
-        <th>Hoy </th>
-        <th>Mañana</th>
-        <th>Proximos 7 dias</th>
-    </tr>
-    <tr>
-        <td>
-            <div th:if="${#lists.isEmpty(notificationsToday)}">
-                -
-            </div>
-            <ul>
-                <li th:each="notif: ${notificationsToday}">
-                    <span th:text="|${notif.date} - ${notif.text}|"></span>
-                </li>
-            </ul>
-        </td>
-        <td>
-            <ul>
-                <li th:each="notif: ${notificationsTomorrow}">
-                    <span th:text="|${#temporals.format(notif.date, 'HH:mm')} - ${notif.text}|"></span>
-                </li>
-            </ul>
-        </td>
-        <td>
-            <ul>
-                <li th:each="notif: ${notificationsRestOfWeek}">
-                    <span th:text="|${#temporals.dayOfWeekName(notif.date)} - ${notif.text}|"></span>
-                </li>
-            </ul>
-        </td>
-    </tr>
-</table>
+<div class="cl_calendar">
+    <div class="cl_day">
+        <span class="title">Hoy</span>
 
+        <div th:if="${#lists.isEmpty(notificationsToday)}">
+            -
+        </div>
+        <div class="cl_day_item" th:each="notif: ${notificationsToday}">
+            <div class="cl_day_item_time" th:text="|${#temporals.format(notif.date, 'HH:mm')}|">10:22</div>
+            <div class="cl_day_item_content" th:text="|${notif.text}|">Examen Matematicas</div>
+        </div>
+    </div>
+    <div class="cl_day">
+        <span class="title">Mañana</span>
 
-<div th:if="${#lists.isEmpty(shoppingList)}">
-    --Shopping List está vacia--
+        <div th:if="${#lists.isEmpty(notificationsTomorrow)}">
+            -
+        </div>
+        <div class="cl_day_item" th:each="notif: ${notificationsTomorrow}">
+            <div class="cl_day_item_time" th:text="|${#temporals.format(notif.date, 'HH:mm')}|">10:22</div>
+            <div class="cl_day_item_content" th:text="|${notif.text}|">Examen Matematicas</div>
+        </div>
+    </div>
+    <div class="cl_day">
+        <span class="title">Siguientes Dias</span>
+        <div th:if="${#lists.isEmpty(notificationsRestOfWeek)}">
+            -
+        </div>
+        <div class="cl_day_item" th:each="notif: ${notificationsRestOfWeek}">
+            <div class="cl_day_item_time" th:text="|${#temporals.dayOfWeekName(notif.date)}|">Jueves</div>
+            <div class="cl_day_item_content" th:text="|${notif.text}|">Examen Matematicas</div>
+        </div>
+    </div>
 </div>
-<ul>
-    <li th:each="item: ${shoppingList}">
-        <span th:text="|${item}|"></span>
-    </li>
-</ul>
+
+<div class="cl_table">
+    <div class="cl_shopping_list">
+        <span class="title">Shopping List</span>
+
+        <div class="cl_shopping_items">
+            <div th:if="${#lists.isEmpty(shoppingList)}">
+                --Shopping List está vacia--
+            </div>
+            <ol>
+                <li th:each="item: ${shoppingList}">
+                    <span th:text="|${item}|">shoppingListItem</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div class="cl_hourly">
+        <div class="cl_day_item" th:each="hourly: ${hourlyInfo}">
+            <div class="cl_day_item_time" th:text="|${hourly.time}|">10:00</div>
+            <div class="cl_day_item_content" th:text="|${notif.weather}|">Despejado</div>
+            <div class="cl_day_item_content" th:text="|${notif.temperature}|">15</div>
+            <div class="cl_day_item_content" th:text="|${notif.price}|">0.44</div>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>
