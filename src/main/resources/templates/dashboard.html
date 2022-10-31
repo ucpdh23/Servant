@@ -89,6 +89,14 @@ td {
     font-weight: 600;
 }
 
+.cl_day_item_content_weather {
+    width: 160px;
+}
+
+.cl_day_item_content_data {
+    width: 22px;
+}
+
 </style>
 </head>
 <body>
@@ -145,9 +153,9 @@ td {
     <div class="cl_hourly">
         <div class="cl_day_item" th:each="hourly: ${hourlyInfo}">
             <div class="cl_day_item_time" th:text="|${hourly.time}|">10:00</div>
-            <div class="cl_day_item_content" th:text="|${hourly.weather}|">Despejado</div>
-            <div class="cl_day_item_content" th:text="|${hourly.temperature}|">15</div>
-            <div class="cl_day_item_content" th:text="|${hourly.price}|">0.44</div>
+            <div class="cl_day_item_content_weather" th:text="|${hourly.weather}|">Despejado</div>
+            <div class="cl_day_item_content_data" th:text="|${hourly.temperature}|">15</div>
+            <div class="cl_day_item_content_data" th:text="|${hourly.price}|">0.44</div>
         </div>
     </div>
 </div>
