@@ -204,9 +204,9 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
         File output = new File("/opt/servant/dashboard.bin");
         try (OutputStream outputStream = new FileOutputStream(output, false)) {
-            for (int h = 0; h < 480; h++)
+            for (int h = 0; h < 480 & h < height; h++)
             {
-                for (int w = 0; w < width; w++)
+                for (int w = 0; w < 800; w++)
                 {
                     rgb = img.getRGB(w,  h);
 
