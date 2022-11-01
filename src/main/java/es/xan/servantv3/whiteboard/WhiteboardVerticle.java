@@ -109,7 +109,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                     }
 
                     try {
-                        SSHUtils.runLocalCommand("xvfb-run -e /opt/servant/error cutycapt --url=file:///opt/servant/dashboard.html --out=/opt/servant/dashboard.bmp");
+                        SSHUtils.runLocalCommand("xvfb-run -e /opt/servant/error cutycapt --url=file:///opt/servant/dashboard.html --out=/opt/servant/dashboard.bmp --insecure");
 
                         String pre_md5 = resolveMD5("/opt/servant/dashboard.bin");
                         File binFile = createBinFile(new File("/opt/servant/dashboard.bmp"));
