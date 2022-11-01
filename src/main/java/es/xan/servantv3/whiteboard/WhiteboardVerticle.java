@@ -214,7 +214,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
                     green = (rgb >> 8 ) & 0x000000FF;
                     blue = (rgb) & 0x000000FF;
 
-                    if (red + green + blue < 580 ) {
+                    if (red + green + blue < 640 ) {
                         components[position] = true;
                     } else {
                         components[position] = false;
