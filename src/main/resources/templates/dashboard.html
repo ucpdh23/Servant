@@ -17,17 +17,8 @@ ul {
 body {
 	width: 800px;
 	height: 480px;
-}
-
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-
-td {
-  font-size: 20px;
-  font-weight: 500;
-  width: 220px;
+	display: flex;
+	flex-direction: column;
 }
 
 .cl_calendar {
@@ -81,25 +72,48 @@ td {
 
 .cl_hourly {
     border: 1px solid black;
-    flex: 1;
+    display: flex;
+    flex-direction: row;
+    height: 100px;
 }
+
+.cl_hourly_item:first-child {
+    width: 45px;
+    margin-top: -10px;
+    background-color: white;
+    border-top: 3px solid black;
+    font-size: 20px;
+}
+
+
+.cl_hourly_item {
+   display: flex;
+   flex-direction: column;
+   width: 32px;
+
+}
+
 
 .title {
     font-size: 20px;
     font-weight: 600;
 }
 
-.cl_day_item_content_weather {
+.cl_hourly_item_content_weather {
     width: 160px;
 }
 
-.cl_day_item_content_data {
-    width: 22px;
+.cl_hourly_item_content_data {
+    text-align: center;
+}
+
+.price {
+    font-size: 18px;
 }
 
 </style>
 </head>
-<body>
+<body class="cl_body">
 <div class="cl_calendar">
     <div class="cl_day">
         <span class="title">Hoy</span>
@@ -135,8 +149,7 @@ td {
     </div>
 </div>
 
-<div class="cl_table">
-    <div class="cl_shopping_list">
+   <div class="cl_shopping_list">
         <span class="title">Shopping List</span>
 
         <div class="cl_shopping_items">
@@ -150,16 +163,13 @@ td {
             </ol>
         </div>
     </div>
-    <div class="cl_hourly">
-        <div class="cl_day_item" th:each="hourly: ${hourlyInfo}">
-            <div class="cl_day_item_time" th:text="|${hourly.time}|">10:00</div>
-            <div class="cl_day_item_content_weather" th:text="|${hourly.weather}|">Despejado</div>
-            <div class="cl_day_item_content_data" th:text="|${hourly.temperature}|">15</div>
-            <div class="cl_day_item_content_data" th:text="|${hourly.price}|">0.44</div>
-        </div>
+<div class="cl_hourly">
+    <div class="cl_hourly_item" th:each="hourly: ${hourlyInfo}">
+        <div class="cl_hourly_item_content_data price" th:text="|${hourly.price}|">0.44</div>
+        <div class="cl_hourly_item_content_data" th:text="|${hourly.temperature}|">15</div>
+        <div class="cl_hourly_item_content_weather"><img th:attr="src=@{|https://www.aemet.es/imagenes/png/estado_cielo/${hourly.weatherId}.png|}" src="https://www.aemet.es/imagenes/png/estado_cielo/16.png" /></div>
+        <div class="cl_day_item_time" th:text="|${hourly.time}|">10:00</div>
     </div>
 </div>
-
-
 </body>
 </html>

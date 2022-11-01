@@ -101,8 +101,11 @@ public class WeatherUtils {
                 Integer hour = Integer.parseInt(periodo);
 
                 HourlyInfo info = items.get(hour);
-                if (info != null)
+                if (info != null) {
                     info.weather = ele.getAttribute("descripcion");
+                    info.weatherId = ele.getTextContent();
+                }
+
             }
 
         } catch (Exception e) {
@@ -119,6 +122,7 @@ public class WeatherUtils {
     public static class HourlyInfo {
         public LocalTime time;
         public String weather;
+        public String weatherId;
         public Integer temperature;
         public Float price;
     }
