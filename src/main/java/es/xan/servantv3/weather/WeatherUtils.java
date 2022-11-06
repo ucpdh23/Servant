@@ -117,7 +117,7 @@ public class WeatherUtils {
                 String line = priceRow.text();
 
                 Integer hour = Integer.parseInt(line.split("h")[0]);
-                Float price = Float.parseFloat(line.split(" ")[1]);
+                Float price = Float.parseFloat(line.split(" ")[1].replace(',','.'));
 
                 output.put(hour, price);
             }
