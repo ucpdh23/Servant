@@ -108,7 +108,7 @@ body {
 }
 
 .price {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 </style>
@@ -165,7 +165,7 @@ body {
     </div>
 <div class="cl_hourly">
     <div class="cl_hourly_item" th:each="hourly: ${hourlyInfo}">
-        <div class="cl_hourly_item_content_data price" th:text="|${hourly.price}|">0.44</div>
+        <div class="cl_hourly_item_content_data price" th:text="|${#numbers.formatDecimal(hourly.price, 0, 'COMMA', 3, 'POINT')}|">0.44</div>
         <div class="cl_hourly_item_content_data" th:text="|${hourly.temperature}|">15</div>
         <div class="cl_hourly_item_content_weather"><img th:attr="src=@{|https://www.aemet.es/imagenes/png/estado_cielo/${hourly.weatherId}.png|}" src="https://www.aemet.es/imagenes/png/estado_cielo/16.png" /></div>
         <div class="cl_day_item_time" th:text="|${hourly.time}|">10:00</div>

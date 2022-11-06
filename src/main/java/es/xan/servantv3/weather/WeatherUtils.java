@@ -8,6 +8,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -19,6 +21,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,6 +52,8 @@ public class WeatherUtils {
         return cache;
     }
 
+
+
     private static List<HourlyInfo> _updateCache(LocalDateTime dateTime) {
         List<HourlyInfo> output = new ArrayList<>();
 
@@ -70,6 +75,75 @@ public class WeatherUtils {
                 composeItems(output, xmlDocument, 0, tomorrow , 24 - output.size());
             }
 
+            updateEnergyPrice(output, dateTime);
+
+        } catch (Exception e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+
+        return output;
+    }
+
+    private static void updateEnergyPrice(List<HourlyInfo> output, LocalDateTime dateTime) {
+        // Compute Today's prices
+        Map<Integer, Float> todaysPrices = computeTodaysPrices();
+        Map<Integer, Float> tomorrowsPrices = computeTomorrowsPrices();
+
+        boolean isToday = true;
+        for (HourlyInfo info : output) {
+            info.price = isToday?
+                    todaysPrices.get(info.time.getHour()) :
+                    tomorrowsPrices.get(info.time.getHour());
+
+            if (info.price == null) {
+                info.price = 0F;
+            }
+
+            if (info.time.getHour() == 23) {
+                isToday = false;
+            }
+        }
+    }
+
+    private static Map<Integer, Float> computeTomorrowsPrices() {
+        Map<Integer, Float> output = new HashMap<>();
+
+        try {
+            org.jsoup.nodes.Document doc = Jsoup.connect("https://tarifaluzhora.es/info/precio-kwh-manana").get();
+
+            Elements priceRows = doc.select("#precio-luz-hoy tbody tr");
+
+            for (org.jsoup.nodes.Element priceRow : priceRows) {
+                String line = priceRow.text();
+
+                Integer hour = Integer.parseInt(line.split("h")[0]);
+                Float price = Float.parseFloat(line.split(" ")[1]);
+
+                output.put(hour, price);
+            }
+
+        } catch (Exception e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+
+        return output;
+    }
+
+    private static Map<Integer, Float> computeTodaysPrices() {
+        Map<Integer, Float> output = new HashMap<>();
+
+        try {
+            org.jsoup.nodes.Document doc = Jsoup.connect("https://tarifaluzhora.es/").get();
+
+            Elements priceRows = doc.select(".col-xs-9");
+
+            for (org.jsoup.nodes.Element priceRow : priceRows) {
+                String line = priceRow.text();
+                Integer hour = Integer.parseInt(line.split("h")[0]);
+                Float price = Float.parseFloat(line.split(":")[1].trim().split(" ")[0]);
+
+                output.put(hour, price);
+            }
 
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -128,7 +202,8 @@ public class WeatherUtils {
     }
 
     public static void main(String agrs[]) {
-        System.out.println(resolveHourlyInfo());
+        // updateEnergyPrice(null, LocalDateTime.now());
+        System.out.println(computeTomorrowsPrices());
     }
 
     public static class HourlyInfo {
