@@ -82,7 +82,7 @@ public enum Rules {
 					.and(messageContains("lista")),
 			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), findNumber(tokens));},
 			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
-			"Ex. continuar lista"
+			"Ex. eliminar elemento [number] de lista"
 	),
 	CONTINUE_SHOPPING_LIST(ShoppingListVerticle.Actions.CONTINUE_LIST,
 			isContextFree()
