@@ -75,6 +75,15 @@ public enum Rules {
 			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
 			"Ex. comenzar lista"
 	),
+	REMOVE_ITEM_FROM_SHOPPING_LIST(ShoppingListVerticle.Actions.REMOVE_FROM_LIST,
+			isContextFree()
+					.and(messageContains("eliminar||quitar||quita||elimina"))
+					.and(messageContains("elemento||producto"))
+					.and(messageContains("lista")),
+			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), findNumber(tokens));},
+			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
+			"Ex. continuar lista"
+	),
 	CONTINUE_SHOPPING_LIST(ShoppingListVerticle.Actions.CONTINUE_LIST,
 			isContextFree()
 					.and(messageContains("continuar"))
@@ -91,18 +100,18 @@ public enum Rules {
 			msg -> { return reply( null, TranslationUtils.forwarding(msg));},
 			"Ex. finalizar lista"
 	),
-	ADD_TO_SHOPPING_LIST(ShoppingListVerticle.Actions.SAVE_ITEM,
-			isContext("Shopping"),
-			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
-			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
-			"Ex. Item"
-	),
 	SHOW_SHOPPING(ShoppingListVerticle.Actions.GET_LIST,
 			messageContains("muestra", "mostrar")
 			.and(messageContains("lista")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. Muestra lista"
+	),
+	ADD_TO_SHOPPING_LIST(ShoppingListVerticle.Actions.SAVE_ITEM,
+			isContext("Shopping"),
+			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. Item"
 	),
 	PRINT_ACTION(WhiteboardVerticle.Actions.PRINT,
 			isContextFree()

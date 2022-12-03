@@ -33,6 +33,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
     public enum Actions implements Action {
         START_LIST(null),
         CONTINUE_LIST(null),
+        REMOVE_FROM_LIST(TextMessage.class),
         SAVE_ITEM(TextMessage.class),
         GET_LIST(null),
         PRINT_LIST(null),
@@ -80,8 +81,28 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
         msg.reply(builderOn.build());
     }
 
+    public void remove_from_list(TextMessage message, final Message<Object> msg) {
+        String text = message.getMessage();
+        try {
+            int itemToDelete = Integer.parseInt(text);
+            ShoppingListUtils.deleteItem(itemToDelete);
+
+            MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+            builderOn.setOk();
+            msg.reply(builderOn.build());
+        } catch (Exception e) {
+            String output = ShoppingListUtils.listToString(true);
+
+            MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+            builderOn.setOk();
+            builderOn.setMessage(output);
+            msg.reply(builderOn.build());
+        }
+
+    }
+
     public void get_list( final Message<Object> msg) {
-        String output = ShoppingListUtils.listToString();
+        String output = ShoppingListUtils.listToString(false);
 
         MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
         builderOn.setOk();

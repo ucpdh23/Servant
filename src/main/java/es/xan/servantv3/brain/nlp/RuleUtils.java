@@ -1,6 +1,7 @@
 package es.xan.servantv3.brain.nlp;
 
 import es.xan.servantv3.brain.UserContext;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -36,6 +37,10 @@ public class RuleUtils {
 
 	public static Predicate<Pair<String, UserContext>> messageStartsWith(String expected) {
 		return (Pair<String, UserContext> text) -> text.getLeft().toLowerCase().startsWith(expected);
+	}
+
+	public static String findNumber(String[] tokens) {
+		return Arrays.stream(tokens).filter(NumberUtils::isNumber).findFirst().orElse("");
 	}
 
 	public static String concatStrings(String[] tokens) {
