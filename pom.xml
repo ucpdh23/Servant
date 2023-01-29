@@ -85,6 +85,13 @@
 			<artifactId>vertx-tcp-eventbus-bridge</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-unit</artifactId>
+			<version>${vertx.version}</version>
+			<scope>test</scope>
+		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/org.telegram/telegrambots -->
 		<dependency>
