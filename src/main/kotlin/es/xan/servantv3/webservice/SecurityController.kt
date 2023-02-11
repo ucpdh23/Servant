@@ -15,7 +15,7 @@ class SecurityController constructor(override val router: Router, var publisher 
 	post("/security/video/:code").handler { context ->
 		log.debug("video " + context.request().params().get("code"))
 
-		val uploads: Set<FileUpload> = context.fileUploads()
+		val uploads: List<FileUpload> = context.fileUploads()
 
 		uploads.forEach {
 			var info = Recorded(it.uploadedFileName(), context.request().params().get("code"))

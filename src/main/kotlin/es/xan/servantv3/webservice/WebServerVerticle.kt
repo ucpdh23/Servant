@@ -4,10 +4,11 @@ import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Constant
 import io.vertx.ext.web.Router
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
-import io.vertx.ext.web.handler.sockjs.PermittedOptions
+//import io.vertx.ext.web.handler.sockjs.BridgeOptions
+//import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.ext.web.handler.sockjs.BridgeEventType
+//import io.vertx.ext.web.handler.sockjs.BridgeEventType
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.core.Vertx
 import io.vertx.ext.web.handler.BodyHandler
 
@@ -33,24 +34,32 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		router = MainController(router, this).create();
 		router = SecurityController(router, this).create();
 
-		vertx.createHttpServer().requestHandler(router::accept).listen(mPort);
+		vertx.createHttpServer().requestHandler(router).listen(mPort);
 		
 		LOG.info("Started web server listening in port [{}]", mPort);
 		
 	}
 	
 	fun webSocketConfiguration(router : Router) {
+	/*
 		val options = BridgeOptions().apply {
     			addOutboundPermitted(PermittedOptions().setAddressRegex(Constant.EVENT))
     			addInboundPermitted(PermittedOptions().setAddressRegex(".*"));
-		}
+		}*/
+		
+		val sockJSHandler = SockJSHandler.create(vertx);
+val options = SockJSBridgeOptions();
+// mount the bridge on the router
 	
-		router.route("/eventbus/*").handler(SockJSHandler.create(vertx).bridge(options, { 
+		router.route("/eventbus/*")
+		.subRouter(sockJSHandler.bridge(options));
+		/*
+		.handler(SockJSHandler.create(vertx).bridge(options, { 
 	         if (it.type().equals(BridgeEventType.SOCKET_CREATED)) {
 	            LOG.info("A socket was created");
 	         }
 	         it.complete(true);
-		}));
+		}));*/
 	}
 	
 }

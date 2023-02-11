@@ -12,7 +12,9 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+//import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+
+import io.vertx.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpEntity;
@@ -57,8 +59,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
         supportedActions(WhiteboardVerticle.Actions.values());
 
-        this.engine = ThymeleafTemplateEngine.create();
-        this.engine.getThymeleafTemplateEngine().addDialect(new Java8TimeDialect());
+        
 
     }
 
@@ -125,9 +126,9 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
     protected void _create_image(Map<String, Object> data, File output, Consumer<File> functor) {
         LOGGER.info("_create_image", data);
 
-        RoutingContextImpl routingContext = new RoutingContextImpl(this.vertx, data);
+        //RoutingContextImpl routingContext = new RoutingContextImpl(this.vertx, data);
 
-        engine.render(routingContext, "templates/", "dashboard.html", res -> {
+        engine.render(data, "templates/dashboard.html", res -> {
             if (res.succeeded()) {
                 Buffer buffer = res.result();
 
@@ -307,6 +308,9 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
     @Override
     public void start() {
         super.start();
+        
+        this.engine = ThymeleafTemplateEngine.create(this.vertx);
+        this.engine.getThymeleafTemplateEngine().addDialect(new Java8TimeDialect());
 
         this.mConfiguration = Vertx.currentContext().config().getJsonObject("WhiteboardVerticle");
         this.mHttpclient = HttpClients.createDefault();

@@ -238,7 +238,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		LOGGER.debug("publish action [{}]", send);
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
-		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build(), replyHandler);
+		vertx.eventBus().request(resolveVerticleName(send.getClass().getCanonicalName()), builder.build(), replyHandler);
 	}
 	
 
@@ -250,7 +250,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		
 		JsonObject object = builder.build();
 		
-		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), object, replyHandler);
+		vertx.eventBus().request(resolveVerticleName(send.getClass().getCanonicalName()), object, replyHandler);
 	}
 
 	private static String resolveVerticleName(String canonicalName) {

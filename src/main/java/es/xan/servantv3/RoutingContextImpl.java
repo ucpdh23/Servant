@@ -10,11 +10,11 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.*;
-import io.vertx.ext.web.Locale;
+//import io.vertx.ext.web.Locale;
 
 import java.util.*;
 
-public class RoutingContextImpl implements RoutingContext {
+public class RoutingContextImpl /* implements RoutingContext */ {
 
     private Vertx mVertx;
     private Map<String,Object> mData;
@@ -23,152 +23,153 @@ public class RoutingContextImpl implements RoutingContext {
         this.mVertx = vertx;
         this.mData = data;
     }
-    @Override
+    //@Override
     public HttpServerRequest request() {
         return null;
     }
 
-    @Override
+    //@Override
     public HttpServerResponse response() {
         return null;
     }
 
-    @Override
+   // @Override
     public void next() {
 
     }
 
-    @Override
+    //@Override
     public void fail(int i) {
 
     }
 
-    @Override
+    //@Override
     public void fail(Throwable throwable) {
 
     }
 
-    @Override
+    //@Override
     public RoutingContext put(String s, Object o) {
         return null;
     }
 
-    @Override
+    //@Override
     public <T> T get(String s) {
         return null;
     }
 
-    @Override
+    //@Override
     public <T> T remove(String s) {
         return null;
     }
 
-    @Override
+    //@Override
     public Map<String, Object> data() {
         return this.mData;
     }
 
-    @Override
+    //@Override
     public Vertx vertx() {
         return this.mVertx;
     }
 
-    @Override
+    //@Override
     public String mountPoint() {
         return null;
     }
 
-    @Override
+   // @Override
     public Route currentRoute() {
         return null;
     }
 
-    @Override
+    //@Override
     public String normalisedPath() {
         return null;
     }
+    /*
 
-    @Override
+   // @Override
     public Cookie getCookie(String s) {
         return null;
     }
 
-    @Override
+    //@Override
     public RoutingContext addCookie(Cookie cookie) {
         return null;
     }
 
-    @Override
+    //@Override
     public Cookie removeCookie(String s) {
         return null;
     }
 
-    @Override
+    //@Override
     public int cookieCount() {
         return 0;
     }
 
-    @Override
+    //@Override
     public Set<Cookie> cookies() {
         return null;
     }
-
-    @Override
+*/
+    //@Override
     public String getBodyAsString() {
         return null;
     }
 
-    @Override
+    //@Override
     public String getBodyAsString(String s) {
         return null;
     }
 
-    @Override
+    //@Override
     public JsonObject getBodyAsJson() {
         return null;
     }
 
-    @Override
+    //@Override
     public JsonArray getBodyAsJsonArray() {
         return null;
     }
 
-    @Override
+    //@Override
     public Buffer getBody() {
         return null;
     }
 
-    @Override
+   // @Override
     public Set<FileUpload> fileUploads() {
         return null;
     }
 
-    @Override
+    //@Override
     public Session session() {
         return null;
     }
 
-    @Override
+    //@Override
     public User user() {
         return null;
     }
 
-    @Override
+    //@Override
     public Throwable failure() {
         return null;
     }
 
-    @Override
+   // @Override
     public int statusCode() {
         return 0;
     }
 
-    @Override
+  //  @Override
     public String getAcceptableContentType() {
         return null;
     }
 
-    @Override
+   /* @Override
     public ParsedHeaderValues parsedHeaders() {
         return new ParsedHeaderValues() {
             @Override
@@ -257,12 +258,13 @@ public class RoutingContextImpl implements RoutingContext {
     public void reroute(HttpMethod httpMethod, String s) {
 
     }
-
+/*
     @Override
     public List<Locale> acceptableLocales() {
         return null;
     }
-
+*/
+/*
     @Override
     public Map<String, String> pathParams() {
         return null;
@@ -271,5 +273,5 @@ public class RoutingContextImpl implements RoutingContext {
     @Override
     public String pathParam(String s) {
         return null;
-    }
+    }*/
 }

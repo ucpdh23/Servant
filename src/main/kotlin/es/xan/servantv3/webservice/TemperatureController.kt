@@ -31,7 +31,7 @@ class TemperatureController constructor(override val router: Router, var publish
 	get("/listTemperature").handler { context ->
 		publisher.publishAction(TemperatureVerticle.Actions.LAST_VALUES, { output ->
 			context.response().setChunked(true);
-			context.response().write(output.result().body().toString()).end();
+			context.response().end(output.result().body().toString());
 		});
 	}; 
 

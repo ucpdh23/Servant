@@ -19,6 +19,7 @@ import es.xan.servantv3.messages.Temperature;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -136,6 +137,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 				LOGGER.debug(res.result().toString());
 				List<JsonObject> items = res.result().getJsonObject("cursor").getJsonArray("firstBatch").getList();
 				
+				List<Promise> promises = new ArrayList<>();
 				List<Future> futures = new ArrayList<>();
 				for (JsonObject item : items) {
 					String room = item.getString("_id");
@@ -145,19 +147,21 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 							put("room", room).
 							put("timestamp", maxTimestamp);
 					
-					Future<JsonObject> future = Future.future();
-					futures.add(future);
+					//Future<JsonObject> future = Future.future();
+					Promise<JsonObject> promise = Promise.promise();
+					promises.add(promise);
+					futures.add(promise.future());
 					mongoClient.findOne(TEMPERATURES_COLLECTION, query, null,  result -> {
 						  if (result.succeeded()) {
-							  future.complete(result.result());
+							  promise.complete(result.result());
 						  } else {
-							  future.fail(result.cause());
+							  promise.fail(result.cause());
 						  }
 					});
 					
 				}
 				
-				CompositeFuture.all(futures).setHandler(result -> {
+				CompositeFuture.all(futures).onComplete(result -> {
 					if (result.failed()) {
 						ReplyBuilder builder = MessageBuilder.createReply();
 						builder.setError();
