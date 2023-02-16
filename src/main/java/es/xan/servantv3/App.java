@@ -15,6 +15,7 @@ import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.mqtt.MqttVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
@@ -79,6 +80,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 	}
 

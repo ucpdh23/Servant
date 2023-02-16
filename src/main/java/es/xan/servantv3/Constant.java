@@ -1,6 +1,7 @@
 package es.xan.servantv3;
 
 public class Constant {
+  public static final String MQTT_VERTICLE = "mqtt";
 	public static final String WEBSERVER_VERTICLE = "webserver.verticle";
 	public static final String THERMOSTAT_VERTICLE 	= "thermostat.verticle";
 	public static final String LAMP_VERTICLE 	= "lamp.verticle";
