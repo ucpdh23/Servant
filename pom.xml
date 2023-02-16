@@ -56,6 +56,11 @@
 			<version>${vertx.version}</version>
 		</dependency>
 		<dependency>
+   <groupId>io.vertx</groupId>
+   <artifactId>vertx-mqtt</artifactId>
+   <version>${vertx.version}</version>
+</dependency>
+		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-java8time</artifactId>
 			<version>3.0.4.RELEASE</version>
@@ -356,6 +361,8 @@
 							<arguments>
 								<argument>run</argument>
 								<argument>${main.verticle}</argument>
+								<argument>-conf</argument>
+								<argument>../config.json</argument>
 							</arguments>
 						</configuration>
 					</execution>
