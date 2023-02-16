@@ -76,8 +76,8 @@ mqttServer.endpointHandler(endpoint -> {
   }
   LOGGER.debug("[properties = " + endpoint.connectProperties() + "]");
   if (endpoint.will() != null) {
-    LOGGER.debug("[will topic = " + endpoint.will().getWillTopic() + " msg = " + new String(endpoint.will().getWillMessageBytes()) +
-      " QoS = " + endpoint.will().getWillQos() + " isRetain = " + endpoint.will().isWillRetain() + "]");
+    LOGGER.debug("[will topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will() +
+      " QoS = " + endpoint.will() + " isRetain = " + endpoint.will() + "]");
   }
 
   LOGGER.debug("[keep alive timeout = " + endpoint.keepAliveTimeSeconds() + "]");
@@ -86,7 +86,7 @@ mqttServer.endpointHandler(endpoint -> {
   endpoint.accept(false);
 endpoint.publishHandler(message -> {
 
-  System.out.println("Just received message [" + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
+  LOGGER.info("Just received message [" + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
 /*
   if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
     endpoint.publishAcknowledge(message.messageId());
