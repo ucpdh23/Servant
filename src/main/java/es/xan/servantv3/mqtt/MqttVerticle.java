@@ -24,6 +24,9 @@ import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.temperature.TemperatureVerticle;
+import es.xan.servantv3.messages.Temperature;
+import java.util.Date;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -89,6 +92,21 @@ endpoint.publishHandler(message -> {
   LOGGER.info("Just received message ["
   + message.topicName() + "-" 
   + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
+  
+  if (message.topicName().startsWith("rtl_433/112/temperature_C")) {
+    Temperature temperature = new Temperature("outside", Float.parseFloat(message.payload().toString()), new Date().getTime());
+    
+    publishAction(TemperatureVerticle.Actions.SAVE, temperature);
+    
+  } else if (message.topicName().startsWith("rtl_433/17/temperature_C")) {
+
+    Temperature temperature = new Temperature("inside", Float.parseFloat(message.payload().toString()), new Date().getTime());
+
+    
+    publishAction(TemperatureVerticle.Actions.SAVE, temperature);
+    
+  }
+  
 /*
   if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
     endpoint.publishAcknowledge(message.messageId());
