@@ -86,7 +86,9 @@ mqttServer.endpointHandler(endpoint -> {
   endpoint.accept(false);
 endpoint.publishHandler(message -> {
 
-  LOGGER.info("Just received message [" + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
+  LOGGER.info("Just received message ["
+  + message.topicName() + "-" 
+  + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
 /*
   if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
     endpoint.publishAcknowledge(message.messageId());
