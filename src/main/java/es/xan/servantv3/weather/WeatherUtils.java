@@ -110,13 +110,20 @@ public class WeatherUtils {
         try {
             org.jsoup.nodes.Document doc = Jsoup.connect("https://tarifaluzhora.es/info/precio-kwh-manana").get();
 
-            Elements priceRows = doc.select("#precio-luz-hoy tbody tr");
+            Elements priceRows = doc.select("table tbody tr");
 
             for (org.jsoup.nodes.Element priceRow : priceRows) {
                 String line = priceRow.text();
+                
+                //System.out.println(line);
 
-                Integer hour = Integer.parseInt(line.split("h")[0]);
-                Float price = Float.parseFloat(line.split(" ")[1].replace(',','.'));
+                Integer hour = Integer.parseInt(line.split(":")[0]);
+                //System.out.println("hour" + hour);
+                
+                //System.out.println(line.split(" ")[4]);
+                
+                Float price = Float.parseFloat(line.split(" ")[4].replace(',','.').split("€")[0]);
+                //System.out.println("price"+price);
 
                 output.put(hour, price);
             }
@@ -134,12 +141,13 @@ public class WeatherUtils {
         try {
             org.jsoup.nodes.Document doc = Jsoup.connect("https://tarifaluzhora.es/").get();
 
-            Elements priceRows = doc.select(".col-xs-9");
+            Elements priceRows = doc.select(".col-xs-11");
 
             for (org.jsoup.nodes.Element priceRow : priceRows) {
                 String line = priceRow.text();
-                Integer hour = Integer.parseInt(line.split("h")[0]);
-                Float price = Float.parseFloat(line.split(":")[1].trim().split(" ")[0]);
+                System.out.println(line);
+                Integer hour = Integer.parseInt(line.split(":")[0]);
+                Float price = Float.parseFloat(line.split(" ")[3]);
 
                 output.put(hour, price);
             }
@@ -202,7 +210,7 @@ public class WeatherUtils {
 
     public static void main(String agrs[]) {
         // updateEnergyPrice(null, LocalDateTime.now());
-        System.out.println(computeTomorrowsPrices());
+        System.out.println(computeTodaysPrices());
     }
 
     public static class HourlyInfo {
