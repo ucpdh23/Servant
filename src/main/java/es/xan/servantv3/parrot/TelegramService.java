@@ -1,6 +1,7 @@
 package es.xan.servantv3.parrot;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,6 +11,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -55,7 +57,12 @@ public class TelegramService extends TelegramLongPollingBot {
 		for (Entry<String, Object> entry : this.mConversations.entrySet()) {
 			if (entry.getValue().toString().equals(chatId.toString())) {
 				Pair<String, Boolean> messageTextReceived = resolveMessage(update);
-				mListener.onMessage(entry.getKey(), messageTextReceived.getLeft());
+
+				if (messageTextReceived.getLeft().startsWith("Photos#")) {
+					mListener.onFile(entry.getKey(), messageTextReceived.getLeft());
+				} else {
+					mListener.onMessage(entry.getKey(), messageTextReceived.getLeft());
+				}
 
 				if (messageTextReceived.getRight()) {
 					send(entry.getKey(), "recibído: " + messageTextReceived.getLeft());
@@ -68,11 +75,29 @@ public class TelegramService extends TelegramLongPollingBot {
 	private Pair<String, Boolean> resolveMessage(Update update) {
 		final String messageTextReceived = update.getMessage().getText();
 
-		if (messageTextReceived == null) {
+		if (update.getMessage().hasPhoto()) {
+			String caption = update.getMessage().getCaption();
+
+			List<PhotoSize> photos = update.getMessage().getPhoto();
+			String output = "Photos#" + (caption != null? caption : "") + "#";
+			String fileId = null;
+			int maxFileSize = 0;
+			for (PhotoSize photo : photos) {
+				if (photo.getFileSize() > maxFileSize) {
+					maxFileSize =photo.getFileSize();
+					fileId = photo.getFileId();
+				}
+			}
+
+			File file = ParrotUtils.downloadPhoto("https://api.telegram.org", this.mToken, fileId, this.mModeDebug);
+			output += file.getAbsolutePath();
+
+			return Pair.of(output, Boolean.FALSE);
+		} else if (update.getMessage().hasVoice()) {
 			Voice voice = update.getMessage().getVoice();
 
-			File file = AudioUtils.downloadAudio("https://api.telegram.org", this.mToken, voice.getFileId(), this.mModeDebug);
-			return Pair.of(AudioUtils.transcribe("https://api.wit.ai", this.mWitToken, file), Boolean.TRUE);
+			File file = ParrotUtils.downloadAudio("https://api.telegram.org", this.mToken, voice.getFileId(), this.mModeDebug);
+			return Pair.of(ParrotUtils.transcribe("https://api.wit.ai", this.mWitToken, file), Boolean.TRUE);
 		} else {
 			return Pair.of(messageTextReceived, Boolean.FALSE);
 		}

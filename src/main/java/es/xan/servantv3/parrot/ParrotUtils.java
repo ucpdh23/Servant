@@ -7,31 +7,26 @@ import io.vertx.core.logging.LoggerFactory;
 import kotlin.text.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Random;
 
-public class AudioUtils {
+public class ParrotUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AudioUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParrotUtils.class);
 
     private static CloseableHttpClient HTTP_CLIENT;
 
@@ -40,6 +35,40 @@ public class AudioUtils {
     }
 
 
+    public static File downloadPhoto(String telegramAPIURL, String botToken, String fileId, Boolean modeDebug) {
+        LOGGER.warn(fileId);
+
+        HttpPost reqFilePath = new HttpPost(telegramAPIURL + "/bot" + botToken + "/getFile");
+
+        String jsonString="{\"file_id\":\"" + fileId + "\"}";
+        HttpEntity stringEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+        reqFilePath.setEntity(stringEntity);
+
+        try (CloseableHttpResponse response = HTTP_CLIENT.execute(reqFilePath)) {
+            LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
+            final HttpEntity entity = response.getEntity();
+
+            String content = EntityUtils.toString(entity);
+            LOGGER.info(content);
+            JsonObject json = new JsonObject(content);
+            String filePath = json.getJsonObject("result").getString("file_path");
+
+            String oga_fileName = ""+ fileId + ".jpg";
+            URL fileToGet = new URL("https://api.telegram.org/file/bot"+ botToken +"/"+ filePath);
+            try (ReadableByteChannel rbc = Channels.newChannel(fileToGet.openStream());  FileOutputStream fos = new FileOutputStream(oga_fileName)) {
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return new File(oga_fileName);
+        } catch (Exception e) {
+            LOGGER.warn("Cannot setting boiler to [{}]", e);
+        }
+
+        return null;
+
+    }
 
     public static File downloadAudio(String telegramAPIURL, String botToken, String fileId, Boolean modeDebug) {
         LOGGER.warn(fileId);

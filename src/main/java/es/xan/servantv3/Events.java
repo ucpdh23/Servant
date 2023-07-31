@@ -1,12 +1,6 @@
 package es.xan.servantv3;
 
-import es.xan.servantv3.messages.Device;
-import es.xan.servantv3.messages.NewStatus;
-import es.xan.servantv3.messages.ParrotMessageReceived;
-import es.xan.servantv3.messages.Person;
-import es.xan.servantv3.messages.Power;
-import es.xan.servantv3.messages.Room;
-import es.xan.servantv3.messages.Temperature;
+import es.xan.servantv3.messages.*;
 
 /**
  * List of events 
@@ -15,6 +9,7 @@ import es.xan.servantv3.messages.Temperature;
  */
 public enum Events implements Event {
 	PARROT_MESSAGE_RECEIVED(ParrotMessageReceived.class),
+	PARROT_FILE_RECEIVED(VideoMessage.class),
 	PARRONT_AVAILABLE(null),
 	
 	TEMPERATURE_RECEIVED(Temperature.class),

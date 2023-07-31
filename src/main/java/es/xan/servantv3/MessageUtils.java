@@ -4,11 +4,20 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
+import java.util.function.Consumer;
+
 public class MessageUtils {
 	public static boolean isOk(AsyncResult<Message<Object>> msg) {
 		return isOk(msg.result());
 	}
-	
+
+	public static void temporaryYesOrNoResponse(Message<Object> msg,
+												String literalToDisplay,
+												Consumer<Message<Object>> yesResponse,
+												Consumer<Message<Object>> noResponse) {
+
+	}
+
 	public static boolean isOk(Message<Object> msg) {
 		if (msg == null) return false;
 		

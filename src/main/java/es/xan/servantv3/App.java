@@ -1,5 +1,6 @@
 package es.xan.servantv3;
 
+import es.xan.servantv3.folder.FolderVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import io.vertx.ext.bridge.BridgeOptions;
@@ -81,6 +82,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		
 	}
 

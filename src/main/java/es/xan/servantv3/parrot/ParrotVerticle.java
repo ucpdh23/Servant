@@ -4,10 +4,7 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.messages.OpenChat;
-import es.xan.servantv3.messages.ParrotMessageReceived;
-import es.xan.servantv3.messages.TextMessage;
-import es.xan.servantv3.messages.VideoMessage;
+import es.xan.servantv3.messages.*;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
@@ -92,6 +89,14 @@ public class ParrotVerticle extends AbstractServantVerticle implements Communica
 	@Override
 	public void onMessage(String sender, String message) {
 		publishEvent(Events.PARROT_MESSAGE_RECEIVED, new ParrotMessageReceived(sender, message));
+	}
+
+	@Override
+	public void onFile(String sender, String content) {
+		String[] items = content.split("#");
+		String caption = items[1];
+		String filepath = items[2];
+		publishEvent(Events.PARROT_FILE_RECEIVED, new VideoMessage(sender, caption, filepath));
 	}
 
 }
