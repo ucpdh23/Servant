@@ -36,7 +36,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 		fun findSumPwr1(text : String) = SUMPWR1.find(text)?.groups?.get(1)?.value?:"0.0"
 		
 		
-		fun isWorking(x : JsonObject) = !findActivePwr1(x.getString("message")).equals("0.0")
+		fun isWorking(x : JsonObject) = findActivePwr1(x.getString("message")).toFloat() > 2.0F
 		
 		fun sumPower1(x : JsonObject) = findSumPwr1(x.getString("message")).toFloat()
 		
