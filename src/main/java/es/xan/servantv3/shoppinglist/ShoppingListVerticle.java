@@ -13,6 +13,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 
@@ -81,7 +82,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
         msg.reply(builderOn.build());
     }
 
-    public void remove_from_list(TextMessage message, final Message<Object> msg) {
+    public void remove_from_list(TextMessage message, final Message<Object> msg) throws IOException {
         String text = message.getMessage();
         try {
             int itemToDelete = Integer.parseInt(text);
@@ -101,7 +102,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
 
     }
 
-    public void get_list( final Message<Object> msg) {
+    public void get_list( final Message<Object> msg) throws IOException {
         String output = ShoppingListUtils.listToString(false);
 
         MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
@@ -110,7 +111,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
         msg.reply(builderOn.build());
     }
 
-    public void start_list( final Message<Object> msg) {
+    public void start_list( final Message<Object> msg) throws IOException {
         ShoppingListUtils.clearList();
 
         MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
@@ -149,7 +150,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
         LOGGER.info("started shoppingList");
     }
 
-    private boolean saveText(String message) throws UnsupportedEncodingException {
+    private boolean saveText(String message) throws IOException {
         LOGGER.info("saving message [{}]", message);
 
         ShoppingListUtils.addToList(message);

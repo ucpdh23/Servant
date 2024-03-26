@@ -77,6 +77,8 @@ data class ParrotMessageReceived(var user: String, var message: String)
  */
 data class Temperature(var room: String, var temperature: Float, var timestamp: Long)
 
+data class Cost(var price: Float, var timestamp: Long)
+
 
 data class Knowledge(var _what: String, var _who: String, var _when: String, var _how: String, var _where: String, var _why: String, var _whose: String)
 

@@ -222,16 +222,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		this.mScheduler = new Scheduler(getVertx());
 		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
-//		this.mScheduledStartBoilerTask = mScheduler.scheduleTask(at(LocalTime.of(15,0)), (UUID id) -> { publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("on"), response -> {
-//			for (String master : this.mMasters) {
-//				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Boiler switched on " + response.result().body().toString()));
-//			}
-//		});  return true; });
-//		this.mScheduledStopBoilerTask = mScheduler.scheduleTask(at(LocalTime.of(22,0)), (UUID id) -> { publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("off"), response -> {
-//			for (String master : this.mMasters) {
-//				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Boiler switched off " + response.result().body().toString()));
-//			}
-//		});  return true; });
+
 		
 		LOGGER.info("Started HomeVerticle");
 	}
