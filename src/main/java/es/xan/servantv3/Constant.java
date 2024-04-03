@@ -19,7 +19,9 @@ public class Constant {
 	public static final String OUTLET_VERTICLE = "outlet.verticle";
 	public static final String LAUNDRY_VERTICLE = "laundry.verticle";
 	public static final String AUTOTHERMOSTAT_VERTICLE = "autothermostat.verticle";
-	
+	public static final String ROAD_VERTICLE = "road.verticle";
+
+
 	public static final String EVENT = "event";
 	
 	public static final String REPLY_OK = "REPLY.OK";
