@@ -19,11 +19,11 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FolderVerticle extends AbstractServantVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(FolderVerticle.class);
@@ -88,6 +88,7 @@ public class FolderVerticle extends AbstractServantVerticle {
 
     public enum Actions implements Action {
         STORE_FILE(VideoMessage.class),
+        RESOLVE_FILE(TextMessage.class),
         RESOLVE_TYPES(null)
         ;
 
@@ -107,18 +108,40 @@ public class FolderVerticle extends AbstractServantVerticle {
         store_file(toStore, message);
     }
 
+    public void resolve_file(TextMessage textMessage, Message<Object> message) {
+        String type = textMessage.getMessage();
+        if (type.equals("")) {
+            type = this.mDefaults.get(textMessage.getUser());
+        }
+
+        if (this.mTypes.containsKey(type)) {
+            String filename = this._popFile(this.mTypes.get(type));
+            VideoMessage response = new VideoMessage(textMessage.getUser(), "here you are", filename);
+            publishAction(ParrotVerticle.Actions.SEND_VIDEO, response);
+        }
+    }
+
     public void store_file(VideoMessage toStore, Message<Object> message) {
         String type = toStore.getMessage().toLowerCase();
 
         if (type.equals(""))
             type = this.mDefaults.get(toStore.getUser());
 
+        MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
         if (this.mTypes.containsKey(type)) {
             String filename = this._pushFile(this.mTypes.get(type), toStore.getFilepath());
-            publishAction(ParrotVerticle.Actions.SEND, new TextMessage(toStore.getUser(), "Image stored in " + type + " as " + filename ));
+
+            builder.setOk();
+            builder.setMessage("Image stored in " + type + " as " + filename );
+
+            VideoMessage vMsg = new VideoMessage(toStore.getUser(), type, filename);
+            publishEvent(Events.NEW_FILE_STORED, vMsg);
         } else {
-            publishAction(ParrotVerticle.Actions.SEND, new TextMessage(toStore.getUser(), "Unsupported Type [" + type + "]"));
+            builder.setError();
+            builder.setMessage("Unsupported Type [" + type + "]");
         }
+
+        message.reply(builder.build());
 
     }
 
@@ -148,17 +171,30 @@ public class FolderVerticle extends AbstractServantVerticle {
 
         try {
             Files.copy(source, targetFile);
-            return fileName;
+            return targetFile.getAbsolutePath();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public void load_file(Recorded recorded, Message<Object> message) {
+    private String _popFile(File targetFolder) {
+        // Directory to list files from
+        Path dir = Paths.get(targetFolder.getAbsolutePath());
 
+        // Get a sorted list of files by name
+        try {
+            List<Path> sortedFiles = java.nio.file.Files.list(dir)
+                    .filter(java.nio.file.Files::isRegularFile)
+                    .sorted(Comparator.comparing(Path::getFileName))
+                    .collect(Collectors.toList());
+
+            Path firstFile = sortedFiles.get(0);
+            return firstFile.toFile().getAbsolutePath();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
 
 }

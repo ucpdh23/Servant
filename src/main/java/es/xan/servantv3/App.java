@@ -1,6 +1,10 @@
 package es.xan.servantv3;
 
 import es.xan.servantv3.folder.FolderVerticle;
+import es.xan.servantv3.knowledge.KnowledgeVerticle;
+import es.xan.servantv3.neo4j.Neo4jVerticle;
+import es.xan.servantv3.openia.OpenIAVerticle;
+import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import io.vertx.ext.bridge.BridgeOptions;
@@ -71,6 +75,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+//		vertx.deployVerticle(RoadVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
@@ -83,7 +88,11 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		
+		vertx.deployVerticle(KnowledgeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+
+
 	}
 
 	private void initializeLogBridges() {

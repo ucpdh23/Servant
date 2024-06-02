@@ -58,9 +58,6 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         super(Constant.WHITEBOARD_VERTICLE);
 
         supportedActions(WhiteboardVerticle.Actions.values());
-
-        
-
     }
 
     private CloseableHttpClient mHttpclient;

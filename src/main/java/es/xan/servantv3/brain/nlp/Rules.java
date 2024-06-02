@@ -12,6 +12,7 @@ import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
@@ -50,6 +51,20 @@ public enum Rules {
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Information about all the available commands"
+	),
+	TRACK_TRAVEL(RoadVerticle.Actions.START_MONITORING,
+			isContextFree()
+					.and(messageContains("https://maps.app.goo.gl")),
+			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Start tracking a journey"
+	),
+	UNTRACK_TRAVEL(RoadVerticle.Actions.STOP_MONITORING,
+			isContextFree()
+				.and(messageContains("untrack")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"untrack"
 	),
 	VIDEO(HomeVerticle.Actions.RECORD_VIDEO,
 			isContextFree()

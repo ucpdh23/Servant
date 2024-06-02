@@ -1,5 +1,6 @@
 package es.xan.servantv3.messages
 
+import es.xan.servantv3.road.RoadUtils.Window
 import io.vertx.core.json.JsonObject
 
 /**

@@ -170,7 +170,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 						Object parameter = message;
 						if (beanClass != null) {
 							final JsonObject entity = json.getJsonObject("bean");
-							parameter = JsonUtils.toBean(entity.encode(), beanClass);
+							parameter = beanClass.equals(JsonObject.class)?
+									entity : JsonUtils.toBean(entity.encode(), beanClass);
 						}
 						
 						method.invoke(this, parameter);
@@ -178,7 +179,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 					} else if (parameterCount == 2) {
 						final Class<?> beanClass = action.getPayloadClass();
 						final JsonObject entity = json.getJsonObject("bean");
-						final Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
+						final Object newInstance = beanClass.equals(JsonObject.class)?
+								entity : JsonUtils.toBean(entity.encode(), beanClass);
 
 						method.invoke(this, newInstance, message);
 					}
@@ -202,6 +204,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		EventBuilder eventBuilder = MessageBuilder.createEvent();
 		eventBuilder.setAction(event.name());
 		eventBuilder.setBean(JsonUtils.toJson(item));
+		LOGGER.debug("publishing event [{}]", event);
+
 		vertx.eventBus().publish(Constant.EVENT, eventBuilder.build());
 	}
 

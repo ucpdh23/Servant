@@ -53,5 +53,13 @@
   	"CalendarVerticle" : {
   		"calendar" : "",
   		"secret" : ""
-  	}
+  	},
+	"OpenIAVerticle" : {
+		"secret": ""
+	},
+	"Neo4JVerticle" : {
+		"uri": "",
+		"username" : "",
+		"password" : ""
+	}
 }

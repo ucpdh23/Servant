@@ -26,6 +26,8 @@ public enum Events implements Event {
 	
 	LAUNDRY_OFF(Power.class),
 
+	NEW_FILE_STORED(VideoMessage.class),
+
 	_EVENT_(es.xan.servantv3.messages.Event.class)
 	
 	
