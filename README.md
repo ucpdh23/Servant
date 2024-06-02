@@ -28,9 +28,11 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Web interface that allows the creation of a web application.
 
-* Includes a Jabber (XMPP) chatbot.
+* Includes a Telegram chatbot.
 
 * Google Calendar integration in order to schedule and run operations.
+
+* Integracion with OpenIA in orde to resolve information from images (right now bills)
 
 
 **Smart**
@@ -39,6 +41,8 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 * Natural language processing in order to a better human/system interaction.
 
 * Scheduler for automatic actions and events triggering.
+
+* Working into the integration with openIA and a Neo4J knowledge database
 
 **Extra functionalities**
 
