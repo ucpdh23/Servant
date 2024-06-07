@@ -1,24 +1,23 @@
 # **Servant**
 
-[![Build Status](https://travis-ci.org/ucpdh23/Servant.svg?branch=master)](https://travis-ci.org/ucpdh23/Servant)
-
 **My Smart Home System**
 
-     Servant is a home automation platform based on vertx V3 and 100% pure JVM.
+How do you manage your Shopping list? Can you schedule your domestic heating system in a regular basis from outside your home? Can you monitor the indoor and outdoor temperatures from everywhere?
+Would you like a domestic a DIY security system for your home? What about tracking your utility bills?
+
+     Servant is a home assistant platform to handle various domestic and recurrent activities efficiently.     
      
 
 ## **Introduction**
- 
 
-The main goal of Servant is to provide a generic software architecture to integrate in just one place any kind of sensor or actuator you want. 
+Servant aims to provide a software architecture with capacity to integrate various sensors, transformers, and actuators into a single platform. 
 
-     The key words of Servant are extensibility, integration and smart.
+     Key attributes of Servant are Smart, Interactive, Extensibility and Integration.
 
-**Extensibility**
+**IA Capabilities**
 
-Servant provides a extensible framework, implemented in Java and Kotlin, that allows the integration of new elements like sensors and actuators.
-
-Integration of any kind of device into the Internet of Things technology is easy. Thanks to a distributed messaging system and Java, interfacing with any system in order to send or receive data from/to the cloud never will be a hard work. Integration with systems like IFTTT 
+LLMs offer a novel way to interact with your data. In addition to generating content from a given input, LLMs can be utilized to transform heterogeneous and irregular content into a structured and more analyzable output.
+Then, this transformed content can be used to build a knowledge data model for future activities.  
 
 
 **Interaction**
@@ -28,11 +27,17 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Web interface that allows the creation of a web application.
 
-* Includes a Telegram chatbot.
+* Includes a Telegram chatbot as a human/system interface. 
 
 * Google Calendar integration in order to schedule and run operations.
 
-* Integracion with OpenIA in orde to resolve information from images (right now bills)
+
+**Extensibility**
+
+Servant provides an extensible framework, implemented in Java and Kotlin, that allows the integration of new elements like sensors and actuators.
+
+Integration of any kind of device into the Internet of Things technology is easy. Thanks to a distributed messaging system and Java, interfacing with any system in order to send or receive data from/to the cloud never will be a hard work. Integration with systems like IFTTT 
+
 
 
 **Smart**
@@ -46,19 +51,21 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 **Extra functionalities**
 
-* Includes mongodb integration
+* Include integrations with mongodb and neo4j 
+
 * Easy json <=> java transformation.
 
 
 **Implementation Details**
 
 * In order to simplify development, a [Conventions over configurations](https://en.wikipedia.org/wiki/Convention_over_configuration) policy has been adopted. This project implement abstract some concepts, providing a mini-framework to simplify development:
-       - Providing almost a 99% object oriented friendly static way to map and use jsons.
-       - communication between verticles based on java enums values.
-       - State machines based on enums.
-       - Mixing java with kotlin code.
+       - Providing almost a 99% friendly object-oriented static way to map and use json data.
+       - improved communication system inside the vertx nodes system thanks to java enum objects.
+       - Toolkit to build state machines with a java enums language.
+       - Interaction between java with kotlin code.
 
-* Java and Kotlin project, based on Vertx as the basement for all the system
+* Asynchronous JVM project (Java & Kotlin) based on Vertx
 
-* Vertx event bus can become a nightmare rapidly. In order to keep all the communications under control, a small layer has been created over Vertx. Actions and Events provide a easy way to interchange information between verticles. Further details, please visit the javadoc documentation of this project.
+* Built-in facilities on top of Vertx event bus to handle the interaction with events in a controlled way. 
 
+* SMTP bridge to interact with external systems.
