@@ -4,6 +4,7 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.data.Fact;
+import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.UpdateState;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
@@ -47,6 +48,7 @@ public class Neo4jVerticle extends AbstractServantVerticle {
         }
     }
 
+
     public void add_fact(JsonObject fact, final Message<Object> msg) {
         LOGGER.info("Fact to store [{}]", fact);
 
@@ -78,10 +80,25 @@ public class Neo4jVerticle extends AbstractServantVerticle {
             }
         }
 
-        processWhat(fact.getValue("what"), id);
-        processWhen(fact.getValue("when"), id);
-        processWhere(fact.getValue("where"), id);
-        processWho(fact.getValue("who"), id);
+        if (fact.getValue("what") != null) processWhat(fact.getValue("what"), id);
+        if (fact.getValue("when") != null) processWhen(fact.getValue("when"), id);
+        if (fact.getValue("where") != null) processLink(Question.WHERE, fact.getValue("where"), id);
+        if (fact.getValue("who") != null) processLink(Question.WHO, fact.getValue("who"), id);
+        if (fact.getValue("why") != null) processWhy(fact.getValue("why"), id);
+
+    }
+
+    private void processWhy(Object obj, String id) {
+        if (JsonObject.class.isInstance(obj)) {
+            JsonObject why = (JsonObject) obj;
+
+            Map map = new HashMap<String, String>();
+            map.put("type", why.getString("type"));
+            map.put("name", why.getString("name"));
+            map.put("elementId", id);
+
+            EagerResult result = this.driver.executableQuery("MATCH (startNode) WHERE elementId(startNode) = $elementId MERGE (o:" + why.getString("type") + " {name: $name}) MERGE (startNode)-[:WHY]->(o) RETURN startNode, o").withParameters(map).execute();
+        }
 
     }
 
@@ -102,37 +119,20 @@ public class Neo4jVerticle extends AbstractServantVerticle {
         }
     }
 
-    private void processWho(Object obj, String id) {
-        if (String.class.isInstance(obj)) {
-            String who = (String) obj;
+    enum Question {
+        WHO("ENTITY"),
+        WHERE("PLACE");
 
-            Map map = new HashMap<String, String>();
-            map.put("name", who);
-            map.put("elementId", id);
+        private final String mDefaultType;
 
-            EagerResult result = this.driver.executableQuery("MATCH (startNode) WHERE elementId(startNode) = $elementId MERGE (o:ENTITY {name: $name}) MERGE (startNode)-[:WHO]->(o) RETURN startNode, o").withParameters(map).execute();
-
-            for (String key : result.keys()) {
-                LOGGER.info(key);
-            }
-
+        private Question(String defaultType) {
+            this.mDefaultType = defaultType;
         }
-    }
 
-    private void processWhere(Object obj, String id) {
-        if (String.class.isInstance(obj)) {
-            String where = (String) obj;
-
-            Map map = new HashMap<String, String>();
-            map.put("name", where);
-            map.put("elementId", id);
-
-            EagerResult result = this.driver.executableQuery("MATCH (startNode) WHERE elementId(startNode) = $elementId MERGE (o:PLACE {name: $name}) MERGE (startNode)-[:WHERE]->(o) RETURN startNode, o").withParameters(map).execute();
-
-            for (String key : result.keys()) {
-                LOGGER.info(key);
-            }
+        protected String getType() {
+            return this.mDefaultType;
         }
+
     }
 
     private void processWhen(Object obj, String id) {
@@ -151,7 +151,20 @@ public class Neo4jVerticle extends AbstractServantVerticle {
                     LOGGER.info(key);
                 }
             }
+        }
+    }
 
+    private void processLink(Question question, Object obj, String rootId) {
+        if (JsonObject.class.isInstance(obj)) {
+
+        } else if (String.class.isInstance(obj)) {
+            String content = (String) obj;
+
+            Map map = new HashMap<String, String>();
+            map.put("name", content);
+            map.put("elementId", rootId);
+
+            EagerResult result = this.driver.executableQuery("MATCH (startNode) WHERE elementId(startNode) = $elementId MERGE (o:" + question.getType() + " {name: $name}) MERGE (startNode)-[:" + question.name() + "]->(o) RETURN startNode, o").withParameters(map).execute();
         }
 
     }

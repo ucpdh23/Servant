@@ -24,6 +24,7 @@ import org.apache.commons.lang3.RegExUtils;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
@@ -86,8 +87,8 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
                     fact.put("type", "PAYMENT");
                     fact.put("when", buildPeriod(datasource.getString("billing_period")));
                     fact.put("where", "HOME");
-                    fact.put("who", "IBERDROLA");
-                    fact.put("what",  buildBilling("GAS"));
+                    fact.put("who", "gas".equals(msg.getMessage())? "IBERDROLA" : "NATURGY");
+                    fact.put("what",  buildBilling(msg.getMessage().toUpperCase(Locale.ROOT)));
 
                     publishAction(Neo4jVerticle.Actions.ADD_FACT, fact);
                 }
@@ -139,8 +140,7 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
     }
 
     public final static void main(String[] args) {
-        Object ast = Parser.parse(new Tokenizer().tokenize("(pizza ())"));
-
+        Object ast = Parser.parse(new Tokenizer().tokenize("(FACT: ())"));
 
     }
 }

@@ -392,6 +392,7 @@ public class TimeFactory {
         return actual.equals(expected);
     }
 
+
     public static long findTimeAndTransform(String input) {
         if (input.toLowerCase().contains(" at ")) {
             return addtimingInfo(input);

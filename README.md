@@ -12,7 +12,7 @@ Would you like a domestic a DIY security system for your home? What about tracki
 
 Servant aims to provide a software architecture with capacity to integrate various sensors, transformers, and actuators into a single platform. 
 
-     Key attributes of Servant are Smart, Interactive, Extensibility and Integration.
+See bellow some key features of Servant:
 
 **IA Capabilities**
 
