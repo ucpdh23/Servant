@@ -8,11 +8,19 @@ import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.messages.Temperature;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.temperature.TemperatureVerticle;
+import io.netty.handler.codec.mqtt.MqttProperties;
+import io.netty.handler.codec.mqtt.MqttQoS;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.mqtt.MqttServer;
+import io.vertx.mqtt.MqttServerOptions;
+import io.vertx.mqtt.MqttTopicSubscription;
+import io.vertx.mqtt.messages.codes.MqttSubAckReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Mqtt bridge
@@ -48,7 +56,12 @@ public class MqttVerticle extends AbstractServantVerticle {
     public void start() {
         super.start();
 
-        MqttServer mqttServer = MqttServer.create(vertx);
+        var config = new MqttServerOptions();
+        config.setTcpKeepAlive(true);
+        config.setMaxMessageSize(500000);
+        config.setReceiveBufferSize(500000);
+
+        MqttServer mqttServer = MqttServer.create(vertx, config);
         mqttServer.exceptionHandler(handler -> {
            System.out.println(handler);
         });
@@ -60,7 +73,7 @@ public class MqttVerticle extends AbstractServantVerticle {
                     if (endpoint.auth() != null) {
                         LOGGER.debug("[username = " + endpoint.auth().getUsername() + ", password = " + endpoint.auth().getPassword() + "]");
                     }
-                    LOGGER.debug("[properties = " + endpoint.connectProperties() + "]");
+                    LOGGER.debug("[properties = " + endpoint.connectProperties().listAll() + "]");
                     if (endpoint.will() != null) {
                         LOGGER.debug("[will topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will() +
                                 " QoS = " + endpoint.will() + " isRetain = " + endpoint.will() + "]");
@@ -70,11 +83,36 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                     // accept connection from the remote client
                     endpoint.accept(false);
-                    endpoint.publishHandler(message -> {
+                    endpoint.subscribeHandler(subscribe -> {
 
-                        LOGGER.info("Just received message ["
-                                + message.topicName() + "-"
-                                + message.payload().toString() + "] with QoS [" + message.qosLevel() + "]");
+                        List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
+                        for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {
+                            LOGGER.debug("subscribeHAndler [{}->{}]", s.topicName(), s.qualityOfService());
+                            reasonCodes.add(MqttSubAckReasonCode.qosGranted(s.qualityOfService()));
+                        }
+                        // ack the subscriptions request
+                        endpoint.subscribeAcknowledge(subscribe.messageId(), reasonCodes, MqttProperties.NO_PROPERTIES);
+
+                    });
+                    endpoint.publishHandler(message -> {
+                        LOGGER.debug("message...");
+
+                        if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
+                            LOGGER.debug("MqttQoS.AT_LEAST_ONCE");
+                            endpoint.publishAcknowledge(message.messageId());
+                        } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
+                            LOGGER.debug("MqttQoS.EXACTLY_ONCE");
+                            endpoint.publishReceived(message.messageId());
+                        } else if (message.qosLevel() == MqttQoS.AT_MOST_ONCE) {
+                            LOGGER.debug("MqttQoS.AT_MOST_ONCE");
+                            LOGGER.debug("message.messageId: [{}]", message.messageId());
+                            LOGGER.debug("message,payload: [{}]", message.payload());
+                            LOGGER.debug("message.topicName: [{}]", message.topicName());
+                            LOGGER.debug("message.isRetain: [{}]", message.isRetain());
+
+                        } else {
+                            LOGGER.debug("qosLevel: [{}]", message.qosLevel());
+                        }
 
                         if (message.topicName().startsWith("rtl_433/112/temperature_C")) {
                             Temperature temperature = new Temperature("outside", Float.parseFloat(message.payload().toString()), new Date().getTime());
