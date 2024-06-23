@@ -2,10 +2,9 @@ package es.xan.servantv3.webservice
 
 import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.messages.Recorded
-import es.xan.servantv3.messages.Recording
-import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.FileUpload
 import io.vertx.ext.web.Router
+import org.slf4j.LoggerFactory
 
 
 class SecurityController constructor(override val router: Router, var publisher : WebServerVerticle) : Controller({

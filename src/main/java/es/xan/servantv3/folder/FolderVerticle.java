@@ -2,20 +2,16 @@ package es.xan.servantv3.folder;
 
 import com.google.common.io.Files;
 import es.xan.servantv3.*;
-import es.xan.servantv3.messages.Recorded;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.VideoMessage;
 import es.xan.servantv3.parrot.ParrotVerticle;
-import es.xan.servantv3.whiteboard.WhiteboardVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;

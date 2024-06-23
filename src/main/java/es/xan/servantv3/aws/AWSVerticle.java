@@ -5,8 +5,9 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class AWSVerticle extends AbstractServantVerticle {
 

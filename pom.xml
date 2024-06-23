@@ -12,33 +12,49 @@
         <!-- the main verticle class name -->
         <main.verticle>es.xan.servantv3.App</main.verticle>
 
-        <vertx.version>4.3.7</vertx.version>
-        <vertx.kotlin.version>4.3.7</vertx.kotlin.version>
-        <kotlin.version>1.8.10</kotlin.version>
-        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <!-- Vertx Version -->
+        <vertx.version>4.5.8</vertx.version>
+        <vertx.kotlin.version>4.5.8</vertx.kotlin.version>
+        <kotlin.version>2.0.0</kotlin.version>
+        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
 
-        <kotlin.coroutines>0.30.1</kotlin.coroutines>
+        <jakarta.json.version>2.1.3</jakarta.json.version>
 
-        <smack.version>4.0.5</smack.version>
+        <httpclient.version>4.5.14</httpclient.version>
 
-        <httpclient.version>4.5</httpclient.version>
-
-        <commons.io.version>2.5</commons.io.version>
-        <commons.collections.version>4.0</commons.collections.version>
+        <commons.io.version>2.16.1</commons.io.version>
+        <commons.collections.version>4.4</commons.collections.version>
         <commons.lang.version>3.14.0</commons.lang.version>
 
-        <org.telegram.version>6.1.0</org.telegram.version>
+        <org.telegram.version>6.9.7.1</org.telegram.version>
 
-        <jsch.version>0.1.54</jsch.version>
+        <jsch.version>0.1.55</jsch.version>
 
-        <logback.version>1.0.13</logback.version>
-        <julToSlf4j.version>1.7.24</julToSlf4j.version>
-        <sentryLogback.version>7.8.5</sentryLogback.version>
+        <neo4j.driver.version>5.20.0</neo4j.driver.version>
+
+        <slf4j.version>2.0.13</slf4j.version>
+        <logback.version>1.5.6</logback.version>
+        <julToSlf4j.version>2.0.13</julToSlf4j.version>
+
+        <sentry.version>7.10.0</sentry.version>
+
+        <aws.sdk.version>2.25.55</aws.sdk.version>
+
+        <google.maps.version>2.2.0</google.maps.version>
+        <google.gson.version>2.11.0</google.gson.version>
+        <google.apiclient.version>1.23.0</google.apiclient.version>
+        <google.oauthclient.version>1.36.0</google.oauthclient.version>
+        <google.apicalendar.version>v3-rev321-1.23.0</google.apicalendar.version>
+
+        <jsoup.version>1.17.2</jsoup.version>
+
+        <junit.version>4.13.2</junit.version>
+        <hamcrest.junit.version>2.0.0.0</hamcrest.junit.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
     </properties>
 
@@ -105,10 +121,25 @@
             <version>${org.telegram.version}</version>
         </dependency>
 
+        <!-- jakarta.json-api -->
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+            <version>${jakarta.json.version}</version>
+        </dependency>
+
+
+        <!-- Apache Commons -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang.version}</version>
         </dependency>
 
         <dependency>
@@ -123,29 +154,34 @@
             <version>${commons.collections.version}</version>
         </dependency>
 
+        <!-- AWS SDK -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>aws-sdk-java</artifactId>
-            <version>2.25.55</version>
+            <version>${aws.sdk.version}</version>
         </dependency>
 
+
+        <!-- Neo4j -->
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
-            <version>5.20.0</version>
+            <version>${neo4j.driver.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang.version}</version>
-        </dependency>
 
+        <!-- SSH -->
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>${jsch.version}</version>
+        </dependency>
+
+        <!-- login -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
@@ -160,63 +196,25 @@
             <version>${julToSlf4j.version}</version>
         </dependency>
 
+        <!-- Sentry -->
         <dependency>
-            <groupId>com.getsentry.raven</groupId>
-            <artifactId>raven-logback</artifactId>
-            <version>${sentryLogback.version}</version>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>${sentry.version}</version>
         </dependency>
 
+        <!-- Google -->
         <!-- https://mvnrepository.com/artifact/com.google.maps/google-maps-services -->
         <dependency>
             <groupId>com.google.maps</groupId>
             <artifactId>google-maps-services</artifactId>
-            <version>2.2.0</version>
+            <version>${google.maps.version}</version>
         </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.15.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest-junit -->
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-junit</artifactId>
-            <version>2.0.0.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-lang-kotlin</artifactId>
-            <version>${vertx.kotlin.version}</version>
-        </dependency>
-
-        <!-- dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency -->
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.1</version>
+            <version>${google.gson.version}</version>
         </dependency>
 
         <!-- google calendar -->
@@ -224,21 +222,59 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>1.23.0</version>
+            <version>${google.apiclient.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
-            <version>1.23.0</version>
+            <version>${google.oauthclient.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-calendar -->
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-calendar</artifactId>
-            <version>v3-rev321-1.23.0</version>
+            <version>${google.apicalendar.version}</version>
+        </dependency>
+
+
+
+        <!-- jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+        </dependency>
+
+
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-junit</artifactId>
+            <version>${hamcrest.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Kotlin -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-lang-kotlin</artifactId>
+            <version>${vertx.kotlin.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
 
     </dependencies>
@@ -246,16 +282,12 @@
     <build>
         <pluginManagement>
             <plugins>
-
-
-                <!-- We specify the Maven compiler plugin as we need to set it to Java
-                    1.8 -->
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.13.0</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>21</source>
+                        <target>21</target>
                     </configuration>
                 </plugin>
             </plugins>
@@ -272,6 +304,7 @@
                 <executions>
                     <execution>
                         <id>compile</id>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
@@ -330,13 +363,11 @@
                 </executions>
             </plugin>
 
-            <!-- We specify the Maven compiler plugin as we need to set it to Java
-                1.8 -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
                 <executions>
                     <!-- Replacing default-compile as it is treated specially by maven -->

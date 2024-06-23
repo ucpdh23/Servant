@@ -40,7 +40,7 @@ public class RuleUtils {
 	}
 
 	public static String findNumber(String[] tokens) {
-		return Arrays.stream(tokens).filter(NumberUtils::isNumber).findFirst().orElse("");
+		return Arrays.stream(tokens).filter(NumberUtils::isCreatable).findFirst().orElse("");
 	}
 
 	public static String concatStrings(String[] tokens) {

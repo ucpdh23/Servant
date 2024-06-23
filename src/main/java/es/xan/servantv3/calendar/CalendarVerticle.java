@@ -19,8 +19,9 @@ import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class CalendarVerticle extends AbstractServantVerticle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CalendarVerticle.class);

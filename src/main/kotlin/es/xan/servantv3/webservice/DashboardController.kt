@@ -1,8 +1,8 @@
 package es.xan.servantv3.webservice
 
 import io.vertx.core.http.HttpServerResponse
-import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
+import org.slf4j.LoggerFactory
 import java.io.File
 
 

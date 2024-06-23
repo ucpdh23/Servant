@@ -1,31 +1,27 @@
 package es.xan.servantv3.openia;
 
-import com.google.common.base.Strings;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import es.xan.servantv3.*;
+import es.xan.servantv3.AbstractServantVerticle;
+import es.xan.servantv3.Action;
+import es.xan.servantv3.Constant;
+import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.messages.VideoMessage;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import okhttp3.OkHttp;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;

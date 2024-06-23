@@ -6,11 +6,11 @@ import com.google.maps.model.EncodedPolyline;
 import com.google.maps.model.LatLng;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.ServantException;
-import es.xan.servantv3.ThrowingSupplier;
 import es.xan.servantv3.messages.DGTMessage;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.impl.URIDecoder;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -22,8 +22,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -35,15 +35,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -151,16 +148,15 @@ public class RoadUtils {
             if (statusCode == 200) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    JSONObject jsonObject = null;
                     String jsonString = EntityUtils.toString(entity);
 
-                    JSONObject object = new JSONObject(jsonString);
-                    JSONObject path = (JSONObject) ((JSONArray) object.get("routes")).get(0);
+                    JsonObject object = Json.createReader(new StringReader(jsonString)).readObject();
+                    JsonObject path = object.getJsonArray("routes").getJsonObject(0);
 
-                    JSONArray steps = path.getJSONArray("steps");
+                    JsonArray steps = path.getJsonArray("steps");
 
-                    for (int i=0;i < steps.length(); i++) {
-                        JSONObject step = steps.getJSONObject(i);
+                    for (int i=0;i < steps.size(); i++) {
+                        JsonObject step = steps.getJsonObject(i);
                         String name = step.getString("name");
                         if (!Strings.isNullOrEmpty(name)) output.add(name);
 
@@ -206,11 +202,10 @@ public class RoadUtils {
             if (statusCode == 200) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    JSONObject jsonObject = null;
                     String jsonString = EntityUtils.toString(entity);
 
-                    JSONObject object = new JSONObject(jsonString);
-                    JSONObject path = (JSONObject) ((JSONArray) object.get("paths")).get(0);
+                    JsonObject object = Json.createReader(new StringReader(jsonString)).readObject();
+                    JsonObject path = (JsonObject) object.getJsonArray("paths").getJsonObject(0);
                     String points = path.getString("points");
 
                     EncodedPolyline polyline = new EncodedPolyline(points);
@@ -291,17 +286,17 @@ public class RoadUtils {
 
                     HttpEntity entity = response.getEntity();
                     if (entity != null) {
-                        JSONObject jsonObject = null;
+                        JsonObject jsonObject = null;
                         String jsonString = EntityUtils.toString(entity);
                         if (jsonString.startsWith("[")) {
-                            JSONArray jsonArray = new JSONArray(jsonString);
-                            jsonObject = (JSONObject) jsonArray.get(0);
+                            JsonArray jsonArray = Json.createReader(new StringReader(jsonString)).readArray();
+                            jsonObject = jsonArray.getJsonObject(0);
 
                         } else if (jsonString.startsWith("{")) {
-                            jsonObject = new JSONObject(jsonString);
+                            jsonObject = Json.createReader(new StringReader(jsonString)).readObject();
                         }
 
-                        coordinate = new TrackPoint(jsonObject.getDouble("lat"), jsonObject.getDouble("lon"));
+                        coordinate = new TrackPoint(jsonObject.getJsonNumber("lat").doubleValue(), jsonObject.getJsonNumber("lon").doubleValue());
                     }
                 }
             }

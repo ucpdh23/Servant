@@ -21,8 +21,8 @@ import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Superior temporal sulcus.
@@ -120,7 +120,7 @@ public class STSVerticle extends AbstractServantVerticle {
 				}
 			}
 		} catch ( ExecutionException e) {
-			LOGGER.warn(e);
+			LOGGER.warn(e.getMessage(), e);
 		}
 	}
 	
@@ -157,7 +157,7 @@ public class STSVerticle extends AbstractServantVerticle {
 				}
 			}
 		} catch (ExecutionException e) {
-			LOGGER.warn(e);
+			LOGGER.warn(e.getMessage(), e);
 		}
 	}
 

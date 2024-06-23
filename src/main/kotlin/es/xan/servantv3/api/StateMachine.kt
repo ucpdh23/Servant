@@ -3,7 +3,7 @@ package es.xan.servantv3.api
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AbstractVerticle
 import es.xan.servantv3.Events
-import io.vertx.core.logging.LoggerFactory
+import org.slf4j.LoggerFactory
 
 /**
  * I love state machines!

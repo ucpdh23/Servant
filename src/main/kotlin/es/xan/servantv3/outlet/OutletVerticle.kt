@@ -1,18 +1,14 @@
 package es.xan.servantv3.outlet
 
-import es.xan.servantv3.AbstractServantVerticle
-import es.xan.servantv3.Constant
-import es.xan.servantv3.Action
-import es.xan.servantv3.messages.UpdateState
+import es.xan.servantv3.*
 import es.xan.servantv3.messages.Configure
+import es.xan.servantv3.messages.UpdateState
 import io.vertx.core.eventbus.Message
-import es.xan.servantv3.SSHUtils
-import es.xan.servantv3.MessageBuilder
-import io.vertx.core.logging.LoggerFactory
+import org.slf4j.LoggerFactory
 
 class OutletVerticle : AbstractServantVerticle(Constant.OUTLET_VERTICLE) {
 	companion object {
-        val LOG = LoggerFactory.getLogger(OutletVerticle::class.java.name) 
+        val LOG = LoggerFactory.getLogger(OutletVerticle::class.java.name)
     }
 	
 	init {

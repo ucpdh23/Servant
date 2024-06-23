@@ -1,19 +1,18 @@
 package es.xan.servantv3;
 
+import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.messages.Query;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.function.BiConsumer;
-
-import es.xan.servantv3.MessageBuilder.ReplyBuilder;
-import es.xan.servantv3.messages.Query;
 
 /**
  * 

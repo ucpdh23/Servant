@@ -1,16 +1,15 @@
 package es.xan.servantv3.webservice
 
+//import io.vertx.ext.web.handler.sockjs.BridgeOptions
+//import io.vertx.ext.web.handler.sockjs.PermittedOptions
+//import io.vertx.ext.web.handler.sockjs.BridgeEventType
 import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Constant
 import io.vertx.ext.web.Router
-import io.vertx.core.logging.LoggerFactory
-//import io.vertx.ext.web.handler.sockjs.BridgeOptions
-//import io.vertx.ext.web.handler.sockjs.PermittedOptions
-import io.vertx.ext.web.handler.sockjs.SockJSHandler
-//import io.vertx.ext.web.handler.sockjs.BridgeEventType
-import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
-import io.vertx.core.Vertx
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import org.slf4j.LoggerFactory
 
 class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 	

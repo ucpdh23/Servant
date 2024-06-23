@@ -1,39 +1,18 @@
 package es.xan.servantv3.mqtt;
 
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import es.xan.servantv3.homeautomation.HomeVerticle;
-import es.xan.servantv3.messages.*;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
-import es.xan.servantv3.Events;
-import es.xan.servantv3.MessageBuilder;
-import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.Temperature;
+import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.temperature.TemperatureVerticle;
-
+import io.vertx.mqtt.MqttServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.mqtt.*;
 
 /**
  * Mqtt bridge
@@ -70,6 +49,9 @@ public class MqttVerticle extends AbstractServantVerticle {
         super.start();
 
         MqttServer mqttServer = MqttServer.create(vertx);
+        mqttServer.exceptionHandler(handler -> {
+           System.out.println(handler);
+        });
         mqttServer.endpointHandler(endpoint -> {
 
                     // shows main connect info

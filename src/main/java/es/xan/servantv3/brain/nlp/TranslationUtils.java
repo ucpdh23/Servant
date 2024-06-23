@@ -3,8 +3,9 @@ package es.xan.servantv3.brain.nlp;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.MessageUtils;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class TranslationUtils {
 

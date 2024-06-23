@@ -3,10 +3,9 @@ package es.xan.servantv3.brain.nlp;
 import es.xan.servantv3.api.State;
 import es.xan.servantv3.api.StateMachine;
 import es.xan.servantv3.api.Transition;
-
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TimeFactory {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeFactory.class);
 
     enum TimeDetector implements State<TimeBuilder> {

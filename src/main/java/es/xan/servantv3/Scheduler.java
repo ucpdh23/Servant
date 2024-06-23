@@ -14,24 +14,28 @@ import org.apache.commons.lang3.Validate;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Scheduler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
+
 	private Vertx mVertx;
-	private Map<UUID, Long> mContainer;
+	private final Map<UUID, Long> mContainer;
 
 	public Scheduler(Vertx vertx) {
-		Validate.notNull(vertx);
+		Validate.notNull(vertx, "vertx cannot be null");
 		
 		this.mVertx = vertx;
 		this.mContainer = new HashMap<>();
 	}
 	
 	public UUID scheduleTask(TimeExpression expression, Function<UUID, Boolean> function) {
-		Validate.notNull(expression);
-		Validate.notNull(function);
+		Validate.notNull(expression, "expression cannot be null");
+		Validate.notNull(function, "function cannot be null");
 		
 		UUID uuid = UUID.randomUUID();
-		this.mContainer.put(uuid, Long.valueOf(-1));
+		this.mContainer.put(uuid, -1L);
 		
 		scheduleTask(uuid, expression, function);
 		
@@ -39,43 +43,39 @@ public class Scheduler {
 	}
 	
 	public void removeScheduledTask(UUID uuid) {
-		Validate.notNull(uuid);
+		Validate.notNull(uuid, "uuid cannot be null");
 
 		Long vertxId = this.mContainer.get(uuid);
 		this.mVertx.cancelTimer(vertxId);
 	}
 	
 	private void scheduleTask(UUID uuid, TimeExpression expression, Function<UUID, Boolean> function) {
-		long vertxId = this.mVertx.setTimer(expression.resolveDelay(), new Handler<Long>() {
-
-			@Override
-			public void handle(Long event) {
+		long vertxId = this.mVertx.setTimer(expression.resolveDelay(), (event) -> {
 				Boolean withReply = function.apply(uuid);
 				
 				if (expression.isPeriodic() && withReply) {
 					scheduleTask(uuid, expression, function);
 				}
-			}
 		});
 		
 		this.mContainer.put(uuid, vertxId);
 	}
 	
 	public static TimeExpression in(int value, ChronoUnit unit) {
-		Validate.notNull(value);
-		Validate.notNull(unit);
+		Validate.notNull(value, "value cannot be null");
+		Validate.notNull(unit, "unit cannot be null");
 		
 		return new TimeExpression(LocalDateTime.now().plus(value, unit));
 	}
 	
 	public static TimeExpression at(LocalTime lt) {
-		Validate.notNull(lt);
+		Validate.notNull(lt, "lt cannot be null");
 		
 		return new TimeExpression(lt);
 	}
 	
 	public static TimeExpression at(LocalDateTime lt) {
-		Validate.notNull(lt);
+		Validate.notNull(lt, "lt cannot be null");
 		
 		return new TimeExpression(lt);
 	}
@@ -84,7 +84,7 @@ public class Scheduler {
 		private LocalDateTime currentDateTimeTarget;
 		private LocalTime currentTimeTarget;
 		
-		private boolean mIsPeriodic;
+		private final boolean mIsPeriodic;
 		
 		TimeExpression(LocalTime target) {
 			this.currentTimeTarget = target;
@@ -100,7 +100,9 @@ public class Scheduler {
 		protected long resolveDelay() {
 			try {
 				Thread.sleep(200);
-			} catch (InterruptedException e) { }
+			} catch (InterruptedException e) {
+				LOGGER.warn(e.getMessage(), e);
+			}
 			
 			LocalDateTime now = LocalDateTime.now();
 			

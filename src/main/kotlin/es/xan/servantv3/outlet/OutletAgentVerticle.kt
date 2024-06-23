@@ -1,22 +1,14 @@
 package es.xan.servantv3.laundry
 
-import es.xan.servantv3.Constant
-
-import es.xan.servantv3.AbstractServantVerticle
-import io.vertx.core.logging.LoggerFactory
-import es.xan.servantv3.Events
-import es.xan.servantv3.messages.Temperature
-import io.vertx.core.eventbus.Message
-import io.vertx.core.json.JsonObject
-import es.xan.servantv3.homeautomation.HomeVerticle
-import es.xan.servantv3.messages.TextMessageToTheBoss
-import es.xan.servantv3.Action
-import es.xan.servantv3.MessageBuilder
-import es.xan.servantv3.outlet.OutletVerticle
-import es.xan.servantv3.api.Transition
+import es.xan.servantv3.*
 import es.xan.servantv3.api.State
 import es.xan.servantv3.api.StateMachine
+import es.xan.servantv3.api.Transition
 import es.xan.servantv3.messages.Power
+import es.xan.servantv3.outlet.OutletVerticle
+import io.vertx.core.eventbus.Message
+import io.vertx.core.json.JsonObject
+import org.slf4j.LoggerFactory
 
 /**
  * This verticle checks the current state of the outlet in order to determine whether the laundry has finished.

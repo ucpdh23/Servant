@@ -1,43 +1,32 @@
 package es.xan.servantv3.homeautomation;
 
-import static es.xan.servantv3.Scheduler.at;
-import static es.xan.servantv3.Scheduler.in;
-
-import java.io.File;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import es.xan.servantv3.AbstractServantVerticle;
-import es.xan.servantv3.Action;
-import es.xan.servantv3.Constant;
-import es.xan.servantv3.Events;
-import es.xan.servantv3.JsonUtils;
-import es.xan.servantv3.MessageBuilder;
+import es.xan.servantv3.*;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
-import es.xan.servantv3.MessageUtils;
-import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.lamp.LampVerticle;
+import es.xan.servantv3.messages.Event;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
-import es.xan.servantv3.thermostat.ThermostatVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static es.xan.servantv3.Scheduler.at;
+import static es.xan.servantv3.Scheduler.in;
 
 /**
  * Home automation verticle.
@@ -110,7 +99,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 				LOGGER.info("cannot publish RECORD_VIDEO action");
 			}
 		} catch (ExecutionException e) {
-			LOGGER.warn(e);
+			LOGGER.warn(e.getMessage(), e);
 		}
 
 		MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
@@ -162,7 +151,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 					LOGGER.info("cannot publish RECORD_VIDEO action");
 				}
 			} catch (ExecutionException e) {
-				LOGGER.warn(e);
+				LOGGER.warn(e.getMessage(), e);
 			}
 		} else if ("door".equals(event.getName()) && event.getStatus().startsWith("temp")) {
 			String data = event.getStatus().split("=")[1];

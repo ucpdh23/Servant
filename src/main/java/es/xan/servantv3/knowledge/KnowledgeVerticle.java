@@ -1,32 +1,22 @@
 package es.xan.servantv3.knowledge;
 
-import com.google.common.collect.Maps;
-import es.xan.servantv3.*;
-import es.xan.servantv3.data.Fact;
-import es.xan.servantv3.data.Type;
-import es.xan.servantv3.data.When;
-import es.xan.servantv3.folder.FolderVerticle;
+import es.xan.servantv3.AbstractServantVerticle;
+import es.xan.servantv3.Action;
+import es.xan.servantv3.Constant;
+import es.xan.servantv3.Events;
 import es.xan.servantv3.knowledge.utils.parser.Parser;
 import es.xan.servantv3.knowledge.utils.parser.Tokenizer;
-import es.xan.servantv3.messages.Knowledge;
-import es.xan.servantv3.messages.Query;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.VideoMessage;
 import es.xan.servantv3.neo4j.Neo4jVerticle;
 import es.xan.servantv3.openia.OpenIAVerticle;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.RegExUtils;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +38,7 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
 
         private Class<?> mBeanClass;
 
-        private Actions (Class<?> beanClass) {
+        Actions (Class<?> beanClass) {
             this.mBeanClass = beanClass;
         }
 

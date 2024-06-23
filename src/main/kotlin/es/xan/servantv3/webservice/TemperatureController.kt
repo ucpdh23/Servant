@@ -1,18 +1,10 @@
 package es.xan.servantv3.webservice
 
-import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.StaticHandler
-import io.vertx.core.logging.LoggerFactory
-import java.io.FileNotFoundException
-import java.lang.NullPointerException
-import io.netty.handler.codec.http.HttpResponseStatus
-import io.vertx.core.http.HttpMethod
-import io.vertx.core.json.JsonObject
-import io.vertx.core.json.Json
-import es.xan.servantv3.temperature.TemperatureVerticle
 import es.xan.servantv3.messages.Temperature
-import java.util.Date
-
+import es.xan.servantv3.temperature.TemperatureVerticle
+import io.vertx.ext.web.Router
+import org.slf4j.LoggerFactory
+import java.util.*
 
 
 class TemperatureController constructor(override val router: Router, var publisher : WebServerVerticle) : Controller({

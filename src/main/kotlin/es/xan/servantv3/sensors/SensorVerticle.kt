@@ -1,18 +1,16 @@
 package es.xan.servantv3.sensors
 
-import es.xan.servantv3.Constant
-import es.xan.servantv3.AbstractServantVerticle
-import io.vertx.core.logging.LoggerFactory
+import es.xan.servantv3.*
 import es.xan.servantv3.messages.Sensor
-import es.xan.servantv3.Action
-import io.vertx.core.json.JsonObject
 import io.vertx.core.eventbus.Message
-import es.xan.servantv3.MessageBuilder
-import es.xan.servantv3.SSHUtils
+import io.vertx.core.json.JsonObject
+import org.slf4j.LoggerFactory
+import java.util.*
+import kotlin.collections.HashMap
 
 class SensorVerticle : AbstractServantVerticle(Constant.SENSOR_VERTICLE) {
 	companion object {
-        val LOG = LoggerFactory.getLogger(SensorVerticle::class.java.name) 
+        val LOG = LoggerFactory.getLogger(SensorVerticle::class.java.name)
     }
 	
 	init {
@@ -31,7 +29,7 @@ class SensorVerticle : AbstractServantVerticle(Constant.SENSOR_VERTICLE) {
 		HashMap<String,String>().apply {
 			config().getJsonObject("SensorVerticle").getJsonArray("items").forEach{ it ->
 				val item = it as JsonObject
-				val name = item.getString("name").decapitalize()
+				val name = item.getString("name").replaceFirstChar { it.lowercase(Locale.getDefault()) }
 				val command = item.getString("command")
 				LOG.info("putting [$name]->[$command]")
 				put(name, command)
@@ -42,7 +40,7 @@ class SensorVerticle : AbstractServantVerticle(Constant.SENSOR_VERTICLE) {
 	fun reset_sensor(sensor : Sensor , message : Message<Any> ) {
 		LOG.info("Asking to reset sensor [{}]", sensor.sensor);
 		
-		val item = sensor.sensor.decapitalize();
+		val item = sensor.sensor.replaceFirstChar { it.lowercase(Locale.getDefault()) };
 		
 		val sensorsToReset = when (item) {
 			"all" -> this.mSensors.keys;

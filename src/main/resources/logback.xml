@@ -20,11 +20,12 @@
 	</appender>
 	
 	<!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
-    <appender name="SENTRY" class="com.getsentry.raven.logback.SentryAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
-        </filter>
-    </appender>
+	<appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+	</appender>
+
 
 	<logger name="es.xan" level="INFO">
 		<appender-ref ref="SENTRY" />
@@ -32,7 +33,7 @@
 	
 	<logger name="es.xan.servantv3" level="DEBUG" />
 
-	<root level="WARN">
+	<root level="DEBUG">
 		<appender-ref ref="FILE" />
 	</root>
 </configuration>
