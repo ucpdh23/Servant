@@ -33,7 +33,7 @@
 	
 	<logger name="es.xan.servantv3" level="DEBUG" />
 
-	<root level="DEBUG">
+	<root level="WARN">
 		<appender-ref ref="FILE" />
 	</root>
 </configuration>
