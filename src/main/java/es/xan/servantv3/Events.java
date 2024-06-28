@@ -28,8 +28,10 @@ public enum Events implements Event {
 
 	NEW_FILE_STORED(VideoMessage.class),
 
-	_EVENT_(es.xan.servantv3.messages.Event.class)
-	
+	DOOR_STATUS_CHANGED(NewStatus.class),
+
+	_EVENT_(es.xan.servantv3.messages.Event.class),
+
 	
 	;
 	
