@@ -1,20 +1,24 @@
 package es.xan.servantv3.mqtt;
 
 
+import com.google.gson.JsonParser;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
+import es.xan.servantv3.Events;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.Temperature;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import io.netty.handler.codec.mqtt.MqttProperties;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.mqtt.MqttServer;
 import io.vertx.mqtt.MqttServerOptions;
 import io.vertx.mqtt.MqttTopicSubscription;
 import io.vertx.mqtt.messages.codes.MqttSubAckReasonCode;
+import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,26 +99,26 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                     });
                     endpoint.publishHandler(message -> {
-                        LOGGER.debug("message...");
-
                         if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
-                            LOGGER.debug("MqttQoS.AT_LEAST_ONCE");
                             endpoint.publishAcknowledge(message.messageId());
                         } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
-                            LOGGER.debug("MqttQoS.EXACTLY_ONCE");
                             endpoint.publishReceived(message.messageId());
-                        } else if (message.qosLevel() == MqttQoS.AT_MOST_ONCE) {
-                            LOGGER.debug("MqttQoS.AT_MOST_ONCE");
-                            LOGGER.debug("message.messageId: [{}]", message.messageId());
-                            LOGGER.debug("message,payload: [{}]", message.payload());
-                            LOGGER.debug("message.topicName: [{}]", message.topicName());
-                            LOGGER.debug("message.isRetain: [{}]", message.isRetain());
-
-                        } else {
-                            LOGGER.debug("qosLevel: [{}]", message.qosLevel());
                         }
 
-                        if (message.topicName().startsWith("rtl_433/112/temperature_C")) {
+                        if (message.topicName().startsWith("zigbee2mqtt/Puerta")) {
+                            JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
+                            Boolean contact = object.getBoolean("contact");
+                            LOGGER.info("Puerta [{}]", contact);
+
+                            publishEvent(Events.DOOR_STATUS_CHANGED, new NewStatus(contact.toString()));
+                        } else if (message.topicName().startsWith("zigbee2mqtt/Inundacion")) {
+                            JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
+                            Boolean contact = object.getBoolean("water_leak");
+                            LOGGER.info("Inundacion [{}]", contact);
+
+                            publishEvent(Events.WATER_LEAK_STATUS_CHANGED, new NewStatus(contact.toString()));
+
+                        } else if (message.topicName().startsWith("rtl_433/112/temperature_C")) {
                             Temperature temperature = new Temperature("outside", Float.parseFloat(message.payload().toString()), new Date().getTime());
                             publishAction(TemperatureVerticle.Actions.SAVE, temperature);
                         } else if (message.topicName().startsWith("rtl_433/17/temperature_C")) {
