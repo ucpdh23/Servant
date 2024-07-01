@@ -107,14 +107,15 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                         if (message.topicName().startsWith("zigbee2mqtt/Puerta")) {
 			    LOGGER.info("Puerta [{}]", message.payload().toJsonObject().toString());
-                            JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
-                            Boolean contact = object.getBoolean("contact");
+			    Boolean contact = message.payload().toJsonObject().getString("contact");
+                            //JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
+                            //Boolean contact = object.getBoolean("contact");
                             LOGGER.info("Puerta [{}]", contact);
 
                             publishEvent(Events.DOOR_STATUS_CHANGED, new NewStatus(contact.toString()));
                         } else if (message.topicName().startsWith("zigbee2mqtt/Inundacion")) {
-                            JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
-                            Boolean contact = object.getBoolean("water_leak");
+                            //JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
+                            Boolean contact = message.payload().toJsonObject().getBoolean("water_leak");
                             LOGGER.info("Inundacion [{}]", contact);
 
                             publishEvent(Events.WATER_LEAK_STATUS_CHANGED, new NewStatus(contact.toString()));
