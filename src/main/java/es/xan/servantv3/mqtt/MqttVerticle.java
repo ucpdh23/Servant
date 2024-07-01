@@ -106,6 +106,7 @@ public class MqttVerticle extends AbstractServantVerticle {
                         }
 
                         if (message.topicName().startsWith("zigbee2mqtt/Puerta")) {
+			    LOGGER.info("Puerta [{}]", message.payload().toJsonObject().toString());
                             JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
                             Boolean contact = object.getBoolean("contact");
                             LOGGER.info("Puerta [{}]", contact);
