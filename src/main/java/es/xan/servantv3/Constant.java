@@ -1,7 +1,7 @@
 package es.xan.servantv3;
 
 public class Constant {
-    public static final String MQTT_VERTICLE = "mqtt";
+    public static final String MQTT_VERTICLE = "mqtt.verticle";
     public static final String WEBSERVER_VERTICLE = "webserver.verticle";
     public static final String THERMOSTAT_VERTICLE = "thermostat.verticle";
     public static final String LAMP_VERTICLE = "lamp.verticle";
@@ -20,6 +20,7 @@ public class Constant {
     public static final String HOME_VERTICLE = "home.verticle";
     public static final String STS_VERTICLE = "sts.verticle";
     public static final String OUTLET_VERTICLE = "outlet.verticle";
+    public static final String SECURITY_VERTICLE = "security.verticle";
     public static final String LAUNDRY_VERTICLE = "laundry.verticle";
     public static final String AUTOTHERMOSTAT_VERTICLE = "autothermostat.verticle";
     public static final String ROAD_VERTICLE = "road.verticle";
