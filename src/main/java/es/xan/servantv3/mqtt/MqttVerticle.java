@@ -156,9 +156,9 @@ public class MqttVerticle extends AbstractServantVerticle {
                     }
                 });
 
-        MqttClient client = MqttClient.create(vertx);
+        client = MqttClient.create(vertx);
         client.connect(1883, "localhost").onComplete(s -> {
-
+            LOGGER.info("Mqtt client connected");
         });
     }
 

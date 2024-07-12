@@ -31,6 +31,7 @@ import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.NoRouteToHostException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -375,7 +376,9 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
 
             return true;
         } catch (Exception e) {
+            LOGGER.info("url [{}]", url);
             LOGGER.warn("Cannot print img [{}]", file, e);
+
             return false;
         }
     }
