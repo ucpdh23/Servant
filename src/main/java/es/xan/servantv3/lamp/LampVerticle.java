@@ -2,8 +2,10 @@ package es.xan.servantv3.lamp;
 
 import es.xan.servantv3.*;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.messages.MqttMsg;
 import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.mqtt.MqttVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -100,6 +102,17 @@ public class LampVerticle extends AbstractServantVerticle {
 	}
 
 	private boolean send(boolean on) throws UnsupportedEncodingException {
+		JsonObject object = new JsonObject()
+			.put("state", on? "ON" : "OFF");
+
+		String topic = mConfiguration.getString("topic");
+
+		publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg(topic, object));
+
+		return true;
+	}
+
+	private boolean _send(boolean on) throws UnsupportedEncodingException {
 		LOGGER.info("setting lamp to [{}]", on);
 		
 		String url = mConfiguration.getString("url");

@@ -7,6 +7,7 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.MqttMsg;
 import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.Temperature;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
@@ -14,6 +15,7 @@ import es.xan.servantv3.temperature.TemperatureVerticle;
 import io.netty.handler.codec.mqtt.MqttProperties;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import io.vertx.core.json.JsonObject;
+import io.vertx.mqtt.MqttClient;
 import io.vertx.mqtt.MqttServer;
 import io.vertx.mqtt.MqttServerOptions;
 import io.vertx.mqtt.MqttTopicSubscription;
@@ -33,6 +35,8 @@ import java.util.List;
  */
 public class MqttVerticle extends AbstractServantVerticle {
 
+    private MqttClient client = null;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttVerticle.class);
 
     public MqttVerticle() {
@@ -42,6 +46,7 @@ public class MqttVerticle extends AbstractServantVerticle {
     }
 
     public enum Actions implements Action {
+        PUBLISH_MSG(MqttMsg.class)
         ;
 
         private Class<?> mMessageClass;
@@ -54,6 +59,10 @@ public class MqttVerticle extends AbstractServantVerticle {
         public Class<?> getPayloadClass() {
             return mMessageClass;
         }
+    }
+
+    public void publish_msg(MqttMsg msg) {
+        this.client.publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_LEAST_ONCE, false, false );
     }
 
     @Override
@@ -146,6 +155,11 @@ public class MqttVerticle extends AbstractServantVerticle {
                         //ar.cause().printStackTrace();
                     }
                 });
+
+        MqttClient client = MqttClient.create(vertx);
+        client.connect(1883, "localhost").onComplete(s -> {
+
+        });
     }
 
 }

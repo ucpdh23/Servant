@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject
  * Actions Messages
  */
 
+data class ServantEvent(var event: Event, var data : Object)
 
 data class Recording(var time: Integer, var code: String)
 
@@ -72,6 +73,7 @@ data class Power(var power: Float)
 
 data class ParrotMessageReceived(var user: String, var message: String)
 
+data class MqttMsg(val topic : String, val payload: JsonObject)
 
 /**
  * POJOS
