@@ -107,7 +107,7 @@ public class LampVerticle extends AbstractServantVerticle {
 
 		String topic = mConfiguration.getString("topic");
 
-		publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg(topic, object));
+		publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg(topic + "/set", object));
 
 		return true;
 	}
