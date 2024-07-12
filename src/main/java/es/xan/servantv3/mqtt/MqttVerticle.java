@@ -15,18 +15,13 @@ import es.xan.servantv3.temperature.TemperatureVerticle;
 import io.netty.handler.codec.mqtt.MqttProperties;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import io.vertx.core.json.JsonObject;
-import io.vertx.mqtt.MqttClient;
-import io.vertx.mqtt.MqttServer;
-import io.vertx.mqtt.MqttServerOptions;
-import io.vertx.mqtt.MqttTopicSubscription;
+import io.vertx.mqtt.*;
 import io.vertx.mqtt.messages.codes.MqttSubAckReasonCode;
 import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Mqtt bridge
@@ -62,8 +57,14 @@ public class MqttVerticle extends AbstractServantVerticle {
     }
 
     public void publish_msg(MqttMsg msg) {
-        this.client.publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_LEAST_ONCE, false, false );
+        for (Map.Entry<String, MqttEndpoint> entry : this.endpoints.entrySet()) {
+            entry.getValue().publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false );
+
+        }
+        //this.client.publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false );
     }
+
+    Map<String, MqttEndpoint> endpoints = new HashMap<>();
 
     @Override
     public void start() {
@@ -79,6 +80,7 @@ public class MqttVerticle extends AbstractServantVerticle {
            System.out.println(handler);
         });
         mqttServer.endpointHandler(endpoint -> {
+                    endpoints.put(endpoint.clientIdentifier(), endpoint);
 
                     // shows main connect info
                     LOGGER.info("MQTT client [" + endpoint.clientIdentifier() + "] request to connect, clean session = " + endpoint.isCleanSession());
@@ -100,7 +102,7 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                         List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
                         for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {
-                            LOGGER.debug("subscribeHAndler [{}->{}]", s.topicName(), s.qualityOfService());
+                            LOGGER.debug("subscribeHandler [{}->{}]", s.topicName(), s.qualityOfService());
                             reasonCodes.add(MqttSubAckReasonCode.qosGranted(s.qualityOfService()));
                         }
                         // ack the subscriptions request
@@ -108,6 +110,8 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                     });
                     endpoint.publishHandler(message -> {
+                        LOGGER.debug("message [{}]", message.topicName());
+
                         if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
                             endpoint.publishAcknowledge(message.messageId());
                         } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
@@ -159,6 +163,9 @@ public class MqttVerticle extends AbstractServantVerticle {
         client = MqttClient.create(vertx);
         client.connect(1883, "localhost").onComplete(s -> {
             LOGGER.info("Mqtt client connected");
+        });
+        client.publishCompletionHandler(it -> {
+            LOGGER.info("Mqtt client message published [{}]", it);
         });
     }
 
