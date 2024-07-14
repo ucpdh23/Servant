@@ -57,11 +57,9 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	override fun start() {
 		super.start();
 
-		/*
 		vertx.setPeriodic(200000) { _ ->
 			publishAction(Actions.CHECK_STATUS);
 		}
-		 */
 	}
 	
 
