@@ -100,6 +100,8 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 						newState.entering(servantContext)
 					}
 
+					LOG.info("Moving to [{}]", newState)
+
 					currentState = newState
 				}
 			}

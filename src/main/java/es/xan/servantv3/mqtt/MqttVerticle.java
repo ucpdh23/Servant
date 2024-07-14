@@ -117,7 +117,12 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                         MqttRules rule = MqttRules.identifyRule(message);
 
-                        if (rule != null) rule.apply(message, this);
+                        if (rule != null)  {
+                            LOGGER.info("Found rule [{}]", rule);
+                            rule.apply(message, this);
+                        } else {
+                            LOGGER.info("Not found rule for message [{}]", message);
+                        }
 
                     }).publishReleaseHandler(messageId -> {
 
