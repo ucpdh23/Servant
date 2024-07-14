@@ -102,7 +102,6 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                         List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
                         for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {
-                            LOGGER.debug("subscribeHandler [{}->{}]", s.topicName(), s.qualityOfService());
                             reasonCodes.add(MqttSubAckReasonCode.qosGranted(s.qualityOfService()));
                         }
                         // ack the subscriptions request
@@ -110,39 +109,16 @@ public class MqttVerticle extends AbstractServantVerticle {
 
                     });
                     endpoint.publishHandler(message -> {
-                        LOGGER.debug("message [{}]", message.topicName());
-
                         if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
                             endpoint.publishAcknowledge(message.messageId());
                         } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
                             endpoint.publishReceived(message.messageId());
                         }
 
-                        if (message.topicName().startsWith("zigbee2mqtt/Puerta")) {
-			    LOGGER.info("Puerta [{}]", message.payload().toJsonObject().toString());
-			    Boolean contact = message.payload().toJsonObject().getBoolean("contact");
-                            //JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
-                            //Boolean contact = object.getBoolean("contact");
-                            LOGGER.info("Puerta [{}]", contact);
+                        MqttRules rule = MqttRules.identifyRule(message);
 
-                            publishEvent(Events.DOOR_STATUS_CHANGED, new NewStatus(contact.toString()));
-                        } else if (message.topicName().startsWith("zigbee2mqtt/Inundacion")) {
-                            //JsonObject object = MqttUtils.resolvePayload(message.payload().toJsonObject().getString("message"));
-                            Boolean contact = message.payload().toJsonObject().getBoolean("water_leak");
-                            LOGGER.info("Inundacion [{}]", contact);
+                        if (rule != null) rule.apply(message, this);
 
-                            publishEvent(Events.WATER_LEAK_STATUS_CHANGED, new NewStatus(contact.toString()));
-
-                        } else if (message.topicName().startsWith("rtl_433/112/temperature_C")) {
-                            Temperature temperature = new Temperature("outside", Float.parseFloat(message.payload().toString()), new Date().getTime());
-                            publishAction(TemperatureVerticle.Actions.SAVE, temperature);
-                        } else if (message.topicName().startsWith("rtl_433/17/temperature_C")) {
-                            Temperature temperature = new Temperature("inside", Float.parseFloat(message.payload().toString()), new Date().getTime());
-                            publishAction(TemperatureVerticle.Actions.SAVE, temperature);
-                        } else if (message.topicName().startsWith("aws/cost")) {
-                            TextMessageToTheBoss messageToTheBoss = new TextMessageToTheBoss("AWS Cost: " + message.payload().toString());
-                            publishAction(HomeVerticle.Actions.NOTIFY_BOSS, messageToTheBoss);
-                        }
                     }).publishReleaseHandler(messageId -> {
 
                         endpoint.publishComplete(messageId);

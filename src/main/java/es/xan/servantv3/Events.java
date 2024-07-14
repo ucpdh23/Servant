@@ -15,9 +15,8 @@ public enum Events implements Event {
 	TEMPERATURE_RECEIVED(Temperature.class),
 	NO_TEMPERATURE_INFO(Room.class),
 	
-	NEW_NETWORK_DEVICES_MESSAGE(Device.class),
-	REM_NETWORK_DEVICES_MESSAGE(Device.class),
-	
+	NETWORK_DEVICES_STATUS_UPDATED(Device.class),
+
 	PERSON_AT_HOME(Person.class),
 	PERSON_LEAVE_HOME(Person.class),
 	

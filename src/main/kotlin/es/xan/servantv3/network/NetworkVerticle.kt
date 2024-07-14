@@ -2,16 +2,21 @@ package es.xan.servantv3.network
 
 import es.xan.servantv3.*
 import es.xan.servantv3.messages.Device
+import es.xan.servantv3.messages.DeviceSecurity
 import es.xan.servantv3.messages.DeviceStatus
 import io.vertx.core.eventbus.Message
 import org.slf4j.LoggerFactory
+import java.sql.Connection
+import java.sql.DriverManager
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 
 /**
- * Home network manager. Store information about the devices connected to the network,
- * creating events when devices come in or out.
+ * Home network manager. Store information about the devices connected to the local network,
+ * creating events when devices come in or go out.
  * According to the changes in the devices' status, this Verticle publishes two events: Events.REM_NETWORK_DEVICES_MESSAGE and Events.REW_NETWORK_DEVICES_MESSAGE.
  * Devices status info must be provided by external sensors through the REST API defined into the controller DevicesController.   
  */
@@ -21,31 +26,52 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
         val LOG = LoggerFactory.getLogger(NetworkVerticle::class.java.name)
 		val TTL = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES); 
     }
-	
+
+	private val storedStatus: MutableMap<String, Device> = HashMap();
+
 	init {
+		LOG.info("loading NetworkVerticle...")
 		supportedActions(Actions::class.java)
+		loadKnownDevides()
+		LOG.info("loaded NetworkVerticle")
 	}
-	
+
+	fun loadKnownDevides() {
+		LOG.info("loading known devices...");
+		App.connection.createStatement().use { statement ->
+			statement.executeUpdate("create table if not exists network_device (user string, mac string, security string)")
+
+			val currTimeStamp = Date().time
+			val rs = statement.executeQuery("select * from network_device")
+			while (rs.next()) {
+				val security = DeviceSecurity.valueOf(rs.getString("security"))
+				val device = Device(rs.getString("user"), rs.getString("mac"), DeviceStatus.UNKNOWN,  security, currTimeStamp, currTimeStamp)
+
+				storedStatus[device.mac] = device
+			}
+
+			LOG.info("loaded [{}] devices", storedStatus.size)
+		}
+	}
+
 	override fun start() {
 		super.start();
-		
-		vertx.setPeriodic(300000, { id -> 
+
+		/*
+		vertx.setPeriodic(200000) { _ ->
 			publishAction(Actions.CHECK_STATUS);
-		});
+		}
+		 */
 	}
 	
-	// *********** Verticle state info
-	
-	var storedStatus: MutableMap<String, Device> = HashMap();
-	
-	
+
 	// *********** Supported actions
 	
 	enum class Actions(val clazz : Class<*>? ) : Action {
 		/**
 		 * Updates the status of the passing device
 		 */
-		UPDATE_DEVICE_STATUS(Device::class.java),
+		UPDATE_DEVICE_SECURITY(Device::class.java),
 		
 		/**
 		 * Checks the current status the all the available devices
@@ -59,23 +85,84 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	}
 	
 	
-	fun update_device_status(input: Device) {
-		if (input.status == DeviceStatus.DOWN) input.status = DeviceStatus.QUARANTINE;
-		
-		val stored = storedStatus.getOrPut(input.mac)
-				{Device(input.user, input.mac, DeviceStatus.NEW, 0)}
-		
-		updateStatus(stored, input.timestamp, input.status)
+	fun update_device_security(input: Device) {
+		App.connection.createStatement().use { statement ->
+			statement.executeUpdate("UPDATE network_device set security = '" + input.security.name + "' where mac='" + input.mac + "'")
+		}
+		this.storedStatus[input.mac]?.security = input.security
+		this.storedStatus[input.mac]?.status = DeviceStatus.UNKNOWN
 	}
 		
 	fun check_status() {
-		LOG.debug("check network status");
-		
-		val currTimeStamp = Date().getTime()
-		
+		LOG.debug("checking network status...");
+
+		val result = SSHUtils.runLocalCommand("sudo nmap -PR -sn 192.168.1.0/24")
+
+		val networkDevices = computeDevices(result.output)
+
+		val currTimeStamp = Date().time
+
+		val stateChanged : MutableSet<Device> = HashSet()
+		networkDevices.forEach { device ->
+			val found = storedStatus[device.mac]
+
+			if (found == null) {
+				storedStatus[device.mac] = device
+				stateChanged.add(device)
+			} else {
+				if (found.status != DeviceStatus.UP) {
+					if (found.status != DeviceStatus.UNKNOWN || found.security == DeviceSecurity.INSECURE)
+						stateChanged.add(found)
+
+					found.firstTimestamp = device.firstTimestamp
+					found.lastTimestamp = device.lastTimestamp
+					found.status = DeviceStatus.UP
+
+				} else {
+					found.lastTimestamp = device.lastTimestamp
+				}
+			}
+		}
+
 		storedStatus
-				.filterValues { dev -> dev.status == DeviceStatus.QUARANTINE && dev.timestamp < currTimeStamp - TTL}
-				.forEach { _, dev -> updateStatus(dev, currTimeStamp, DeviceStatus.DOWN)};
+			.filterValues { dev -> dev.lastTimestamp < currTimeStamp - TTL}
+			.forEach { _, dev ->
+				if (dev.status != DeviceStatus.UNKNOWN || dev.security == DeviceSecurity.INSECURE)
+					stateChanged.add(dev)
+
+				dev.status = DeviceStatus.DOWN
+			};
+
+		for (device in stateChanged) {
+			publishEvent(Events.NETWORK_DEVICES_STATUS_UPDATED, device)
+		}
+	}
+
+	private fun computeDevices(commandOutput : String) : List<Device> {
+		val output = ArrayList<Device>()
+
+		var ipAddress : String? = null
+		var mac : String? = null
+
+		val currTimeStamp = Date().time
+		for (line in commandOutput.lines()) {
+			if (line.startsWith("Nmap done")) {
+
+			} else if (line.startsWith("Nmap ")) {
+				ipAddress = line.split(" for ")[1]
+			} else if (line.startsWith("MAC Address: ")) {
+				mac = line.split(" ")[2]
+
+				if (ipAddress != null && mac != null) {
+					output.add(Device(ipAddress, mac, DeviceStatus.UP, DeviceSecurity.UNKNOWN, currTimeStamp, currTimeStamp))
+
+					ipAddress = null
+					mac = null
+				}
+			}
+		}
+
+		return output
 	}
 	
 	fun list(message: Message<Any>) {
@@ -87,39 +174,6 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 		}
 		
 		message.reply(builder.build());
-	}
-	
-	
-	
-	// ********* Private methos
-	
-	private fun updateStatus(dev : Device, timestamp : Long, status : DeviceStatus) {
-		if (dev.status == status) return;
-		
-		val step = DeviceWorkflow.resolve(dev.status, status);
-		if (step == null) return;
-		
-		dev.timestamp = timestamp;
-		dev.status = status;
-		
-		if (step.event != null) {
-			LOG.debug("publishing event [{}] for device [{}]", step.event, dev.mac)
-			publishEvent(step.event, dev);
-		}
-	}
-	
-	
-	public enum class DeviceWorkflow(val from: DeviceStatus, val to: DeviceStatus, val event: Events? = null) {
-		NEW_UP(DeviceStatus.NEW, DeviceStatus.UP, Events.NEW_NETWORK_DEVICES_MESSAGE),
-		NEW_QUARANTINE(DeviceStatus.NEW, DeviceStatus.QUARANTINE),
-		UP_QUARANTINE(DeviceStatus.UP, DeviceStatus.QUARANTINE),
-		QUARANTINE_UP(DeviceStatus.QUARANTINE, DeviceStatus.UP),
-		QUARANTINE_DOWN(DeviceStatus.QUARANTINE, DeviceStatus.DOWN, Events.REM_NETWORK_DEVICES_MESSAGE),
-		DOWN_UP(DeviceStatus.DOWN, DeviceStatus.UP, Events.NEW_NETWORK_DEVICES_MESSAGE);
-		
-		companion object {
-			fun resolve(curr: DeviceStatus, new: DeviceStatus) = DeviceWorkflow.values().firstOrNull { it.from == curr && it.to == new };
-		}
 	}
 
 }

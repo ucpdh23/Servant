@@ -58,11 +58,20 @@ data class Room(var name: String)
 
 enum class DeviceStatus {
 	UP,
+	UNKNOWN,
 	DOWN,
 	QUARANTINE,
-	NEW
+	NEW,
+
 }
-data class Device(var user: String, var mac: String, var status: DeviceStatus, var timestamp: Long)
+
+enum class DeviceSecurity {
+	SECURE,
+	INSECURE,
+	UNKNOWN
+}
+
+data class Device(var user: String, var mac: String, var status: DeviceStatus, var security: DeviceSecurity, var firstTimestamp : Long, var lastTimestamp: Long)
 
 /**
  * Events Messages

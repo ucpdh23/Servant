@@ -10,6 +10,7 @@ import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
+import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.road.RoadVerticle;
@@ -266,7 +267,13 @@ public enum Rules {
 			msg -> { return reply(null, HomeUtils.toString(msg));},
 			"Ex. home"
 			),
-	
+	DEVICE_UPDATE_DANGERIOUS(HomeVerticle.Actions.PROCESS_DEVICE_SECURITY,
+			isContextFree()
+					.and(messageStartsWith("Source: Is device ")),
+			(tokens, userContext) -> {return new TextMessage("dummy", userContext.thisMessage);},
+			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
+			"Mark device status"
+			),
 	RESET_SENSOR(SensorVerticle.Actions.RESET_SENSOR,
 			isContextFree()
 				.and(messageContains("sensor")),

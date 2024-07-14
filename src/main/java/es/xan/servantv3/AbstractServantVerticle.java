@@ -9,12 +9,16 @@ import java.util.regex.Pattern;
 import es.xan.servantv3.MessageBuilder.ActionBuilder;
 import es.xan.servantv3.MessageBuilder.EventBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.api.*;
+import es.xan.servantv3.security.SecurityVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +45,14 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private final Map<String, Pair<Event, Method>> mEventMap;
 	
 	private final Map<String, Method> mMethodMap;
-	
+
+	private Agent<AgentInput> agent;
+
+	public void registerStateMachine(AgentState<AgentInput> state) {
+		AgentContext context = new AgentContext(){};
+		this.agent = new Agent<>(state, this, context);
+	}
+
 	private static class Pair<A,B> {
 		A left;
 		B right;
@@ -111,27 +122,41 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		}
 		
 		Event event = mEventMap.get(eventName).left;
-		
+
+		if (this.agent != null) {
+			JsonObject entity = body.containsKey("bean")? body.getJsonObject("bean") : null;
+			processInStateMachine(event, entity);
+		}  else {
+			processEventAsMethodExecution(event, mEventMap.get(eventName), body, message);
+		}
+	}
+
+	private void processInStateMachine(Object operation, @Nullable JsonObject entity) {
+		AgentInput input = new AgentInput(operation, entity);
+		this.agent.process(input);
+	}
+
+	private void processEventAsMethodExecution(Event event, Pair<Event, Method> info, JsonObject body, Message<Object> message) {
 		try {
-			int count = mEventMap.get(eventName).right.getParameterCount();
-			LOGGER.trace("trying to execute method [{}] with [{}] parameters", mEventMap.get(eventName).right.getName(), count);
-			
+			int count = info.right.getParameterCount();
+			LOGGER.trace("trying to execute method [{}] with [{}] parameters", info.right.getName(), count);
+
 			if (count == 0) {
-				mEventMap.get(eventName).right.invoke(this);
-				
+				info.right.invoke(this);
+
 			} else {
 				Class<?> beanClass = event.getPayloadClass();
 				JsonObject entity = body.getJsonObject("bean");
 				Object newInstance = JsonUtils.toBean(entity.encode(), beanClass);
-				
+
 				if (count == 1) {
-					mEventMap.get(eventName).right.invoke(this, newInstance);
-					
+					info.right.invoke(this, newInstance);
+
 					//Automatic Reply
 					ReplyBuilder builder = MessageBuilder.createReply();
 					message.reply(builder.build());
 				} else if (count == 2) {
-					mEventMap.get(eventName).right.invoke(this, newInstance, message);
+					info.right.invoke(this, newInstance, message);
 				}
 			}
 		} catch (Exception e) {
@@ -153,44 +178,50 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		
 		final Action action = actionPair.left;
 		final Method method = actionPair.right;
-		
-		LOGGER.debug("mapped [{}-{}]", action, method.getName());
-		
-		// Actions are executed as very hard code.
-		vertx.executeBlocking(future -> {
-			try {
-				final int parameterCount = method.getParameterCount();
-				if (parameterCount == 0) {
-					method.invoke(this);
-					
-				} else {
-					if (parameterCount == 1) {
-						final Class<?> beanClass = action.getPayloadClass();
 
-						Object parameter = message;
-						if (beanClass != null) {
+		if (this.agent != null) {
+			JsonObject entity = json.containsKey("bean")? json.getJsonObject("bean") : null;
+			processInStateMachine(action, entity);
+		} else {
+			LOGGER.debug("mapped [{}-{}]", action, method.getName());
+
+			// Actions are executed as very hard code.
+			vertx.executeBlocking(future -> {
+				try {
+					final int parameterCount = method.getParameterCount();
+					if (parameterCount == 0) {
+						method.invoke(this);
+
+					} else {
+						if (parameterCount == 1) {
+							final Class<?> beanClass = action.getPayloadClass();
+
+							Object parameter = message;
+							if (beanClass != null) {
+								final JsonObject entity = json.getJsonObject("bean");
+								parameter = beanClass.equals(JsonObject.class)?
+										entity : JsonUtils.toBean(entity.encode(), beanClass);
+							}
+
+							method.invoke(this, parameter);
+
+						} else if (parameterCount == 2) {
+							final Class<?> beanClass = action.getPayloadClass();
 							final JsonObject entity = json.getJsonObject("bean");
-							parameter = beanClass.equals(JsonObject.class)?
+							final Object newInstance = beanClass.equals(JsonObject.class)?
 									entity : JsonUtils.toBean(entity.encode(), beanClass);
-						}
-						
-						method.invoke(this, parameter);
-					
-					} else if (parameterCount == 2) {
-						final Class<?> beanClass = action.getPayloadClass();
-						final JsonObject entity = json.getJsonObject("bean");
-						final Object newInstance = beanClass.equals(JsonObject.class)?
-								entity : JsonUtils.toBean(entity.encode(), beanClass);
 
-						method.invoke(this, newInstance, message);
+							method.invoke(this, newInstance, message);
+						}
 					}
+				} catch (Exception e) {
+					LOGGER.warn("Action: [{}]", action, e);
 				}
-			} catch (Exception e) {
-				LOGGER.warn("Action: [{}]", action, e);
-			}
-		}, res -> {
-			LOGGER.trace("[{}]", res);
-		});
+			}, res -> {
+				LOGGER.trace("[{}]", res);
+			});
+		}
+
 	}
 
 	protected void publishEvent(Events event) {

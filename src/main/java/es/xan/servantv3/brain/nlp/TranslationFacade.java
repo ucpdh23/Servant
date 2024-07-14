@@ -22,9 +22,8 @@ public class TranslationFacade {
 	private static void fillMessageAndAddress(String text, Translation translation, UserContext context) {
 		for (Rules option : Rules.values()) {
 			if (option.mPredicate.test(Pair.of(text, context))) {
-				LOGGER.debug("Applying rule [{}]", option);
-				
 				translation.action = option.mAddress;
+				context.thisMessage = text;
 				translation.message = option.mFunction.apply(tokenizer(text), context);
 				translation.response = option.mResponse;
 				

@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class UserContext {
 
     private final String mUser;
+    public String thisMessage;
 
     public UserContext(String user) {
         this.mUser = user;

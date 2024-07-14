@@ -17,11 +17,11 @@ class DevicesController constructor(override val router: Router, var publisher :
 	 * allowed values for the argument status are UP and DOWN
 	 */
 	get("/devices/:mac/:status").handler {
-		publisher.publishAction(NetworkVerticle.Actions.UPDATE_DEVICE_STATUS,
+		/*publisher.publishAction(NetworkVerticle.Actions.UPDATE_DEVICE_STATUS,
 			Device("",
 					it.request().params().get("mac"),
 					DeviceStatus.valueOf(it.request().params().get("status")),
-					Date().getTime()));
+					Date().getTime()));*/
 			
 		it.response().end("ok");
 	};

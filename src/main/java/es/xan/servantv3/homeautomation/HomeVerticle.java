@@ -7,6 +7,7 @@ import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.messages.Event;
 import es.xan.servantv3.messages.*;
+import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
@@ -16,6 +17,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.internetmonitor.model.Network;
 
 import java.io.File;
 import java.time.LocalTime;
@@ -52,9 +54,10 @@ public class HomeVerticle extends AbstractServantVerticle {
 		supportedEvents(
 			Events.PARRONT_AVAILABLE,
 			Events.NO_TEMPERATURE_INFO,  
-			Events.NEW_NETWORK_DEVICES_MESSAGE,
-			Events.REM_NETWORK_DEVICES_MESSAGE,
+			Events.NETWORK_DEVICES_STATUS_UPDATED,
 			Events.LAUNDRY_OFF,
+			Events.DOOR_STATUS_CHANGED,
+			Events.WATER_LEAK_STATUS_CHANGED,
 			Events._EVENT_);
 	}
 	
@@ -65,7 +68,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		REPORT_TEMPERATURE(null),
 		MANAGE_VIDEO(Recorded.class),
 		RECORD_VIDEO(null),
-		SHUTDOWN_SECURITY(null)
+		SHUTDOWN_SECURITY(null),
+		PROCESS_DEVICE_SECURITY(UpdateState.class)
 		;
 		
 		Class<?> beanClass;
@@ -80,8 +84,36 @@ public class HomeVerticle extends AbstractServantVerticle {
 		}
 	}
 
+	public void water_leak_status_changed(final NewStatus status) {
+		LOGGER.info("water_leak_status_changed: [{}]", status.getStatus());
+		if ("true".equals(status.getStatus())) {
+			publishAction(Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss("detectada fuga de agua"));
+		} else {
+			publishAction(Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss("detectado algo de agua" + status.getStatus()));
+		}
+	}
+
 	public void shutdown_security(final Message<Object> msg) {
 		this.publishRawAction("SHUTDOWN_SECURITY");
+	}
+
+	public void process_device_security(final TextMessage msg) {
+		String content = msg.getMessage();
+		String query = content.split("\t")[0];
+		String answer = content.split("\t")[1];
+
+		String mac = query.split("mac:")[1].split(" ")[0];
+		Device device = this.notified.get(mac);
+		if (device == null) return;
+
+		if (answer.toLowerCase().contains("si") || answer.toLowerCase().contains("sí") || answer.toLowerCase().contains("yes")) {
+			device.setSecurity(DeviceSecurity.INSECURE);
+		} else {
+			device.setSecurity(DeviceSecurity.SECURE);
+		}
+
+		publishAction(NetworkVerticle.Actions.UPDATE_DEVICE_SECURITY, device);
+
 	}
 
 	public void record_video(final Message<Object> msg) {
@@ -218,12 +250,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	public void no_temperature_info(Room room) {
 		notify_boss(new TextMessageToTheBoss("no temperature info since 1 hour for room " + room.getName()));
-		publishAction(SensorVerticle.Actions.RESET_SENSOR, new Sensor(room.getName()),
-				msg -> {if (MessageUtils.isOk(msg)) {
-						notify_boss(new TextMessageToTheBoss("Sensor reseted"));
-					} else {
-						notify_boss(new TextMessageToTheBoss("Cannot reset sensor"));
-					}});
 	}
 	
 	
@@ -239,26 +265,31 @@ public class HomeVerticle extends AbstractServantVerticle {
 		});
 	}
 
-	public void new_network_devices_message(Device device) {
+	Map<String, Device> notified = new HashMap<>();
+
+	public void network_devices_status_updated(Device device) {
 		Person person = mPopulation.get(device.getMac());
-		
-		if (person == null) return;
-		
-		if (!person.getInHome()) {
-			updatePerson(person, INSIDE_HOME);
+		if (person != null) {
+			if (!person.getInHome() && DeviceStatus.UP.equals(device.getStatus())) {
+				updatePerson(person, INSIDE_HOME);
+			} else if (person.getInHome() && DeviceStatus.DOWN.equals(device.getStatus())) {
+				updatePerson(person, OUTSIDE_HOME);
+			}
 		}
+
+		if (DeviceSecurity.UNKNOWN.equals(device.getSecurity())) {
+			if (!notified.containsKey(device.getMac())) {
+				notified.put(device.getMac(), device);
+				this.mMasters.forEach( master -> {
+					TextMessage message = new TextMessage(master, "Is device ip:" + device.getUser() + " mac:" + device.getMac() + " dangerous?");
+					publishAction(ParrotVerticle.Actions.SEND, message);
+				});
+			}
+		}
+		
 	}
 
-	public void rem_network_devices_message(Device device) {
-		Person person = mPopulation.get(device.getMac());
-		
-		if (person == null) return;
-		
-		if (person.getInHome()) {
-			updatePerson(person, OUTSIDE_HOME);
-		}
-	}
-	
+
 	public void laundry_off(Power power) {
 		this.mMasters.forEach( master -> publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "My laundry just finished: " + power)));
 	}

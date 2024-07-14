@@ -36,7 +36,10 @@ class SensorVerticle : AbstractServantVerticle(Constant.SENSOR_VERTICLE) {
 			}
 		}
 	};
-	
+
+	/**
+	 * Deprecated
+	 */
 	fun reset_sensor(sensor : Sensor , message : Message<Any> ) {
 		LOG.info("Asking to reset sensor [{}]", sensor.sensor);
 		

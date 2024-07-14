@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -17,8 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class TelegramService extends TelegramLongPollingBot {
@@ -75,6 +75,11 @@ public class TelegramService extends TelegramLongPollingBot {
 	private Pair<String, Boolean> resolveMessage(Update update) {
 		final String messageTextReceived = update.getMessage().getText();
 
+		String messageTextSent = null;
+		if (update.getMessage().getReplyToMessage() != null) {
+			messageTextSent = update.getMessage().getReplyToMessage().getText();
+		}
+
 		if (update.getMessage().hasPhoto()) {
 			String caption = update.getMessage().getCaption();
 
@@ -99,7 +104,11 @@ public class TelegramService extends TelegramLongPollingBot {
 			File file = ParrotUtils.downloadAudio("https://api.telegram.org", this.mToken, voice.getFileId(), this.mModeDebug);
 			return Pair.of(ParrotUtils.transcribe("https://api.wit.ai", this.mWitToken, file), Boolean.TRUE);
 		} else {
-			return Pair.of(messageTextReceived, Boolean.FALSE);
+			String messageToCommunicate = (messageTextSent != null)?
+					"source: " + messageTextSent + "\treceived: " + messageTextReceived
+					: messageTextReceived;
+
+			return Pair.of(messageToCommunicate, Boolean.FALSE);
 		}
 	}
 

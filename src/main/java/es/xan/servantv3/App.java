@@ -7,6 +7,7 @@ import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.knowledge.KnowledgeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
+import es.xan.servantv3.modes.NightModeVerticle;
 import es.xan.servantv3.mqtt.MqttVerticle;
 import es.xan.servantv3.neo4j.Neo4jVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
@@ -31,21 +32,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 public class App extends AbstractVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
 	TcpEventBusBridge bridge;
+	public static Connection connection;
 
 	@Override
 	public void start() {
 		LOGGER.info("Starting servant app");
-		
+
 		initializeLogBridges();
+		initializeLocalDatabase();
 		initializeVerticles();
 		initializeEventBusBridge();
 		
 		LOGGER.info("Started :)");
+	}
+
+	private void initializeLocalDatabase() {
+		try {
+			Class.forName("org.sqlite.JDBC");
+			App.connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+		} catch (Exception e) {
+			LOGGER.error("Problems loading sqlite driver", e);
+			System.exit(1);
+		}
 	}
 
 	private void initializeEventBusBridge() {
@@ -71,6 +87,7 @@ public class App extends AbstractVerticle {
 		JsonObject config = Vertx.currentContext().config();
 		
 		vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
