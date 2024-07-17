@@ -116,6 +116,10 @@ public class MqttVerticle extends AbstractServantVerticle {
                         }
 
                         MqttRules rule = MqttRules.identifyRule(message);
+                        if (MqttRules.MANDO.equals(rule)) {
+                            LOGGER.info("action: [{}]", message.payload().toJsonObject().getString("action"));
+                            LOGGER.info("payload: [{}]", message.payload().toString());
+                        }
 
                         if (rule != null)  {
                             LOGGER.info("Found rule [{}]", rule);
