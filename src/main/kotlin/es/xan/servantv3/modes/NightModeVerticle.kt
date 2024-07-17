@@ -21,7 +21,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         val LOG = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
 
         val ON_OFF_TRANSITION : AgentTransition<AgentInput, AgentState<AgentInput>> =  AgentTransition(
-            { _ , input -> Actions.CHANGE_STATUS.equals(input.entity)},
+            { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
             { _ , input ->
                 when (input.entityAs(UpdateState::class.java).newStatus) {
                     "on" -> { StateMachine.ON }
