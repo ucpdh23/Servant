@@ -56,9 +56,9 @@ public enum MqttRules {
             new TopicPredicate("zigbee2mqtt/mando"),
             (message, vertx) -> {
                 String action = message.payload().toJsonObject().getString("action");
-                if (action.equals("1_initial_press")) {
+                if (action.equals("1_short_release")) {
                     vertx.publishAction(NightModeVerticle.Actions.CHANGE_STATUS, new UpdateState("on"));
-                } else if (action.equals("1_long_press")) {
+                } else if (action.equals("1_long_release")) {
                     vertx.publishAction(NightModeVerticle.Actions.CHANGE_STATUS, new UpdateState("off"));
                 }
             }
