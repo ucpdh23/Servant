@@ -60,16 +60,29 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                     ON_OFF_TRANSITION,
                     AgentTransition(
                         { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation)},
-                        { _ , input ->
-                            when (input.entityAs(NewStatus::class.java).status) {
-                                "true" -> { v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door is changed")) }
-                            }
-
-                            ON
+                        { _ , _ ->
+                            v.publishAction(HomeVerticle.Actions.RECORD_VIDEO, null)
+                            v.timed(WAITING_VIDEO, 20000)
                         }
                     )
                 )
             }
+        },
+        WAITING_VIDEO {
+            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+                return arrayOf(
+                    ON_OFF_TRANSITION,
+                    AgentTransition(
+                        { _ , input -> Events.VIDEO_RECORDED.equals(input.operation)},
+                        { _ , _ -> ON }
+                    )
+                )
+            }
+
+            override fun timeout(): AgentState<AgentInput> {
+                return ON
+            }
+
         },
         OFF {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {

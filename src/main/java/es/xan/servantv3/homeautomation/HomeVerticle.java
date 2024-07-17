@@ -146,12 +146,13 @@ public class HomeVerticle extends AbstractServantVerticle {
 		this.mMasters.forEach( master -> {
 			VideoMessage message = new VideoMessage(master, "", recorded.getFilepath());
 			publishAction(ParrotVerticle.Actions.SEND_VIDEO, message);
+			publishEvent(Events.VIDEO_RECORDED);
 		});
 
-		publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
+/*		publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
 		if (mLampOffScheduledTask != null) {
 			this.mScheduler.removeScheduledTask(this.mLampOffScheduledTask);
-		}
+		}*/
 	}
 
 	UUID mLampOffScheduledTask = null;
@@ -169,12 +170,12 @@ public class HomeVerticle extends AbstractServantVerticle {
 				if (!waitingVideo) {
 					LOGGER.info("publishing event");
 
-					this.publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("on"));
+/*					this.publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("on"));
 					if (mLampOffScheduledTask != null) mScheduler.removeScheduledTask(mLampOffScheduledTask);
 					this.mLampOffScheduledTask = mScheduler.scheduleTask(in(1, ChronoUnit.MINUTES), (UUID id) -> {
 						publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
 						return false;
-					});
+					});*/
 
 					this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
 					LOGGER.debug("Waiting video");

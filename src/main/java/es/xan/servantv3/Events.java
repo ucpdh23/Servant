@@ -29,6 +29,7 @@ public enum Events implements Event {
 
 	DOOR_STATUS_CHANGED(NewStatus.class),
 	WATER_LEAK_STATUS_CHANGED(NewStatus.class),
+	VIDEO_RECORDED(null),
 
 	_EVENT_(es.xan.servantv3.messages.Event.class),
 
