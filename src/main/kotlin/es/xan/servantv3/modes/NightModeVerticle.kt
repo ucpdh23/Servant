@@ -49,6 +49,8 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
     }
 
     override fun start() {
+        super.start()
+
         LOG.info("starting nightnode...");
         this.mScheduler = Scheduler(this.getVertx())
         this.mScheduler?.scheduleTask(at(LocalTime.of(6,0,0,0))) {
