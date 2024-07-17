@@ -55,6 +55,9 @@ fun interface AgentState<V> {
 
 	fun entering(servantContext: ServantContext<V>) {
 	}
+
+	fun exiting(servantContext: ServantContext<V>) {
+	}
 }
 
 class AgentTransition<V, S : AgentState<V>>(val predicate : (context: AgentContext, input : V) -> Boolean, val operation: (context: AgentContext, input : V)  -> S)
@@ -97,6 +100,7 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 					timeoutTimer?.cancel()
 
 					if (currentState != newState) {
+						currentState.exiting(servantContext)
 						newState.entering(servantContext)
 					}
 

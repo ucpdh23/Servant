@@ -1,6 +1,7 @@
 package es.xan.servantv3;
 
 public class Constant {
+    public static final String SECURITY_MODE_VERTICLE = "securitymode.verticle";
     public static final String NIGHT_MODE_VERTICLE = "nightmode.verticle";
     public static final String MQTT_VERTICLE = "mqtt.verticle";
     public static final String WEBSERVER_VERTICLE = "webserver.verticle";

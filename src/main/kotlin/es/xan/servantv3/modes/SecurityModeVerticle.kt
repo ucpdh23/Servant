@@ -15,10 +15,10 @@ import es.xan.servantv3.messages.TextMessageToTheBoss
 import es.xan.servantv3.messages.UpdateState
 import org.slf4j.LoggerFactory
 
-class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE)  {
+class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERTICLE)  {
 
     companion object {
-        val LOG = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
+        val LOG = LoggerFactory.getLogger(SecurityModeVerticle::class.java.name)
 
         val ON_OFF_TRANSITION : AgentTransition<AgentInput, AgentState<AgentInput>> =  AgentTransition(
             { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
@@ -55,10 +55,6 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
             }
         },
         ON {
-            override fun entering(servantContext: ServantContext<AgentInput>) {
-                servantContext.publishAction(LampVerticle.Actions.SWITCH_LAMP, UpdateState("off"))
-            }
-
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
                     ON_OFF_TRANSITION,

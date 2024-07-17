@@ -8,6 +8,7 @@ import es.xan.servantv3.knowledge.KnowledgeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.modes.NightModeVerticle;
+import es.xan.servantv3.modes.SecurityModeVerticle;
 import es.xan.servantv3.mqtt.MqttVerticle;
 import es.xan.servantv3.neo4j.Neo4jVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
@@ -87,6 +88,7 @@ public class App extends AbstractVerticle {
 		JsonObject config = Vertx.currentContext().config();
 		
 		vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(SecurityModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
