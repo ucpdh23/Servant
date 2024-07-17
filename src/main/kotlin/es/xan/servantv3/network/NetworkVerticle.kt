@@ -4,14 +4,12 @@ import es.xan.servantv3.*
 import es.xan.servantv3.messages.Device
 import es.xan.servantv3.messages.DeviceSecurity
 import es.xan.servantv3.messages.DeviceStatus
+import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
+import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
-import java.sql.Connection
-import java.sql.DriverManager
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 
 /**
@@ -27,6 +25,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 		val TTL = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES); 
     }
 
+	private var mConfiguration: JsonObject? = null
 	private val storedStatus: MutableMap<String, Device> = HashMap();
 
 	init {
@@ -56,6 +55,8 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 
 	override fun start() {
 		super.start();
+
+		this.mConfiguration = Vertx.currentContext().config().getJsonObject("NetworkVerticle")
 
 		vertx.setPeriodic(200000) { _ ->
 			publishAction(Actions.CHECK_STATUS);
@@ -94,7 +95,11 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	fun check_status() {
 		LOG.debug("checking network status...");
 
-		val result = SSHUtils.runLocalCommand("nmap -PR -sn 192.168.1.0/24")
+		val result = SSHUtils.runRemoteCommandExtended(
+			this.mConfiguration?.getString("server"),
+			this.mConfiguration?.getString("usr"),
+			this.mConfiguration?.getString("pws"),
+			"nmap -PR -sn 192.168.1.0/24")
 
 		val networkDevices = computeDevices(result.output)
 
