@@ -4,6 +4,8 @@ import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Action
 import es.xan.servantv3.Constant
 import es.xan.servantv3.Events
+import es.xan.servantv3.Scheduler
+import es.xan.servantv3.Scheduler.at
 import es.xan.servantv3.api.AgentInput
 import es.xan.servantv3.api.AgentState
 import es.xan.servantv3.api.AgentTransition
@@ -14,8 +16,11 @@ import es.xan.servantv3.messages.NewStatus
 import es.xan.servantv3.messages.TextMessageToTheBoss
 import es.xan.servantv3.messages.UpdateState
 import org.slf4j.LoggerFactory
+import java.time.LocalTime
 
 class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE)  {
+
+    private var mScheduler: Scheduler? = null
 
     companion object {
         val LOG = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
@@ -33,12 +38,27 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
     }
 
     init {
+        LOG.info("initializing nightnode...");
         registerStateMachine(StateMachine.__INIT__)
 
         supportedActions(Actions::class.java)
         supportedEvents(
             es.xan.servantv3.Events.DOOR_STATUS_CHANGED
         )
+        LOG.info("initialized nightnode");
+    }
+
+    override fun start() {
+        LOG.info("starting nightnode...");
+        this.mScheduler = Scheduler(this.getVertx())
+        this.mScheduler?.scheduleTask(at(LocalTime.of(6,0,0,0))) {
+            _ ->
+                if (this.agent != null && this.agent.currentState == StateMachine.ON)
+                    publishAction(Actions.CHANGE_STATUS, UpdateState("off"))
+
+                true
+        }
+        LOG.info("started nightnode");
     }
 
     enum class Actions(val clazz : Class<*>? ) : Action {

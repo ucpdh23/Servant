@@ -46,7 +46,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	
 	private final Map<String, Method> mMethodMap;
 
-	private Agent<AgentInput> agent;
+	protected Agent<AgentInput> agent;
 
 	public void registerStateMachine(AgentState<AgentInput> state) {
 		LOGGER.info("registeringStateMachine with initial State [{}]", state);

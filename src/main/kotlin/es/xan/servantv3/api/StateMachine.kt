@@ -74,7 +74,7 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 		val LOG = LoggerFactory.getLogger(Agent::class.java.name)
 	}
 
-	private var currentState = firstState
+	public var currentState = firstState
 
 
 	private var timeout : Boolean = false
