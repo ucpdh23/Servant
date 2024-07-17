@@ -94,7 +94,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	fun check_status() {
 		LOG.debug("checking network status...");
 
-		val result = SSHUtils.runLocalCommand("sudo nmap -PR -sn 192.168.1.0/24")
+		val result = SSHUtils.runLocalCommand("nmap -PR -sn 192.168.1.0/24")
 
 		val networkDevices = computeDevices(result.output)
 
