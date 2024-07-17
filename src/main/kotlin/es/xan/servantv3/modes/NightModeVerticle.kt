@@ -33,11 +33,12 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
     }
 
     init {
+        registerStateMachine(StateMachine.__INIT__)
+
         supportedActions(Actions::class.java)
         supportedEvents(
             es.xan.servantv3.Events.DOOR_STATUS_CHANGED
         )
-        registerStateMachine(StateMachine.__INIT__)
     }
 
     enum class Actions(val clazz : Class<*>? ) : Action {

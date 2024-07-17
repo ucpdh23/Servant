@@ -49,6 +49,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private Agent<AgentInput> agent;
 
 	public void registerStateMachine(AgentState<AgentInput> state) {
+		LOGGER.info("registeringStateMachine with initial State [{}]", state);
+
 		AgentContext context = new AgentContext(){};
 		this.agent = new Agent<>(state, this, context);
 	}
@@ -132,6 +134,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 
 	private void processInStateMachine(Object operation, @Nullable JsonObject entity) {
+		LOGGER.info("processInStateMachine [{}-{}]", operation, entity.toString());
 		AgentInput input = new AgentInput(operation, entity);
 		this.agent.process(input);
 	}
