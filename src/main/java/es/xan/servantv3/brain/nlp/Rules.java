@@ -10,6 +10,7 @@ import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
+import es.xan.servantv3.modes.SecurityModeVerticle;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
@@ -281,6 +282,22 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. sensor xxxx"
 			),
+	SECURITY_MODE_ON(SecurityModeVerticle.Actions.CHANGE_STATUS,
+			isContextFree()
+					.and(messageContains("on"))
+					.and(messageContains("security")),
+			(tokens, userContext) -> { return new UpdateState("on");},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. security on"
+			),
+	SECURITY_MODE_OFF(SecurityModeVerticle.Actions.CHANGE_STATUS,
+			isContextFree()
+					.and(messageContains("off"))
+					.and(messageContains("security")),
+			(tokens, userContext) -> { return new UpdateState("off");},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"Ex. security off"
+	),
 //	REMINDER(Constant.PARRONT_VERTICLE, false, messageContains("reminder"), TranslationType.COPY),
 //	BOILER_STATUS(Constant.OPERATION_BOILER_STATE_CHECKER, true, messageContains("checkBoilerStatus"), TranslationType.OPERATION),
 //	BOILER_AUTOMATIC_MODE(Constant.THERMOSTAT_VERTICLE, true, messageContains("boiler||caldera")
