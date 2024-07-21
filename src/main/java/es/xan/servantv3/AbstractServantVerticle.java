@@ -258,7 +258,8 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		vertx.eventBus().send(raw_action, builder.build());
 	}
 	
-	protected void publishAction(Action send) {
+	public void publishAction(Action send) {
+		LOGGER.debug("publish action [{}]", send);
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());

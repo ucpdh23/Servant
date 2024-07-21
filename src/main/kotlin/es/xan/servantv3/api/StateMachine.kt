@@ -40,6 +40,10 @@ class ServantContext<V>(val v: AbstractServantVerticle, val a: Agent<V>) {
 		v.publishAction(action, item)
 	}
 
+	fun publishAction(action: Action) {
+		v.publishAction(action)
+	}
+
 	fun timed(state : AgentState<V>, period : Long) : AgentState<V> {
 		a.setupTimeout(period);
 		return state;

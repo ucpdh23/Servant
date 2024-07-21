@@ -61,7 +61,8 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                     AgentTransition(
                         { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation)},
                         { _ , _ ->
-                            v.publishAction(HomeVerticle.Actions.RECORD_VIDEO, null)
+                            v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door has changed"))
+                            v.publishAction(HomeVerticle.Actions.RECORD_VIDEO)
                             v.timed(WAITING_VIDEO, 20000)
                         }
                     )
