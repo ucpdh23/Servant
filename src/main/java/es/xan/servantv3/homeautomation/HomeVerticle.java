@@ -56,7 +56,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NETWORK_DEVICES_STATUS_UPDATED,
 			Events.LAUNDRY_OFF,
-			Events.DOOR_STATUS_CHANGED,
 			Events.WATER_LEAK_STATUS_CHANGED,
 			Events._EVENT_);
 	}
