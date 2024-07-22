@@ -163,6 +163,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 				}
 			}
 		} catch (Exception e) {
+			LOGGER.warn("Not processed event [{}] in verticle [{}]",  info.left, this.mVerticleName);
 			LOGGER.warn(e.getMessage(), e);
 		}
 	}
