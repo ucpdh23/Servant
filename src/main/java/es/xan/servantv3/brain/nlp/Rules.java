@@ -61,6 +61,13 @@ public enum Rules {
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Start tracking a journey"
 	),
+	HOME_DOOR_OPEN(HomeVerticle.Actions.DOOR_OPEN,
+			isContextFree()
+					.and(messageContains("testing")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
+			"testing door"
+	),
 	UNTRACK_TRAVEL(RoadVerticle.Actions.STOP_MONITORING,
 			isContextFree()
 				.and(messageContains("untrack")),
@@ -270,7 +277,7 @@ public enum Rules {
 			),
 	DEVICE_UPDATE_DANGERIOUS(HomeVerticle.Actions.PROCESS_DEVICE_SECURITY,
 			isContextFree()
-					.and(messageStartsWith("Source: Is device ")),
+					.and(messageStartsWith("source: is device ")),
 			(tokens, userContext) -> {return new TextMessage("dummy", userContext.thisMessage);},
 			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
 			"Mark device status"

@@ -81,6 +81,8 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
             }
 
             override fun timeout(): AgentState<AgentInput> {
+                LoggerFactory.getLogger(WAITING_VIDEO::class.java).warn("timeout");
+
                 return ON
             }
 

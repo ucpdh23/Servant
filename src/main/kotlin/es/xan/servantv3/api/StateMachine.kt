@@ -4,6 +4,7 @@ import es.xan.servantv3.*
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
 import java.util.*
+import kotlin.concurrent.schedule
 import kotlin.concurrent.timer
 
 /**
@@ -22,6 +23,13 @@ import kotlin.concurrent.timer
  */
 interface State<V> {
 	val trans : Array<out Transition<V, out State<V>>>
+}
+
+class ExtendedAgentState<V> (val state : AgentState<V>, val period : Long) : AgentState<V>  {
+	override fun trans(v: ServantContext<V>): Array<AgentTransition<V, AgentState<V>>> {
+		return state.trans(v)
+	}
+
 }
 
 class Transition<V, S : State<V>>(val predicate : (JsonObject) -> Boolean, val operation: (V, JsonObject) -> S)
@@ -45,8 +53,7 @@ class ServantContext<V>(val v: AbstractServantVerticle, val a: Agent<V>) {
 	}
 
 	fun timed(state : AgentState<V>, period : Long) : AgentState<V> {
-		a.setupTimeout(period);
-		return state;
+		return ExtendedAgentState<V>(state, period);
 	}
 }
 
@@ -71,7 +78,8 @@ interface AgentContext {
 
 class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle, val context: AgentContext) {
 
-	private var timeoutTimer: Timer? = null
+	private var schedule: TimerTask? = null
+
 	private val servantContext = ServantContext(verticle, this)
 
 	companion object {
@@ -92,16 +100,23 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 			val lastState = currentState
 
 			if (timedout) {
+				LoggerFactory.getLogger(Agent::class.java).info("timeout!!")
 				currentState = currentState.timeout()
 			} else if (input != null) {
-				val newState = currentState.trans(servantContext)
+				var newState = currentState.trans(servantContext)
 					.firstOrNull { tran -> tran.predicate.invoke(context, input) }
 					?.run { operation.invoke(context, input) }
+
 
 				if (newState == null) {
 					currentState
 				} else {
-					timeoutTimer?.cancel()
+					if (newState is ExtendedAgentState) {
+						this.setupTimeout(newState.period)
+						newState = newState.state
+					} else {
+						this.schedule?.cancel()
+					}
 
 					if (currentState != newState) {
 						currentState.exiting(servantContext)
@@ -115,13 +130,22 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 			}
 		}
 
+		LoggerFactory.getLogger(Agent::class.java).info("currentState [{}]", currentState)
+
 		return currentState
 	}
 
 	fun setupTimeout(period: Long) {
-		this.timeoutTimer = timer("timeout", period = period) {
+		LoggerFactory.getLogger(Agent::class.java).info("setupTimeout...")
+
+		this.schedule?.cancel();
+
+		this.schedule = Timer().schedule(period) {
+			LoggerFactory.getLogger(Agent::class.java).info("timer is out!")
 			_process(null, true);
 		}
+
+		LoggerFactory.getLogger(Agent::class.java).info("setupTimeout")
 	}
 
 }

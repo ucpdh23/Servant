@@ -61,6 +61,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 	}
 	
 	public enum Actions implements Action {
+		DOOR_OPEN(null),
 		GET_HOME_STATUS(null),
 		NOTIFY_BOSS(TextMessageToTheBoss.class),
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
@@ -68,7 +69,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		MANAGE_VIDEO(Recorded.class),
 		RECORD_VIDEO(null),
 		SHUTDOWN_SECURITY(null),
-		PROCESS_DEVICE_SECURITY(UpdateState.class)
+		PROCESS_DEVICE_SECURITY(TextMessage.class)
 		;
 		
 		Class<?> beanClass;
@@ -81,6 +82,10 @@ public class HomeVerticle extends AbstractServantVerticle {
 		public Class<?> getPayloadClass() {
 			return beanClass;
 		}
+	}
+
+	public void door_open() {
+		publishEvent(Events.DOOR_STATUS_CHANGED, new NewStatus("on"));
 	}
 
 	public void water_leak_status_changed(final NewStatus status) {

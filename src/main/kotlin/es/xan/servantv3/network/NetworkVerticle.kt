@@ -58,7 +58,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 
 		this.mConfiguration = Vertx.currentContext().config().getJsonObject("NetworkVerticle")
 
-		vertx.setPeriodic(200000) { _ ->
+		vertx.setPeriodic(60000) { _ ->
 			publishAction(Actions.CHECK_STATUS);
 		}
 	}
@@ -86,7 +86,12 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	
 	fun update_device_security(input: Device) {
 		App.connection.createStatement().use { statement ->
-			statement.executeUpdate("UPDATE network_device set security = '" + input.security.name + "' where mac='" + input.mac + "'")
+			val updated = statement.executeUpdate("UPDATE network_device set security = '" + input.security.name + "' where mac='" + input.mac + "'")
+			LOG.info("Updated [{}] for device [{}]", updated, input.mac)
+
+			if (updated == 0) {
+				statement.executeUpdate("INSERT INTO network_device (user, mac, security) values ('" + input.user + "','"+ input.mac +"','"+ input.security.name +"')")
+			}
 		}
 		this.storedStatus[input.mac]?.security = input.security
 		this.storedStatus[input.mac]?.status = DeviceStatus.UNKNOWN
@@ -99,7 +104,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 			this.mConfiguration?.getString("server"),
 			this.mConfiguration?.getString("usr"),
 			this.mConfiguration?.getString("pws"),
-			"nmap -PR -sn 192.168.1.0/24")
+			"sudo nmap -PR -sn 192.168.1.0/24")
 
 		val networkDevices = computeDevices(result.output)
 
