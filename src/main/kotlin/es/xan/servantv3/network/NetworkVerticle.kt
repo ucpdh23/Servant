@@ -58,7 +58,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 
 		this.mConfiguration = Vertx.currentContext().config().getJsonObject("NetworkVerticle")
 
-		vertx.setPeriodic(60000) { _ ->
+		vertx.setPeriodic(200000) { _ ->
 			publishAction(Actions.CHECK_STATUS);
 		}
 	}
