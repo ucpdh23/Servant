@@ -59,7 +59,7 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
             LOGGER.info("processing new input of expected type");
 
             // get Information from OpenIA
-            VideoMessage openiaMessage = new VideoMessage(msg.getUser(), "Can you extract the total_cost, contract_number and the billing_period from this document in a JSON format?", msg.getFilepath());
+            VideoMessage openiaMessage = new VideoMessage(msg.getUser(), "Can you extract the total_cost, contract_number, the start billing period and the end billing period from this document as a plain JSON string? The attribute names must match the provided names and the date must be provided into the format yyyymmdd, for example 20240203 correspond with february 3rd, 2024. And for the total_cost just provide the number with period separator, please remove the euro char and any white space.", msg.getFilepath());
             publishAction(OpenIAVerticle.Actions.EXTRACT_INFORMATION, openiaMessage, (response) -> {
                 JsonObject json = (JsonObject) response.result().body();
                 JsonObject result = json.getJsonObject("result");
@@ -75,7 +75,7 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
                     JsonObject fact = new JsonObject();
                     fact.put("value", buildCost(datasource.getString("total_cost")));
                     fact.put("type", "PAYMENT");
-                    fact.put("when", buildPeriod(datasource.getString("billing_period")));
+                    fact.put("when", buildPeriod(datasource.getString("start_billing_period"), datasource.getString("end_billing_period")));
                     fact.put("where", "HOME");
                     fact.put("who", "gas".equals(msg.getMessage())? "IBERDROLA" : "NATURGY");
                     fact.put("what",  buildBilling(msg.getMessage().toUpperCase(Locale.ROOT)));
@@ -95,6 +95,15 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
         return output;
     }
 
+    public JsonObject buildPeriod(String start, String end) {
+        JsonObject output = new JsonObject();
+        output.put("type", "PERIOD");
+        output.put("from", start);
+        output.put("to", end);
+
+        return output;
+    }
+
     public JsonObject buildPeriod(String message) {
         JsonObject output = new JsonObject();
         output.put("type", "PERIOD");
@@ -106,12 +115,14 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
 
     public JsonObject buildCost(String cost) {
         JsonObject output = new JsonObject();
+        LOGGER.info("money [{}]", cost);
 
         Pattern pattern = Pattern.compile("(\\d+(,\\d+)?)");
         Matcher matcher = pattern.matcher(cost);
         if (matcher.find()) {
             String money = matcher.group(1);
-            Float number = Float.parseFloat(money.replace(",", "."));
+            LOGGER.info("money [{}]", money);
+            Float number = Float.parseFloat(cost); //money.replace(",", "."));
             output.put("type", "VALUE");
             output.put("value", number);
         }

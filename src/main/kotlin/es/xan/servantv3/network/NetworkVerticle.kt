@@ -7,6 +7,7 @@ import es.xan.servantv3.messages.DeviceStatus
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
+import org.apache.commons.lang3.tuple.Pair
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
