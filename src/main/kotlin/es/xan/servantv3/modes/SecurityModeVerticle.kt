@@ -37,7 +37,8 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
 
         supportedActions(Actions::class.java)
         supportedEvents(
-            es.xan.servantv3.Events.DOOR_STATUS_CHANGED
+            Events.DOOR_STATUS_CHANGED,
+            Events.OCCUPANCY_CHANGED
         )
     }
 
@@ -59,11 +60,18 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                 return arrayOf(
                     ON_OFF_TRANSITION,
                     AgentTransition(
-                        { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation)},
+                        { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation) && "false" == input.entityAs(NewStatus::class.java).status},
                         { _ , _ ->
-                            v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door has changed"))
+                            v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door is opened"))
                             v.publishAction(HomeVerticle.Actions.RECORD_VIDEO)
                             v.timed(WAITING_VIDEO, 20000)
+                        }
+                    ),
+                    AgentTransition(
+                        { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
+                        { _ , input ->
+                            v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("occupancy " + input.entityAs(NewStatus::class.java).status))
+                            ON
                         }
                     )
                 )
@@ -76,7 +84,14 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                     AgentTransition(
                         { _ , input -> Events.VIDEO_RECORDED.equals(input.operation)},
                         { _ , _ -> ON }
-                    )
+                    ),
+                    AgentTransition(
+                        { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
+                        { _ , input ->
+                            v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("occupancy " + input.entityAs(NewStatus::class.java).status))
+                            WAITING_VIDEO
+                        }
+                    ),
                 )
             }
 

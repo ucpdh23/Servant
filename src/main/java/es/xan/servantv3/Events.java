@@ -28,6 +28,7 @@ public enum Events implements Event {
 	NEW_FILE_STORED(VideoMessage.class),
 
 	DOOR_STATUS_CHANGED(NewStatus.class),
+	OCCUPANCY_CHANGED(NewStatus.class),
 	WATER_LEAK_STATUS_CHANGED(NewStatus.class),
 	VIDEO_RECORDED(null),
 

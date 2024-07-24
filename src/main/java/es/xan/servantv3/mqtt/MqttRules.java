@@ -30,6 +30,13 @@ public enum MqttRules {
                 vertx.publishAction(TemperatureVerticle.Actions.SAVE, temperature);
             }
     ),
+    MOVIMIENTO(
+            new TopicPredicate("zigbee2mqtt/Movimiento"),
+            (message, vertx) -> {
+                Boolean contact = message.payload().toJsonObject().getBoolean("occupancy");
+                vertx.publishEvent(Events.OCCUPANCY_CHANGED, new NewStatus(contact.toString()));
+            }
+    ),
     DOOR(
             new TopicPredicate("zigbee2mqtt/Puerta"),
             (message, vertx) -> {
