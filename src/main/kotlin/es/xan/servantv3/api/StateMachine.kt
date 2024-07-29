@@ -3,9 +3,7 @@ package es.xan.servantv3.api
 import es.xan.servantv3.*
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
-import java.util.*
-import kotlin.concurrent.schedule
-import kotlin.concurrent.timer
+
 
 /**
  * I love state machines!
@@ -78,7 +76,7 @@ interface AgentContext {
 
 class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle, val context: AgentContext) {
 
-	private var schedule: TimerTask? = null
+	private var scheduleId: Long? = null
 
 	private val servantContext = ServantContext(verticle, this)
 
@@ -115,7 +113,7 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 						this.setupTimeout(newState.period)
 						newState = newState.state
 					} else {
-						this.schedule?.cancel()
+						this.verticle.vertx.cancelTimer(scheduleId!!)
 					}
 
 					if (currentState != newState) {
@@ -138,10 +136,10 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 	fun setupTimeout(period: Long) {
 		LoggerFactory.getLogger(Agent::class.java).info("setupTimeout...")
 
-		this.schedule?.cancel();
+		verticle.vertx.cancelTimer(this.scheduleId!!);
 
-		this.schedule = Timer().schedule(period) {
-			LoggerFactory.getLogger(Agent::class.java).info("timer is out!")
+		this.scheduleId = verticle.vertx.setTimer(period) { _ ->
+			LoggerFactory.getLogger(Agent::class.java).info("time is out!")
 			_process(null, true);
 		}
 

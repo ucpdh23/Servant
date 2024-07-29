@@ -165,6 +165,7 @@ public class RoadVerticle extends AbstractServantVerticle {
                 TextMessage response = new TextMessage(user, "Starting monitor " + windows.size() + " windows ...");
                 publishAction(ParrotVerticle.Actions.SEND, response);
             } catch (Exception e) {
+                LOGGER.warn(e.getMessage(), e);
                 throw new ServantException(e);
             }
 

@@ -7,10 +7,9 @@ import com.google.maps.model.LatLng;
 import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.ServantException;
 import es.xan.servantv3.messages.DGTMessage;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.impl.URIDecoder;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -76,7 +75,10 @@ public class RoadUtils {
 
                     String trkpt = _resolveGPXfromGoogleMap(gMapURL);
                     Window current = null;
-                    for (TrackPoint point : throwingSuplierWrapper(() -> parseXML(trkpt))) {
+                    List<RoadUtils. TrackPoint> points = throwingSuplierWrapper(() -> parseXML(trkpt));
+                    LOGGER.info("Identified [{}] points", points.size());
+
+                    for (TrackPoint point : points) {
                         if (current == null) {
                             current = new Window(point.lat, point.lon);
                             output.add(current);
@@ -94,11 +96,14 @@ public class RoadUtils {
                 (List<Window> output) -> output != null && output.size() > 0
         );
 
+
+        windowList = null;
         if (windowList == null) {
             Pair<TrackPoint, TrackPoint> extremes = _resolveSourceAndOrigin(gMapURL);
             List<TrackPoint> trackPoints = graphhopperRoute(extremes.getLeft(), extremes.getRight());
 
             windowList = new ArrayList<>();
+            LOGGER.info("graphhopper route points [{}]", trackPoints.size());
 
             Window current = null;
             for (TrackPoint point : trackPoints) {
@@ -108,7 +113,7 @@ public class RoadUtils {
                 }
 
                 double distance = current.calculateDistance(point);
-                if (distance > 2) {
+                if (distance > 0.2) {
                     current = new Window(point.lat, point.lon);
                     windowList.add(current);
                 }
@@ -143,14 +148,13 @@ public class RoadUtils {
 
         try (CloseableHttpResponse response = sHttpClient.execute(request)) {
             int statusCode = response.getStatusLine().getStatusCode();
-            System.out.println("Response status code: " + statusCode);
+            LOGGER.info("Response routingOpenstreetmap status code: [{}]", statusCode);
 
             if (statusCode == 200) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     String jsonString = EntityUtils.toString(entity);
-
-                    JsonObject object = Json.createReader(new StringReader(jsonString)).readObject();
+                    JsonObject object = new JsonObject(jsonString);
                     JsonObject path = object.getJsonArray("routes").getJsonObject(0);
 
                     JsonArray steps = path.getJsonArray("steps");
@@ -197,14 +201,14 @@ public class RoadUtils {
 
         try (CloseableHttpResponse response = sHttpClient.execute(request)) {
             int statusCode = response.getStatusLine().getStatusCode();
-            System.out.println("Response status code: " + statusCode);
+            LOGGER.info("graphhopperRoute Response status code: [{}]", statusCode);
 
             if (statusCode == 200) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     String jsonString = EntityUtils.toString(entity);
 
-                    JsonObject object = Json.createReader(new StringReader(jsonString)).readObject();
+                    JsonObject object = new JsonObject(jsonString);
                     JsonObject path = (JsonObject) object.getJsonArray("paths").getJsonObject(0);
                     String points = path.getString("points");
 
@@ -230,7 +234,7 @@ public class RoadUtils {
             // Process the response here
             // For example, you can get the response status code
             int statusCode = response.getStatusLine().getStatusCode();
-            System.out.println("Response status code: " + statusCode);
+            LOGGER.info("_resolveSourceAndOrigin response status code: [{}]", statusCode);
 
             if (statusCode == 302) {
                 Header[] locations = response.getHeaders("location");
@@ -270,6 +274,8 @@ public class RoadUtils {
             TrackPoint coordinate = resolveCoordinate(extreme);
 
             if (coordinate == null) {
+                LOGGER.info("resolving location from end [{}]", extreme);
+
                 extreme = URIDecoder.decodeURIComponent(extreme);
                 HttpGet request = new HttpGet("https://nominatim.openstreetmap.org/search");
                 URI uri = new URIBuilder(request.getURI())
@@ -289,14 +295,14 @@ public class RoadUtils {
                         JsonObject jsonObject = null;
                         String jsonString = EntityUtils.toString(entity);
                         if (jsonString.startsWith("[")) {
-                            JsonArray jsonArray = Json.createReader(new StringReader(jsonString)).readArray();
+                            var jsonArray = new JsonArray(jsonString);
                             jsonObject = jsonArray.getJsonObject(0);
-
                         } else if (jsonString.startsWith("{")) {
-                            jsonObject = Json.createReader(new StringReader(jsonString)).readObject();
+                            jsonObject = new JsonObject(jsonString);
                         }
 
-                        coordinate = new TrackPoint(jsonObject.getJsonNumber("lat").doubleValue(), jsonObject.getJsonNumber("lon").doubleValue());
+                        LOGGER.debug("[{}]", jsonObject);
+                        coordinate = new TrackPoint(Double.parseDouble(jsonObject.getString("lat")), Double.parseDouble(jsonObject.getString("lon")));
                     }
                 }
             }
@@ -363,6 +369,7 @@ public class RoadUtils {
     }
 
     private static String _resolveGPXfromGoogleMap(String gMapURL) throws ServantException {
+        LOGGER.info("_resolveGPXfromGoogleMap...");
         // maps.app.goo.gl%2FLtLS3sGiDrtjtGHR6
         String withoutHttps = gMapURL.substring(8);
         final String withoutHttps_2 = withoutHttps.split("\\?")[0];
@@ -390,7 +397,7 @@ public class RoadUtils {
                 // Process the response here
                 // For example, you can get the response status code
                 int statusCode = response.getStatusLine().getStatusCode();
-                System.out.println("Response status code: " + statusCode);
+                LOGGER.info("Response status code: [{}]", statusCode);
 
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
@@ -399,6 +406,8 @@ public class RoadUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            LOGGER.info("_resolveGPXfromGoogleMap");
         }
 
         return null;

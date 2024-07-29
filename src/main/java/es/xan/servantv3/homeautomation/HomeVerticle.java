@@ -93,7 +93,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		if ("true".equals(status.getStatus())) {
 			publishAction(Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss("detectada fuga de agua"));
 		} else {
-			publishAction(Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss("detectado algo de agua" + status.getStatus()));
+//			publishAction(Actions.NOTIFY_ALL_BOSS, new TextMessageToTheBoss("detectado algo de agua" + status.getStatus()));
+			LOGGER.info("detectado algo de agua [{}]", status.getStatus());
 		}
 	}
 
