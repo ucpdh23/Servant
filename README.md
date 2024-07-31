@@ -2,10 +2,15 @@
 
 **My Smart Home System**
 
-How do you manage your Shopping list? Can you schedule your domestic heating system in a regular basis from outside your home? Can you monitor the indoor and outdoor temperatures from everywhere?
-Would you like a domestic a DIY security system for your home? What about tracking your utility bills?
+Let me ask you some home management questions:
+- How do you manage your Shopping list to avoid forgiving anything?
+- Don't you like to manage your heating system from your google calendar?
+- Don't you like to monitor the home and outdoor temperature from everywhere?
+- Would you like a DIY security system for your home?
+- What about tracking your utilities bills?
 
-     Servant is a home assistant platform to handle various domestic and recurrent activities efficiently.     
+
+**Servant is a home assistant platform to handle various domestic and recurrent activities efficiently.**
      
 
 ## **Introduction**
