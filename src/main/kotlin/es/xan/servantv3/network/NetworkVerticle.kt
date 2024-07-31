@@ -4,13 +4,19 @@ import es.xan.servantv3.*
 import es.xan.servantv3.messages.Device
 import es.xan.servantv3.messages.DeviceSecurity
 import es.xan.servantv3.messages.DeviceStatus
+import es.xan.servantv3.road.RoadUtils
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
 import org.apache.commons.lang3.tuple.Pair
+import org.apache.http.client.config.CookieSpecs
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.impl.client.HttpClients
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
+
+
 
 
 /**
@@ -23,7 +29,7 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	
 	companion object {
         val LOG = LoggerFactory.getLogger(NetworkVerticle::class.java.name)
-		val TTL = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES); 
+		val TTL = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
     }
 
 	private var mConfiguration: JsonObject? = null

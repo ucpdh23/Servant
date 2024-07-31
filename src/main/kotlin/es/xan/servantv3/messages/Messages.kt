@@ -51,6 +51,8 @@ data class Configure(var field: String, var value: String)
  * DTOs
  */
 
+data class VersionInfo(var filename: String, var tagName: String, var url: String)
+
 data class Event(var name: String, var status: String, var timestamp: Long)
 
 data class Person(var name: String, var inHome: Boolean)

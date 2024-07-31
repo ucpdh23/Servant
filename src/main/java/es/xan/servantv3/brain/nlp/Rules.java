@@ -5,6 +5,7 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.UserContext;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
+import es.xan.servantv3.github.GithubVerticle;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.lamp.LampVerticle;
@@ -304,6 +305,13 @@ public enum Rules {
 			(tokens, userContext) -> { return new UpdateState("off");},
 			msg -> { return reply(null, TranslationUtils.forwarding(msg));},
 			"Ex. security off"
+	),
+	GITHUB_VERSION_UPDATE(GithubVerticle.Actions.UPDATE_VERSION,
+			isContextFree()
+					.and(messageStartsWith("source: new version ")),
+			(tokens, userContext) -> {return new TextMessage("dummy", userContext.thisMessage);},
+			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
+			"Mark device status"
 	),
 //	REMINDER(Constant.PARRONT_VERTICLE, false, messageContains("reminder"), TranslationType.COPY),
 //	BOILER_STATUS(Constant.OPERATION_BOILER_STATE_CHECKER, true, messageContains("checkBoilerStatus"), TranslationType.OPERATION),

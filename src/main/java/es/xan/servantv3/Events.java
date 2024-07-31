@@ -32,6 +32,8 @@ public enum Events implements Event {
 	WATER_LEAK_STATUS_CHANGED(NewStatus.class),
 	VIDEO_RECORDED(null),
 
+	NEW_VERSION_AVAILABLE(VersionInfo.class),
+
 	_EVENT_(es.xan.servantv3.messages.Event.class),
 
 	
