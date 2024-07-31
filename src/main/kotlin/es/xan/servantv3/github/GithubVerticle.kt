@@ -35,7 +35,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
                 RequestConfig.custom()
                 .setCookieSpec(CookieSpecs.STANDARD)
                     .setConnectTimeout(10000)
-                    .setSocketTimeout(30000)
+                    .setSocketTimeout(60000)
                 .build())
             .build()
 
@@ -207,7 +207,13 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
                     val inputStream = entity.content
 
                     inputStream.use { input ->
-                        val bytes = Files.copy(input, File(destination).toPath(), StandardCopyOption.REPLACE_EXISTING)
+                        val tempFile = File.createTempFile(version.tagName, "bin")
+                        val bytes = Files.copy(input, tempFile.toPath())
+
+                        Files.copy(tempFile.toPath(), File(destination).toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+                        tempFile.delete()
+
                         LOG.debug("downloaded [{}] bytes", bytes)
                     }
                 }
