@@ -296,7 +296,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		
 		if (matcher.find()) {
 			final String verticleName = matcher.group(1).toLowerCase() + ".verticle";
-			LOGGER.debug("verticleName [{}]", verticleName);
+//			LOGGER.debug("verticleName [{}]", verticleName);
 			
 			return verticleName;
 		}
