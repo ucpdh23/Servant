@@ -2,6 +2,7 @@ package es.xan.servantv3.github
 
 import com.google.common.cache.CacheBuilder
 import es.xan.servantv3.*
+import es.xan.servantv3.ThrowingUtils.retry3times
 import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.messages.TextMessage
 import es.xan.servantv3.messages.TextMessageToTheBoss
@@ -35,7 +36,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
                 RequestConfig.custom()
                 .setCookieSpec(CookieSpecs.STANDARD)
                     .setConnectTimeout(10000)
-                    .setSocketTimeout(60000)
+                    .setSocketTimeout(90000)
                 .build())
             .build()
 
@@ -200,7 +201,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
     fun downloadVersion(version: VersionInfo, destination : String) : Boolean {
         LOG.info("downloading version [{}]", version.tagName)
         val request = HttpGet(version.url)
-        try {
+        val output = retry3times({ ->
             HTTP_CLIENT.execute(request).use { response ->
                 if (response.statusLine.statusCode == 200) {
                     val entity: HttpEntity = response.entity
@@ -208,7 +209,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
 
                     inputStream.use { input ->
                         val tempFile = File.createTempFile(version.tagName, "bin")
-                        val bytes = Files.copy(input, tempFile.toPath())
+                        val bytes = Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
                         Files.copy(tempFile.toPath(), File(destination).toPath(), StandardCopyOption.REPLACE_EXISTING)
 
@@ -217,14 +218,13 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
                         LOG.debug("downloaded [{}] bytes", bytes)
                     }
                 }
-
-                return true
             }
-        } catch (e : Throwable) {
-            LOG.warn(e.message, e)
-        }
 
-        return false
+            true},
+            { x -> x});
+
+        if (output == null) return false;
+        return output;
     }
 
 }
