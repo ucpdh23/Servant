@@ -8,6 +8,8 @@ import es.xan.servantv3.road.RoadUtils
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.apache.commons.lang3.tuple.Pair
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
@@ -107,49 +109,53 @@ class NetworkVerticle : AbstractServantVerticle(Constant.NETWORK_VERTICLE) {
 	fun check_status() {
 		LOG.debug("checking network status...");
 
-		val result = SSHUtils.runRemoteCommandExtended(
-			this.mConfiguration?.getString("server"),
-			this.mConfiguration?.getString("usr"),
-			this.mConfiguration?.getString("pws"),
-			"sudo nmap -PR -sn 192.168.1.0/24")
+		val server = this.mConfiguration?.getString("server")
+		val usr = this.mConfiguration?.getString("usr")
+		val pws = this.mConfiguration?.getString("pws")
 
-		val networkDevices = computeDevices(result.output)
+		GlobalScope.launch {
+			val result = SSHUtils.runRemoteCommandExtended(
+				server, usr, pws,
+				"sudo nmap -PR -sn 192.168.1.0/24")
 
-		val currTimeStamp = Date().time
+			val networkDevices = computeDevices(result.output)
 
-		val stateChanged : MutableSet<Device> = HashSet()
-		networkDevices.forEach { device ->
-			val found = storedStatus[device.mac]
+			val currTimeStamp = Date().time
 
-			if (found == null) {
-				storedStatus[device.mac] = device
-				stateChanged.add(device)
-			} else {
-				if (found.status != DeviceStatus.UP) {
-					if (found.status != DeviceStatus.UNKNOWN || found.security == DeviceSecurity.INSECURE)
-						stateChanged.add(found)
+			val stateChanged : MutableSet<Device> = HashSet()
+			networkDevices.forEach { device ->
+				val found = storedStatus[device.mac]
 
-					found.firstTimestamp = device.firstTimestamp
-					found.lastTimestamp = device.lastTimestamp
-					found.status = DeviceStatus.UP
-
+				if (found == null) {
+					storedStatus[device.mac] = device
+					stateChanged.add(device)
 				} else {
-					found.lastTimestamp = device.lastTimestamp
+					if (found.status != DeviceStatus.UP) {
+						if (found.status != DeviceStatus.UNKNOWN || found.security == DeviceSecurity.INSECURE)
+							stateChanged.add(found)
+
+						found.firstTimestamp = device.firstTimestamp
+						found.lastTimestamp = device.lastTimestamp
+						found.status = DeviceStatus.UP
+
+					} else {
+						found.lastTimestamp = device.lastTimestamp
+					}
 				}
 			}
-		}
 
-		storedStatus
-			.filterValues { dev -> dev.lastTimestamp < currTimeStamp - TTL}
-			.forEach { _, dev ->
-				if (dev.status != DeviceStatus.UNKNOWN || dev.security == DeviceSecurity.INSECURE)
-					stateChanged.add(dev)
+			storedStatus
+				.filterValues { dev -> dev.lastTimestamp < currTimeStamp - TTL}
+				.forEach { _, dev ->
+					if (dev.status != DeviceStatus.UNKNOWN || dev.security == DeviceSecurity.INSECURE)
+						stateChanged.add(dev)
 
-				dev.status = DeviceStatus.DOWN
-			};
+					dev.status = DeviceStatus.DOWN
+				};
 
-		for (device in stateChanged) {
-			publishEvent(Events.NETWORK_DEVICES_STATUS_UPDATED, device)
+			for (device in stateChanged) {
+				publishEvent(Events.NETWORK_DEVICES_STATUS_UPDATED, device)
+			}
 		}
 	}
 

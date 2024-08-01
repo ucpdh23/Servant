@@ -113,7 +113,8 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 						this.setupTimeout(newState.period)
 						newState = newState.state
 					} else {
-						this.verticle.vertx.cancelTimer(scheduleId!!)
+						val scheduleId = this.scheduleId
+						if (scheduleId != null) this.verticle.vertx.cancelTimer(scheduleId)
 					}
 
 					if (currentState != newState) {
@@ -136,7 +137,8 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 	fun setupTimeout(period: Long) {
 		LoggerFactory.getLogger(Agent::class.java).info("setupTimeout...")
 
-		verticle.vertx.cancelTimer(this.scheduleId!!);
+		val scheduleId = this.scheduleId
+		if (scheduleId != null) verticle.vertx.cancelTimer(scheduleId);
 
 		this.scheduleId = verticle.vertx.setTimer(period) { _ ->
 			LoggerFactory.getLogger(Agent::class.java).info("time is out!")

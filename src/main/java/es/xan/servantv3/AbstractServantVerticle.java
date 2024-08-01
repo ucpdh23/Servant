@@ -113,11 +113,11 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private void processEvent(Message<Object> message) {
 		JsonObject body = (JsonObject) message.body();
 		String eventName = body.getString("action");
-		LOGGER.debug("Processing event [{}]", eventName);
+//		LOGGER.debug("Processing event [{}]", eventName);
 		
 		if (!mEventMap.containsKey(eventName)) {
-			LOGGER.debug("mEventMap:" + mEventMap.keySet());
-			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
+//			LOGGER.debug("mEventMap:" + mEventMap.keySet());
+//			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
 			return;
 		}
 		
@@ -132,7 +132,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	}
 
 	private void processInStateMachine(Object operation, @Nullable JsonObject entity) {
-		LOGGER.info("processInStateMachine [{}-{}]", operation, entity.toString());
+//		LOGGER.info("processInStateMachine [{}-{}]", operation, entity.toString());
 		AgentInput input = new AgentInput(operation, entity);
 		this.agent.process(input);
 	}
@@ -140,7 +140,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private void processEventAsMethodExecution(Event event, Pair<Event, Method> info, JsonObject body, Message<Object> message) {
 		try {
 			int count = info.right.getParameterCount();
-			LOGGER.trace("trying to execute method [{}] with [{}] parameters", info.right.getName(), count);
+//			LOGGER.trace("trying to execute method [{}] with [{}] parameters", info.right.getName(), count);
 
 			if (count == 0) {
 				info.right.invoke(this);
@@ -170,11 +170,11 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		final JsonObject json = (JsonObject) message.body();
 		final String actionName = json.getString("action");
 		
-		LOGGER.debug("Action [{}]", actionName);
+//		LOGGER.debug("Action [{}]", actionName);
 		
 		Pair<Action, Method> actionPair = mActionMap.get(actionName);
 		if (actionPair == null) {
-			LOGGER.warn("Cannot perform action [{}] in verticle [{}]", actionName, mVerticleName);
+//			LOGGER.warn("Cannot perform action [{}] in verticle [{}]", actionName, mVerticleName);
 			return;
 		}
 		
@@ -185,7 +185,7 @@ public class AbstractServantVerticle extends AbstractVerticle {
 			JsonObject entity = json.containsKey("bean")? json.getJsonObject("bean") : null;
 			processInStateMachine(action, entity);
 		} else {
-			LOGGER.debug("mapped [{}-{}]", action, method.getName());
+//			LOGGER.debug("mapped [{}-{}]", action, method.getName());
 
 			// Actions are executed as very hard code.
 			vertx.executeBlocking(future -> {
