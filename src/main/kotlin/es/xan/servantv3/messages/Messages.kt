@@ -21,6 +21,11 @@ data class TextMessage(var user: String, var message: String)
 data class VideoMessage(var user: String, var message: String, var filepath: String)
 
 /**
+ * Message for reply
+ */
+data class JiraMessage(var agent: String, var issueNumber: Int, var message: String)
+
+/**
  * like textmessage but using the default user defined in the configuration file
  */
 data class TextMessageToTheBoss(var message: String)

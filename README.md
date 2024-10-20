@@ -74,3 +74,7 @@ Integration of any kind of device into the Internet of Things technology is easy
 * Built-in facilities on top of Vertx event bus to handle the interaction with events in a controlled way. 
 
 * SMTP bridge to interact with external systems.
+
+**Requirements**
+
+* Java 21

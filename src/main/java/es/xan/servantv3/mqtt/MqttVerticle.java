@@ -77,24 +77,24 @@ public class MqttVerticle extends AbstractServantVerticle {
 
         MqttServer mqttServer = MqttServer.create(vertx, config);
         mqttServer.exceptionHandler(handler -> {
-           System.out.println(handler);
+            LOGGER.error(handler.getMessage(), handler);
         });
         mqttServer.endpointHandler(endpoint -> {
                     endpoints.put(endpoint.clientIdentifier(), endpoint);
 
                     // shows main connect info
-                    LOGGER.info("MQTT client [" + endpoint.clientIdentifier() + "] request to connect, clean session = " + endpoint.isCleanSession());
+                    LOGGER.info("MQTT client [{}] request to connect, clean session = [{}]", endpoint.clientIdentifier(), endpoint.isCleanSession());
 
                     if (endpoint.auth() != null) {
-                        LOGGER.debug("[username = " + endpoint.auth().getUsername() + ", password = " + endpoint.auth().getPassword() + "]");
+                        LOGGER.debug("username = [{}], password = [{}]", endpoint.auth().getUsername(), endpoint.auth().getPassword());
                     }
-                    LOGGER.debug("[properties = " + endpoint.connectProperties().listAll() + "]");
+                    LOGGER.debug("[properties = [{}]", endpoint.connectProperties().listAll());
                     if (endpoint.will() != null) {
-                        LOGGER.debug("[will topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will() +
-                                " QoS = " + endpoint.will() + " isRetain = " + endpoint.will() + "]");
+                        LOGGER.debug("will topic = [{}] msg = " + endpoint.will() +
+                                " QoS = " + endpoint.will() + " isRetain = " + endpoint.will() + "]", endpoint.will().getWillTopic());
                     }
 
-                    LOGGER.debug("[keep alive timeout = " + endpoint.keepAliveTimeSeconds() + "]");
+                    LOGGER.debug("keep alive timeout = [{}]", endpoint.keepAliveTimeSeconds());
 
                     // accept connection from the remote client
                     endpoint.accept(false);

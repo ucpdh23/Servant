@@ -4,8 +4,6 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
-import es.xan.servantv3.knowledge.utils.parser.Parser;
-import es.xan.servantv3.knowledge.utils.parser.Tokenizer;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.VideoMessage;
 import es.xan.servantv3.neo4j.Neo4jVerticle;
@@ -15,8 +13,7 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +75,7 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
                     fact.put("when", buildPeriod(datasource.getString("start_billing_period"), datasource.getString("end_billing_period")));
                     fact.put("where", "HOME");
                     fact.put("who", "gas".equals(msg.getMessage())? "IBERDROLA" : "NATURGY");
-                    fact.put("what",  buildBilling(msg.getMessage().toUpperCase(Locale.ROOT)));
+                    fact.put("what",  buildAction("PAY"));
 
                     publishAction(Neo4jVerticle.Actions.ADD_FACT, fact);
                 }
@@ -87,9 +84,9 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
         }
     }
 
-    private JsonObject buildBilling(String name) {
+    private JsonObject buildAction(String name) {
         JsonObject output = new JsonObject();
-        output.put("type", "BILLING");
+        output.put("type", "ACTION");
         output.put("name", name);
 
         return output;
@@ -131,17 +128,69 @@ public class KnowledgeVerticle extends AbstractServantVerticle {
     }
 
     public void process_input(TextMessage text, Message<Object> msg) {
-        Object ast = Parser.parse(new Tokenizer().tokenize(text.getMessage()));
+        String input = text.getMessage();
+        List<String> tokens = tokenizer(input);
 
-        if (ast instanceof List) {
+        JsonObject output = new JsonObject();
+        JsonObject current = output;
+        Deque<JsonObject> queue = new LinkedList<>();
 
-        } else {
+        String propertyName = null;
 
+        for (String token : tokens) {
+            if (!output.fieldNames().contains("type")) {
+                output.put("type", token.toUpperCase());
+            } else if (!output.fieldNames().contains("name")) {
+                output.put("name", token.toUpperCase());
+            } else if (propertyName == null) {
+
+                
+            } else if (token.equals("(")){
+
+
+            }
         }
+
+
+
+    }
+
+    public static List<String> tokenizer(String input) {
+        ArrayList<String> tokens = new ArrayList<String>();
+        String current = "";
+        for(int i = 0 ; i < input.length(); i++)
+        {
+            char c = input.charAt(i);
+            if(current.length() > 0 && c==' ')
+            {
+                tokens.add(current);
+                current = "";
+                continue;
+            }
+            else if(c=='(')
+            {
+                tokens.add("(");
+            }
+            else if(c==')')
+            {
+                tokens.add(current);
+                current = "";
+
+                tokens.add(")");
+            } else {
+                current += c;
+            }
+        }
+
+        if(current.length() > 0)
+            tokens.add(current);
+
+        return tokens;
     }
 
     public final static void main(String[] args) {
-        Object ast = Parser.parse(new Tokenizer().tokenize("(FACT: ())"));
+        String input = "TYPE home (WHEN pepe)";
 
+        System.out.println(tokenizer(input));
     }
 }

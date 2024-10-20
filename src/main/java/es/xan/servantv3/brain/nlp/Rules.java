@@ -5,6 +5,7 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.UserContext;
 import es.xan.servantv3.brain.nlp.TranslationUtils.Reply;
+import es.xan.servantv3.github.AzureDevOpsVerticle;
 import es.xan.servantv3.github.GithubVerticle;
 import es.xan.servantv3.homeautomation.HomeUtils;
 import es.xan.servantv3.homeautomation.HomeVerticle;
@@ -12,9 +13,7 @@ import es.xan.servantv3.lamp.LampVerticle;
 import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.SecurityModeVerticle;
-import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
-import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
@@ -313,6 +312,28 @@ public enum Rules {
 			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
 			"Mark device status"
 	),
+	GITHUB_FETCH_ISSUES(AzureDevOpsVerticle.Actions.FETCH_OPEN_WORK_ITEMS,
+			isContextFree()
+					.and(messageStartsWith("open issues")),
+			(tokens, userContext) -> {return null;},
+			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
+			"Mark device status"
+	),
+	GITHUB_ADD_COMMENT_TO_ISSUE(AzureDevOpsVerticle.Actions.ADD_COMMENT_TO_WORK_ITEM,
+			isContextFree()
+					.and(messageStartsWith("add comment to issue")),
+			(tokens, userContext) -> {return  new JiraMessage("manager", 1, "prueba");},
+			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
+			"Mark device status"
+	),
+	GITHUB_ISSUE_DETAILS(AzureDevOpsVerticle.Actions.FETCH_WORK_ITEM_DETAILS,
+			isContextFree()
+					.and(messageStartsWith("fetch issue")),
+			(tokens, userContext) -> {return  new JiraMessage("manager", 1, "prueba");},
+			msg -> {return reply(null, TranslationUtils.forwarding(msg));},
+			"Mark device status"
+	),
+
 //	REMINDER(Constant.PARRONT_VERTICLE, false, messageContains("reminder"), TranslationType.COPY),
 //	BOILER_STATUS(Constant.OPERATION_BOILER_STATE_CHECKER, true, messageContains("checkBoilerStatus"), TranslationType.OPERATION),
 //	BOILER_AUTOMATIC_MODE(Constant.THERMOSTAT_VERTICLE, true, messageContains("boiler||caldera")

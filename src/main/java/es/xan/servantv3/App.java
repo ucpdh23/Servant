@@ -3,6 +3,7 @@ package es.xan.servantv3;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.calendar.CalendarVerticle;
 import es.xan.servantv3.folder.FolderVerticle;
+import es.xan.servantv3.github.AzureDevOpsVerticle;
 import es.xan.servantv3.github.GithubVerticle;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.knowledge.KnowledgeVerticle;
@@ -111,6 +112,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(AzureDevOpsVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 
 
 	}

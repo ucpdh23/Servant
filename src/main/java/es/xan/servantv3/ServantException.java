@@ -8,4 +8,8 @@ public class ServantException extends RuntimeException {
     public ServantException(Throwable th) {
         super(th);
     }
+
+    public ServantException(String message) {
+        super(message);
+    }
 }

@@ -77,14 +77,15 @@ public class Neo4jVerticle extends AbstractServantVerticle {
             }
         }
 
-        if (fact.getValue("what") != null) processWhat(fact.getValue("what"), id);
-        if (fact.getValue("when") != null) processWhen(fact.getValue("when"), id);
+        if (fact.getValue("what") != null) processLink(Question.WHAT, fact.getValue("what"), id);
+        if (fact.getValue("when") != null) processLink(Question.WHEN, fact.getValue("when"), id);
         if (fact.getValue("where") != null) processLink(Question.WHERE, fact.getValue("where"), id);
         if (fact.getValue("who") != null) processLink(Question.WHO, fact.getValue("who"), id);
-        if (fact.getValue("why") != null) processWhy(fact.getValue("why"), id);
+        if (fact.getValue("why") != null) processLink(Question.WHY, fact.getValue("why"), id);
 
     }
 
+    /*
     private void processWhy(Object obj, String id) {
         if (JsonObject.class.isInstance(obj)) {
             JsonObject why = (JsonObject) obj;
@@ -98,7 +99,9 @@ public class Neo4jVerticle extends AbstractServantVerticle {
         }
 
     }
+     */
 
+    /*
     private void processWhat(Object obj, String id) {
         if (JsonObject.class.isInstance(obj)) {
             JsonObject what = (JsonObject) obj;
@@ -115,10 +118,14 @@ public class Neo4jVerticle extends AbstractServantVerticle {
             }
         }
     }
+    */
 
     enum Question {
-        WHO("ENTITY"),
-        WHERE("PLACE");
+        WHAT("WHAT"),
+        WHEN("WHEN"),
+        WHO("WHO"),
+        WHY("WHY"),
+        WHERE("WHERE");
 
         private final String mDefaultType;
 
@@ -132,6 +139,7 @@ public class Neo4jVerticle extends AbstractServantVerticle {
 
     }
 
+    /*
     private void processWhen(Object obj, String id) {
         if (JsonObject.class.isInstance(obj)) {
             JsonObject when = (JsonObject) obj;
@@ -150,9 +158,39 @@ public class Neo4jVerticle extends AbstractServantVerticle {
             }
         }
     }
+    */
 
     private void processLink(Question question, Object obj, String rootId) {
         if (JsonObject.class.isInstance(obj)) {
+            JsonObject item = (JsonObject) obj;
+
+            Map map = new HashMap<>();
+
+            String type = item.getString("type");
+            for (String fieldName : item.fieldNames()) {
+                if ("type".equals(fieldName)) continue;
+                else {
+                    map.put(fieldName, item.getString(fieldName));
+                }
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.append("(o:");
+            builder.append(type);
+            builder.append(" {");
+
+
+            for (Object key : map.keySet()) {
+                builder.append(key).append(": $").append(key).append(", ");
+            }
+
+            builder.setLength(builder.length() - 2);
+            builder.append("})");
+
+            map.put("elementId", rootId);
+
+
+            EagerResult result = this.driver.executableQuery("MATCH (startNode) WHERE elementId(startNode) = $elementId MERGE " + builder.toString() + " MERGE (startNode)-[:" + question.getType() + "]->(o) RETURN startNode, o").withParameters(map).execute();
 
         } else if (String.class.isInstance(obj)) {
             String content = (String) obj;
