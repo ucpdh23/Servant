@@ -8,6 +8,7 @@ import es.xan.servantv3.messages.Temperature;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
 import es.xan.servantv3.messages.UpdateState;
 import es.xan.servantv3.modes.NightModeVerticle;
+import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import io.vertx.mqtt.messages.MqttPublishMessage;
@@ -72,6 +73,15 @@ public enum MqttRules {
                     vertx.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("on"));
                 } else if (action.equals("2_long_release")) {
                     vertx.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("off"));
+                }
+            }
+    ),
+    BUILDGENTIC_WELCOME(
+            new TopicPredicate("servant/buildgentic"),
+            (message, vertx) -> {
+                String action = message.payload().toJsonObject().getString("action");
+                if ("welcome".equals(action)) {
+                    vertx.publishAction(ScrumLeaderVerticle.Actions.WELCOME);
                 }
             }
     )

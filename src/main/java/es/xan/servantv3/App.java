@@ -17,6 +17,7 @@ import es.xan.servantv3.openia.OpenIAVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.road.RoadVerticle;
+import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
@@ -111,7 +112,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-
+		vertx.deployVerticle(ScrumLeaderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 
 	}
 

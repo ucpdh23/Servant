@@ -59,9 +59,7 @@ public class MqttVerticle extends AbstractServantVerticle {
     public void publish_msg(MqttMsg msg) {
         for (Map.Entry<String, MqttEndpoint> entry : this.endpoints.entrySet()) {
             entry.getValue().publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false );
-
         }
-        //this.client.publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false );
     }
 
     Map<String, MqttEndpoint> endpoints = new HashMap<>();
@@ -83,18 +81,20 @@ public class MqttVerticle extends AbstractServantVerticle {
                     endpoints.put(endpoint.clientIdentifier(), endpoint);
 
                     // shows main connect info
-                    LOGGER.info("MQTT client [" + endpoint.clientIdentifier() + "] request to connect, clean session = " + endpoint.isCleanSession());
+                    LOGGER.info("MQTT client [{}] request to connect, clean session = [{}]",
+                            endpoint.clientIdentifier(), endpoint.isCleanSession());
 
                     if (endpoint.auth() != null) {
-                        LOGGER.debug("[username = " + endpoint.auth().getUsername() + ", password = " + endpoint.auth().getPassword() + "]");
+                        LOGGER.debug("[username = {}, password = {}",
+                                endpoint.auth().getUsername(), endpoint.auth().getPassword());
                     }
-                    LOGGER.debug("[properties = " + endpoint.connectProperties().listAll() + "]");
+                    LOGGER.debug("[properties = {}]", endpoint.connectProperties().listAll());
                     if (endpoint.will() != null) {
-                        LOGGER.debug("[will topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will() +
-                                " QoS = " + endpoint.will() + " isRetain = " + endpoint.will() + "]");
+                        LOGGER.debug("[will topic = {} msg = {} QoS = {}]",
+                                endpoint.will().getWillTopic(), endpoint.will(), endpoint.will() );
                     }
 
-                    LOGGER.debug("[keep alive timeout = " + endpoint.keepAliveTimeSeconds() + "]");
+                    LOGGER.debug("[keep alive timeout = {}", endpoint.keepAliveTimeSeconds());
 
                     // accept connection from the remote client
                     endpoint.accept(false);
@@ -121,11 +121,16 @@ public class MqttVerticle extends AbstractServantVerticle {
                             LOGGER.info("payload: [{}]", message.payload().toString());
                         }
 
+                        if (MqttRules.BUILDGENTIC_WELCOME.equals(rule)) {
+                            LOGGER.info("buildgentic: [{}]", message.payload().toJsonObject().getString("action"));
+                            LOGGER.info("buildgentic [{}]", message.payload().toString());
+                        }
+
                         if (rule != null)  {
                             LOGGER.info("Found rule [{}]", rule);
                             rule.apply(message, this);
                         } else {
-                            LOGGER.info("Not found rule for message [{}]", message);
+                            LOGGER.info("Not found rule for message.topic [{}]", message.topicName());
                         }
 
                     }).publishReleaseHandler(messageId -> {

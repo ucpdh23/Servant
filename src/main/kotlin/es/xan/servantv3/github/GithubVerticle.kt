@@ -10,6 +10,7 @@ import es.xan.servantv3.messages.VersionInfo
 import es.xan.servantv3.network.NetworkVerticle
 import es.xan.servantv3.parrot.ParrotVerticle
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 
 class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
@@ -46,7 +48,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
             .build<String, String>()
     }
 
-    private var currentVersion: VersionInfo = VersionInfo("","","")
+    private var currentVersions: MutableMap<String, VersionInfo> = HashMap();
     private var mConfiguration: JsonObject? = null
 
     init {
@@ -58,7 +60,28 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
 
     fun initDatabase() {
         App.connection.createStatement().use { statement ->
-            statement.executeUpdate("create table if not exists servant_versions (id INTEGER PRIMARY KEY AUTOINCREMENT, tagname string, filename string, url string, status string)")
+            LOG.info("updating servant_versions...")
+            statement.executeUpdate("""
+                create table if not exists servant_versions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tagname string,
+                    filename string,
+                    url string,
+                    status string
+                )""".trimIndent());
+
+            val resultSet = statement.executeQuery("PRAGMA table_info(servant_versions)")
+            val columnExists = generateSequence {
+                if (resultSet.next()) resultSet.getString("name") else null
+            }.any { it.equals("project", ignoreCase = true) }
+
+            // Add 'project' column if it doesn't exist
+            if (!columnExists) {
+                statement.executeUpdate("ALTER TABLE servant_versions ADD COLUMN project TEXT")
+                statement.executeUpdate("UPDATE servant_versions SET project = 'servant'")
+            }
+
+            LOG.info("updated servant_versions")
         }
     }
 
@@ -66,14 +89,29 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
         super.start();
 
         this.mConfiguration = Vertx.currentContext().config().getJsonObject("GithubVerticle")
+        val projects = this.mConfiguration?.getJsonArray("projects");
 
-        vertx.setTimer(60000) { _ ->
-            publishAction(Actions.CHECK_UPDATED_VERSION)
+        if (projects == null) {
+            LOG.warn("Cannot initialize projects from configuration object");
+            return
+        };
+
+        for (project in projects.list) {
+            val jsonProject = project as JsonObject
+
+            if (jsonProject.getBoolean("updatedVersionRequired")) {
+                vertx.setTimer(60000) { _ ->
+                    publishAction(Actions.CHECK_UPDATED_VERSION, jsonProject)
+                }
+            }
+
+            vertx.setPeriodic(600000) { _ ->
+                publishAction(Actions.CHECK_NEW_VERSION, jsonProject);
+            }
+
         }
 
-        vertx.setPeriodic(600000) { _ ->
-            publishAction(Actions.CHECK_NEW_VERSION);
-        }
+
     }
 
     // *********** Supported actions
@@ -82,21 +120,22 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
         /**
          * Checks the current status the all the available devices
          */
-        CHECK_NEW_VERSION(null),
-        CHECK_UPDATED_VERSION(null),
+        CHECK_NEW_VERSION(JsonObject::class.java),
+        CHECK_UPDATED_VERSION(JsonObject::class.java),
         UPDATE_VERSION(TextMessage::class.java);
     }
 
-    fun check_updated_version() {
+    fun check_updated_version(project : JsonObject) {
         LOG.info("Check current version...")
 
         App.connection.createStatement().use { statement ->
+            val projectName = project.getString("name")
             var tagname = "not_found"
             var url = "not_found"
             var filename = "not_found"
             var status = "not_found"
 
-            statement.executeQuery("SELECT * FROM servant_versions ORDER BY id DESC LIMIT 1").use {  rs ->
+            statement.executeQuery("SELECT * FROM servant_versions WHERE project = '${projectName}' ORDER BY id DESC LIMIT 1").use {  rs ->
                 while (rs.next()) {
                     tagname = rs.getString("tagname")
                     filename = rs.getString("filename")
@@ -108,12 +147,16 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
             LOG.info("Found current version [{}-{}-{}-{}]", tagname, filename, url, status)
 
             if (status == "prepared") {
-                statement.executeUpdate("UPDATE servant_versions set status = 'installed' where tagname ='$tagname'")
-                publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("Installed version $tagname"))
+                statement.executeUpdate("UPDATE servant_versions set status = 'installed' where tagname ='$tagname' AND project = '${projectName}'")
+                publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("Installed version $tagname for project $projectName"))
             }
 
-            this.currentVersion = VersionInfo(filename, tagname, url)
-            LOG.debug("Loaded current version [{}-{}-{}] [{}]", this.currentVersion.filename, this.currentVersion.tagName, this.currentVersion.url, status)
+            this.currentVersions[projectName] = VersionInfo(filename, tagname, url)
+            LOG.debug("Loaded current version [{}->{}-{}-{}] [{}]", projectName,
+                this.currentVersions[projectName]?.filename,
+                this.currentVersions[projectName]?.tagName,
+                this.currentVersions[projectName]?.url,
+                status)
         }
 
     }
@@ -141,16 +184,19 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
         throw ServantException()
     }
 
-    fun check_new_version() {
-        val lastVersion = resolveLastVersionInfo(this.mConfiguration!!.getString("account"), this.mConfiguration!!.getString("repository"))
-        val requested = CACHE.get(lastVersion.tagName) { -> "NO" }
+    fun check_new_version(project : JsonObject) {
+        val projectName = project.getString("name")
+
+        val lastVersion = resolveLastVersionInfo(project.getString("account"), project.getString("repository"))
+        val cacheKey = projectName + "-" + lastVersion.tagName
+        val requested = CACHE.get(cacheKey) { -> "NO" }
         LOG.debug("[{}]->{}", lastVersion.tagName, requested)
 
-        if (lastVersion.tagName != this.currentVersion.tagName && requested == "NO") {
-            CACHE.put(lastVersion.tagName, "YES")
+        if (lastVersion.tagName != this.currentVersions[projectName]?.tagName && requested == "NO") {
+            CACHE.put(cacheKey, "YES")
 
             publishEvent(Events.NEW_VERSION_AVAILABLE, lastVersion)
-            publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("new version '${lastVersion.tagName}' available. Do you want to install it?"))
+            publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("new version '${lastVersion.tagName}' available for project '$projectName' Do you want to install it?"))
         }
     }
 
@@ -159,17 +205,23 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
             LOG.info("Updating version from remote repository")
 
             val expectedTagName = msg.message.split("'")[1]
-            val location = this.mConfiguration!!.getString("location")
+            val expectedProjectName = msg.message.split("'")[3]
+            val project = resolveProject(expectedProjectName)
+            if (project == null) {
+                LOG.warn("Cannot identify project $expectedProjectName")
+                return
+            }
 
-            val lastVersion = resolveLastVersionInfo(this.mConfiguration!!.getString("account"), this.mConfiguration!!.getString("repository"))
+            val location = project.getString("location")
+            val lastVersion = resolveLastVersionInfo(project.getString("account"), project.getString("repository"))
 
             if (expectedTagName == lastVersion.tagName) {
                 GlobalScope.launch {
                     LOG.info("Matches tagname: [{}]", expectedTagName)
                     val downloaded = downloadVersion(lastVersion, location)
                     if (downloaded) {
-                        addToDatabase(lastVersion)
-                        rebootServer()
+                        addToDatabase(expectedProjectName, lastVersion)
+                        rebootServer(project)
                     } else {
                         LOG.warn("problems downloading version");
                     }
@@ -181,24 +233,44 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
         }
     }
 
-    fun addToDatabase(version : VersionInfo) {
+    private fun resolveProject(name : String) : JsonObject? {
+        val projects = this.mConfiguration?.getJsonArray("projects") ?: return null;
+
+        for (project in projects) {
+            if ((project as JsonObject).getString("name") == name)
+                return project
+        }
+
+        return null;
+    }
+
+    private fun addToDatabase(projectName : String, version : VersionInfo) {
         App.connection.createStatement().use { statement ->
-            statement.executeUpdate("insert into servant_versions (tagname, filename, url, status) VALUES ('${version.tagName}', '${version.filename}', '${version.url}', 'prepared');")
+            statement.executeUpdate("""
+                insert into servant_versions
+                    (project, tagname, filename, url, status)
+                VALUES
+                    ('$projectName', '${version.tagName}', '${version.filename}', '${version.url}', 'prepared');"""
+            )
         }
     }
 
-    fun rebootServer() {
+    private fun rebootServer(project : JsonObject) {
         LOG.warn("requesting to reboot server")
 
         SSHUtils.runRemoteCommand(
-            this.mConfiguration!!.getString("host"),
-            this.mConfiguration!!.getString("user"),
-            this.mConfiguration!!.getString("pwd"),
-            this.mConfiguration!!.getString("command")
+            project.getString("host"),
+            project.getString("user"),
+            project.getString("pwd"),
+            project.getString("command")
         )
+
+        if (!project.getBoolean("updatedVersionRequired")) {
+            publishAction(Actions.CHECK_UPDATED_VERSION, project)
+        }
     }
 
-    fun downloadVersion(version: VersionInfo, destination : String) : Boolean {
+    private fun downloadVersion(version: VersionInfo, destination : String) : Boolean {
         LOG.info("downloading version [{}]", version.tagName)
         val request = HttpGet(version.url)
         val output = retry3times({ ->
