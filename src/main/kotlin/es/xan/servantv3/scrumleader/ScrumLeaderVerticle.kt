@@ -3,7 +3,9 @@ package es.xan.servantv3.scrumleader
 import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Action
 import es.xan.servantv3.Constant
+import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.messages.Device
+import es.xan.servantv3.messages.TextMessageToTheBoss
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
@@ -40,5 +42,6 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
 
     fun welcome() {
         LOG.info("registered buildgentic");
+        publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("Registered buildgentic"))
     }
 }
