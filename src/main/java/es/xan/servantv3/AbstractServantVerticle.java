@@ -271,6 +271,14 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		builder.setBean(JsonUtils.toJson(item));
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
+
+	public void publishActionWithRawBean(Action send, JsonObject bean) {
+		LOGGER.debug("publish action by bean [{}-{}]", send, bean);
+		ActionBuilder builder = MessageBuilder.createAction();
+		builder.setAction(send.getName());
+		builder.setBean(bean);
+		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
+	}
 	
 	public void publishAction(Action send, Handler<AsyncResult<Message<Object>>> replyHandler) {
 		LOGGER.debug("publish action [{}] with handler", send);

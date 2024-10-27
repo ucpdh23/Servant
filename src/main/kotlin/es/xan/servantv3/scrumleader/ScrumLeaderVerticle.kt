@@ -4,6 +4,7 @@ import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Action
 import es.xan.servantv3.Constant
 import es.xan.servantv3.homeautomation.HomeVerticle
+import es.xan.servantv3.messages.Agent
 import es.xan.servantv3.messages.Device
 import es.xan.servantv3.messages.TextMessageToTheBoss
 import io.vertx.core.Vertx
@@ -37,6 +38,7 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
          * Updates the status of the passing device
          */
         WELCOME(null),
+        REGISTER(Agent::class.java)
         ;
     }
 
@@ -44,4 +46,9 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
         LOG.info("registered buildgentic");
         publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("Registered buildgentic"))
     }
+
+    fun register(agent : Agent) {
+        LOG.info("registering Agent [{}]", agent.name)
+    }
+
 }

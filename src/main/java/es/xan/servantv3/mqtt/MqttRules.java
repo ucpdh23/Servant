@@ -11,6 +11,7 @@ import es.xan.servantv3.modes.NightModeVerticle;
 import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
+import io.vertx.core.json.JsonObject;
 import io.vertx.mqtt.messages.MqttPublishMessage;
 
 import java.util.Date;
@@ -79,9 +80,17 @@ public enum MqttRules {
     BUILDGENTIC_WELCOME(
             new TopicPredicate("servant/buildgentic"),
             (message, vertx) -> {
-                String action = message.payload().toJsonObject().getString("action");
-                if ("welcome".equals(action)) {
+                String str_action = message.payload().toJsonObject().getString("action");
+                if ("welcome".equals(str_action)) {
                     vertx.publishAction(ScrumLeaderVerticle.Actions.WELCOME);
+                } else {
+                    ScrumLeaderVerticle.Actions action = ScrumLeaderVerticle.Actions.valueOf(str_action.toUpperCase());
+                    if (message.payload().toJsonObject().fieldNames().contains("data")) {
+                        JsonObject data = message.payload().toJsonObject().getJsonObject("data");
+                        vertx.publishActionWithRawBean(action, data);
+                    } else {
+                        vertx.publishAction(action);
+                    }
                 }
             }
     )
