@@ -58,7 +58,15 @@ public class MqttVerticle extends AbstractServantVerticle {
 
     public void publish_msg(MqttMsg msg) {
         for (Map.Entry<String, MqttEndpoint> entry : this.endpoints.entrySet()) {
-            entry.getValue().publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false );
+            if (entry.getValue().isConnected()) {
+                try {
+                    entry.getValue().publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false);
+                } catch (IllegalStateException e) {
+                    LOGGER.warn(e.getMessage(), e);
+                }
+            } else {
+                LOGGER.warn("[{}] is not connected", entry.getKey());
+            }
         }
     }
 
@@ -75,7 +83,7 @@ public class MqttVerticle extends AbstractServantVerticle {
 
         MqttServer mqttServer = MqttServer.create(vertx, config);
         mqttServer.exceptionHandler(handler -> {
-           System.out.println(handler);
+            LOGGER.warn("handling exception", handler);
         });
         mqttServer.endpointHandler(endpoint -> {
                     endpoints.put(endpoint.clientIdentifier(), endpoint);
@@ -146,7 +154,6 @@ public class MqttVerticle extends AbstractServantVerticle {
                     } else {
 
                         LOGGER.warn("Error on starting the server", ar.cause());
-                        //ar.cause().printStackTrace();
                     }
                 });
 
