@@ -6,7 +6,9 @@ import es.xan.servantv3.Constant
 import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.messages.Agent
 import es.xan.servantv3.messages.Device
+import es.xan.servantv3.messages.MqttMsg
 import es.xan.servantv3.messages.TextMessageToTheBoss
+import es.xan.servantv3.mqtt.MqttVerticle
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import org.slf4j.LoggerFactory
@@ -49,6 +51,11 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
 
     fun register(agent : Agent) {
         LOG.info("registering Agent [{}]", agent.name)
+        publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("Registered " + agent.name))
+        val payload : JsonObject = JsonObject.of("action", "registration")
+        payload.put("tools", "empty")
+        Thread.sleep(2000)
+        publishAction(MqttVerticle.Actions.PUBLISH_MSG, MqttMsg("servant/buildgentic/" + agent.name, payload))
     }
 
 }
