@@ -40,8 +40,19 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
          * Updates the status of the passing device
          */
         WELCOME(null),
-        REGISTER(Agent::class.java)
+        REGISTER(Agent::class.java),
+        NOP(null),
+        EXECUTED(null),
         ;
+    }
+
+
+    fun executed() {
+        LOG.info("EXECUTED")
+    }
+
+    fun nop() {
+        LOG.info("NOP")
     }
 
     fun welcome() {

@@ -44,7 +44,7 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
 
         val CACHE = CacheBuilder.newBuilder()
             .maximumSize(50)
-            .expireAfterWrite(1, TimeUnit.DAYS)
+            .expireAfterWrite(10, TimeUnit.DAYS)
             .build<String, String>()
     }
 

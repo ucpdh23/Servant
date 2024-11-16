@@ -86,6 +86,8 @@ public class MqttVerticle extends AbstractServantVerticle {
             LOGGER.warn("handling exception", handler);
         });
         mqttServer.endpointHandler(endpoint -> {
+                    LOGGER.info("registering endpoint [{}]", endpoint.clientIdentifier());
+
                     endpoints.put(endpoint.clientIdentifier(), endpoint);
 
                     // shows main connect info
