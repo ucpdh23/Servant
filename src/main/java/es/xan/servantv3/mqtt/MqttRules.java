@@ -3,10 +3,7 @@ package es.xan.servantv3.mqtt;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.homeautomation.HomeVerticle;
-import es.xan.servantv3.messages.NewStatus;
-import es.xan.servantv3.messages.Temperature;
-import es.xan.servantv3.messages.TextMessageToTheBoss;
-import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.NightModeVerticle;
 import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
@@ -83,6 +80,9 @@ public enum MqttRules {
                 String str_action = message.payload().toJsonObject().getString("action");
                 if ("welcome".equals(str_action)) {
                     vertx.publishAction(ScrumLeaderVerticle.Actions.WELCOME);
+                } else if ("executed".equals(str_action)) {
+                    String str_message = message.payload().toJsonObject().getString("message");
+                    vertx.publishAction(ScrumLeaderVerticle.Actions.EXECUTED, new Executed(str_message));
                 } else {
                     ScrumLeaderVerticle.Actions action = ScrumLeaderVerticle.Actions.valueOf(str_action.toUpperCase());
                     if (message.payload().toJsonObject().fieldNames().contains("data")) {
