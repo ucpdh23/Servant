@@ -66,7 +66,22 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
 
         val payload : JsonObject = JsonObject.of(
             "action", "execute",
-            "query", "can you try to improve the current README.md file appending new content?"
+            "query", "you have assigned the ticket: #123\n" +
+                    "Assignee: Bob\n"+
+                    "Title:Readme.md\n" +
+                    "Description: Update README.md appending new content. Some targets for this change:\n" +
+                    " - Clarify the folders hierarchy.\n" +
+                    " - Provide some guidance about how testing must be performed.\n" +
+                    " The new content should include a detailed folder structure and a section on testing procedures.\n\n" +
+                    "-----------------------------------\n" +
+                    "Comments:\n" +
+                    "Date: 2024-11-29\n" +
+                    "Author: Williams (business team)\n" +
+                    "Content:\nBob, can you provide your feedback? let us know and update the description or create any subtask for the development team to proceed." +
+                    "------------------------\n" +
+                    "Date: 2024-11-30\n" +
+                    "Author: Bob\n" +
+                    "Content:\nI have updated the description to provide more clarity on the requirements. I will now create subtasks for the development team to proceed."
         )
 
         Thread.sleep(4000)
