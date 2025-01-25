@@ -124,8 +124,8 @@ class GithubVerticle: AbstractServantVerticle(Constant.GITHUB_VERTICLE) {
         /**
          * Checks the current status the all the available devices
          */
-        CHECK_NEW_VERSION(null),
-        CHECK_UPDATED_VERSION(null),
+        CHECK_NEW_VERSION(JsonObject::class.java),
+        CHECK_UPDATED_VERSION(JsonObject::class.java),
         UPDATE_VERSION(TextMessage::class.java),
         FETCH_OPEN_ISSUES(null),
         ADD_COMMENT_TO_ISSUE(JiraMessage::class.java),
