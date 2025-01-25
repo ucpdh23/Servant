@@ -60,7 +60,7 @@ public class LampVerticle extends AbstractServantVerticle {
 	}
 
 	public void switch_bedroom_lamp(UpdateState status, final Message<Object> msg) {
-		boolean on = ("on" == status.getNewStatus().toLowerCase())? true : false;
+		boolean on = ("on".equals(status.getNewStatus().toLowerCase()))? true : false;
 
 		String topic = this.mConfiguration.getJsonObject("topics").getString("bedroom");
 
@@ -68,7 +68,7 @@ public class LampVerticle extends AbstractServantVerticle {
 	}
 
 	public void switch_livingroom_lamp(UpdateState status, final Message<Object> msg) {
-		boolean on = ("on" == status.getNewStatus().toLowerCase())? true : false;
+		boolean on = ("on".equals(status.getNewStatus().toLowerCase()))? true : false;
 
 		String topic = this.mConfiguration.getJsonObject("topics").getString("livingroom");
 

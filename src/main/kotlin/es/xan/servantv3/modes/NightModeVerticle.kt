@@ -1,10 +1,6 @@
 package es.xan.servantv3.modes
 
-import es.xan.servantv3.AbstractServantVerticle
-import es.xan.servantv3.Action
-import es.xan.servantv3.Constant
-import es.xan.servantv3.Events
-import es.xan.servantv3.Scheduler
+import es.xan.servantv3.*
 import es.xan.servantv3.Scheduler.at
 import es.xan.servantv3.api.*
 import es.xan.servantv3.homeautomation.HomeVerticle
@@ -16,7 +12,19 @@ import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
 /**
- *
+ @NLPRules(
+    [
+        NLPRule(
+            RuleWhen(
+                RuleUtils.isContextFree()
+                    .and(RuleUtils.messageStartsWith("modo noche"))),
+            RuleThenPublishAction(
+                SecurityModeVerticle.Actions.CHANGE_STATUS,
+                { _, _ -> UpdateState("off")}
+            )
+        ),
+    ]
+)
  */
 class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE)  {
 
