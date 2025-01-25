@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import es.xan.servantv3.messages.MqttMsg;
+import es.xan.servantv3.mqtt.MqttVerticle;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -83,7 +85,8 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		try {
 			switch (status.getNewStatus().toLowerCase()) {
 			case "on":
-				boolean updatedOn = send("HIGH");
+
+				boolean updatedOn = send(true);
 				
 				if (updatedOn) {
 					mBoilerOn = true;
@@ -101,7 +104,7 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 				}
 				break;
 			case "off":
-				boolean updatedOff = send("LOW");
+				boolean updatedOff = send(false);
 				
 				if (updatedOff) {
 					mBoilerOn = false;
@@ -146,7 +149,18 @@ public class ThermostatVerticle extends AbstractServantVerticle {
 		LOGGER.info("started Thermostat");
 	}
 
-	private boolean send(String operation) throws UnsupportedEncodingException {
+	private boolean send(boolean on) throws UnsupportedEncodingException {
+		JsonObject object = new JsonObject()
+				.put("state", on? "ON" : "OFF");
+
+		String topic = mConfiguration.getString("topic");
+
+		publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg(topic + "/set", object));
+
+		return true;
+	}
+
+	private boolean _send(String operation) throws UnsupportedEncodingException {
 		LOGGER.info("setting thermostat to [{}]", operation);
 		
 		final String url = mConfiguration.getString("url");

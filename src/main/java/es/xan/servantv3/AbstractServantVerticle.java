@@ -90,6 +90,19 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		return map;
 	}
 
+	protected Boolean currentStateIs(AgentState<AgentInput>...states)  {
+		if (this.agent == null) {
+			LOGGER.warn("Undefined state machine for this verticle. Doesn't make sense to validate the state. ");
+			return Boolean.FALSE;
+		}
+
+		for (AgentState<AgentInput> state : states) {
+			if (state == this.agent.getCurrentState()) return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *  
@@ -269,6 +282,14 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		builder.setBean(JsonUtils.toJson(item));
+		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
+	}
+
+	public void publishActionWithRawBean(Action send, JsonObject bean) {
+		LOGGER.debug("publish action by bean [{}-{}]", send, bean);
+		ActionBuilder builder = MessageBuilder.createAction();
+		builder.setAction(send.getName());
+		builder.setBean(bean);
 		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
 	}
 	

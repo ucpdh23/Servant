@@ -1,6 +1,8 @@
 package es.xan.servantv3;
 
 import es.xan.servantv3.messages.*;
+import es.xan.servantv3.modes.NightModeVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle;
 
 /**
  * List of events 
@@ -34,9 +36,10 @@ public enum Events implements Event {
 
 	NEW_VERSION_AVAILABLE(VersionInfo.class),
 
+	REMOTE_CONTROL(NewStatus.class),
+
 	_EVENT_(es.xan.servantv3.messages.Event.class),
 
-	
 	;
 	
 	

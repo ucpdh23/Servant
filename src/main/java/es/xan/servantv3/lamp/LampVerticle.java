@@ -9,19 +9,19 @@ import es.xan.servantv3.mqtt.MqttVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
 /**
- * Turns on and off the bedroom's lamp 
+ * Turns on and off lamps.
+ * Right now there are two lamps support by this mechanism.
+ * Both are connected to the zibgee home network, therefore servant uses the mqtt bridge
+ *
+ *
  * @author Xan
  *
  */
@@ -39,9 +39,12 @@ public class LampVerticle extends AbstractServantVerticle {
 
 	private JsonObject mConfiguration;
 
-	
+	/**
+	 * UpdateState.newStatus = on | off
+	 */
 	public enum Actions implements Action {
-		SWITCH_LAMP(UpdateState.class)
+		SWITCH_LIVINGROOM_LAMP(UpdateState.class),
+		SWITCH_BEDROOM_LAMP(UpdateState.class),
 		;
 		
 		private Class<?> mMessageClass;
@@ -55,22 +58,26 @@ public class LampVerticle extends AbstractServantVerticle {
 			return mMessageClass;
 		}
 	}
-	
-	public void switch_lamp(UpdateState status, final Message<Object> msg) {
-		boolean on = false;
-		
-		switch (status.getNewStatus().toLowerCase()) {
-		case "on":
-			on = true;
-			break;
-		}
-			
-		switch_status(on, msg);
+
+	public void switch_bedroom_lamp(UpdateState status, final Message<Object> msg) {
+		boolean on = ("on" == status.getNewStatus().toLowerCase())? true : false;
+
+		String topic = this.mConfiguration.getJsonObject("topics").getString("bedroom");
+
+		switch_status(topic, on, msg);
+	}
+
+	public void switch_livingroom_lamp(UpdateState status, final Message<Object> msg) {
+		boolean on = ("on" == status.getNewStatus().toLowerCase())? true : false;
+
+		String topic = this.mConfiguration.getJsonObject("topics").getString("livingroom");
+
+		switch_status(topic, on, msg);
 	}
 	
-	private void switch_status(boolean on, final Message<Object> msg) {
+	private void switch_status(String topic, boolean on, final Message<Object> msg) {
 		try {
-			boolean updatedOn = send(on);
+			boolean updatedOn = send(topic, on);
 				
 			if (updatedOn) {
 				ReplyBuilder builderOn = MessageBuilder.createReply();
@@ -89,8 +96,6 @@ public class LampVerticle extends AbstractServantVerticle {
 		}
 	}
 	
-	
-	
 	@Override
 	public void start() {
 		super.start();
@@ -101,47 +106,12 @@ public class LampVerticle extends AbstractServantVerticle {
 		LOGGER.info("started Thermostat");
 	}
 
-	private boolean send(boolean on) throws UnsupportedEncodingException {
+	private boolean send(String topic, boolean on) throws UnsupportedEncodingException {
 		JsonObject object = new JsonObject()
 			.put("state", on? "ON" : "OFF");
-
-		String topic = mConfiguration.getString("topic");
 
 		publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg(topic + "/set", object));
 
 		return true;
-	}
-
-	private boolean _send(boolean on) throws UnsupportedEncodingException {
-		LOGGER.info("setting lamp to [{}]", on);
-		
-		String url = mConfiguration.getString("url");
-		String token = mConfiguration.getString("token");
-		
-		if (on) {
-			url = url + "/switchOn";
-		} else {
-			url = url + "/switchOff";
-		}
-		
-		final HttpPost httpPost = new HttpPost(url);
-/*		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("access_token", token));
-		nvps.add(new BasicNameValuePair("params", "empty"));
-		httpPost.setEntity(new UrlEncodedFormEntity(nvps));*/
-
-		try (CloseableHttpResponse response = mHttpclient.execute(httpPost)) {
-			LOGGER.info("StatusCode: [{}]", response.getStatusLine().getStatusCode());
-		    final HttpEntity entity = response.getEntity();
-		    
-		    String content = EntityUtils.toString(entity);
-		    LOGGER.info(content);
-		    JsonObject json = new JsonObject(content);
-		    
-		    return json.getBoolean("connected", Boolean.FALSE);
-		} catch (Exception e) {
-			LOGGER.warn("Cannot setting boiler to [{}]", on, e);
-			return false;
-		}
 	}
 }

@@ -69,7 +69,11 @@ fun interface AgentState<V> {
 	}
 }
 
-class AgentTransition<V, S : AgentState<V>>(val predicate : (context: AgentContext, input : V) -> Boolean, val operation: (context: AgentContext, input : V)  -> S)
+//class AgentTransition<V, S : AgentState<V>>(val predicate : (context: AgentContext, input : V) -> Boolean, val operation: (context: AgentContext, input : V)  -> S)
+class AgentTransition<V, S : AgentState<V>>(val predicate : When<V>, val operation: Then<V, S>)
+
+class When<V>(val predicate : (context: AgentContext, input : V) -> Boolean)
+class Then<V, S : AgentState<V>>(val operation: (context: AgentContext, input : V)  -> S)
 
 interface AgentContext {
 }
@@ -102,8 +106,8 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 				currentState = currentState.timeout()
 			} else if (input != null) {
 				var newState = currentState.trans(servantContext)
-					.firstOrNull { tran -> tran.predicate.invoke(context, input) }
-					?.run { operation.invoke(context, input) }
+					.firstOrNull { tran -> tran.predicate.predicate.invoke(context, input) }
+					?.run { operation.operation.invoke(context, input) }
 
 
 				if (newState == null) {

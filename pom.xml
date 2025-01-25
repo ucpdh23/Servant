@@ -13,10 +13,10 @@
         <main.verticle>es.xan.servantv3.App</main.verticle>
 
         <!-- Vertx Version -->
-        <vertx.version>4.5.8</vertx.version>
-        <vertx.kotlin.version>4.5.8</vertx.kotlin.version>
-        <kotlin.version>2.0.0</kotlin.version>
-        <kotlin.coroutines.version>1.8.1</kotlin.coroutines.version>
+        <vertx.version>4.5.12</vertx.version>
+        <vertx.kotlin.version>4.5.12</vertx.kotlin.version>
+        <kotlin.version>2.0.20</kotlin.version>
+        <kotlin.coroutines.version>1.10.1</kotlin.coroutines.version>
         <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
 
         <jakarta.json.version>2.1.3</jakarta.json.version>
@@ -301,7 +301,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-json</artifactId>
-            <version>1.7.3</version>
+            <version>1.8.0</version>
         </dependency>
 
     </dependencies>

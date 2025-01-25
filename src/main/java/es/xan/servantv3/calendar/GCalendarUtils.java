@@ -88,7 +88,7 @@ public class GCalendarUtils {
         DateTime maxTime = new DateTime(System.currentTimeMillis() + endOffset); //TimeUnit.HOURS.toMillis(5));
         
         CalendarList list = service.calendarList().list().execute();
-        LOGGER.debug(list.toPrettyString());
+//        LOGGER.debug(list.toPrettyString());
         
         Events events = service.events().list(calendar)
                 .setMaxResults(10)
@@ -104,7 +104,7 @@ public class GCalendarUtils {
             
             return Collections.emptyList();
         } else {
-            LOGGER.debug("Upcoming events");
+//            LOGGER.debug("Upcoming events");
             
             List<Notification> notifications = Lists.newArrayList();
             for (Event event : items) {
@@ -112,7 +112,7 @@ public class GCalendarUtils {
                 if (start == null) {
                     start = event.getStart().getDate();
                 }
-                LOGGER.debug("{} - {} ({})", event.getId(), event.getSummary(), start);
+                //LOGGER.debug("{} - {} ({})", event.getId(), event.getSummary(), start);
                 
                 Notification notification = new Notification();
                 notification.id = event.getId();

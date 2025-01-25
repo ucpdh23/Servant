@@ -55,9 +55,9 @@ class ScrumMasterVerticle : AbstractServantVerticle(Constant.SCRUMMASTER_VERTICL
             put("path", "/fields/System.AssignedTo")
         }
 
-        val topic = this.mConfiguration.getString("buildgentic_topic");
+        /*val topic = this.mConfiguration.getString("buildgentic_topic");
 
-        publishAction(MqttVerticle.Actions.PUBLISH_MSG, MqttMsg(topic + "/set", jsonBody));
+        publishAction(MqttVerticle.Actions.PUBLISH_MSG, MqttMsg(topic + "/set", jsonBody));*/
     }
 
 

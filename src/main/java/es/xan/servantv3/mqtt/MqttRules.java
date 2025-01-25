@@ -3,12 +3,12 @@ package es.xan.servantv3.mqtt;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.homeautomation.HomeVerticle;
-import es.xan.servantv3.messages.NewStatus;
-import es.xan.servantv3.messages.Temperature;
-import es.xan.servantv3.messages.TextMessageToTheBoss;
-import es.xan.servantv3.messages.UpdateState;
+import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.NightModeVerticle;
+import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
+import es.xan.servantv3.thermostat.ThermostatVerticle;
+import io.vertx.core.json.JsonObject;
 import io.vertx.mqtt.messages.MqttPublishMessage;
 
 import java.util.Date;
@@ -63,10 +63,35 @@ public enum MqttRules {
             new TopicPredicate("zigbee2mqtt/mando"),
             (message, vertx) -> {
                 String action = message.payload().toJsonObject().getString("action");
-                if (action.equals("1_short_release")) {
+                vertx.publishEvent(Events.REMOTE_CONTROL, new NewStatus(action));
+/*                if (action.equals("1_short_release")) {
                     vertx.publishAction(NightModeVerticle.Actions.CHANGE_STATUS, new UpdateState("on"));
                 } else if (action.equals("1_long_release")) {
                     vertx.publishAction(NightModeVerticle.Actions.CHANGE_STATUS, new UpdateState("off"));
+                } else if (action.equals("2_short_release")) {
+                    vertx.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("on"));
+                } else if (action.equals("2_long_release")) {
+                    vertx.publishAction(ThermostatVerticle.Actions.SWITCH_BOILER, new UpdateState("off"));
+                }*/
+            }
+    ),
+    BUILDGENTIC_WELCOME(
+            new TopicPredicate("servant/buildgentic"),
+            (message, vertx) -> {
+                String str_action = message.payload().toJsonObject().getString("action");
+                if ("welcome".equals(str_action)) {
+                    vertx.publishAction(ScrumLeaderVerticle.Actions.WELCOME);
+                } else if ("executed".equals(str_action)) {
+                    String str_message = message.payload().toJsonObject().getString("message");
+                    vertx.publishAction(ScrumLeaderVerticle.Actions.EXECUTED, new Executed(str_message));
+                } else {
+                    ScrumLeaderVerticle.Actions action = ScrumLeaderVerticle.Actions.valueOf(str_action.toUpperCase());
+                    if (message.payload().toJsonObject().fieldNames().contains("data")) {
+                        JsonObject data = message.payload().toJsonObject().getJsonObject("data");
+                        vertx.publishActionWithRawBean(action, data);
+                    } else {
+                        vertx.publishAction(action);
+                    }
                 }
             }
     )

@@ -224,7 +224,7 @@ public enum Rules {
 			"Ex. boiler off"
 			),
 	
-	LAMP_ON(LampVerticle.Actions.SWITCH_LAMP,
+	LAMP_ON(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP,
 			isContextFree()
 				.and(messageContains("lamp||lampara||lámpara"))
 				.and(messageContains("on||encender||activar||conectar")),
@@ -233,7 +233,7 @@ public enum Rules {
 			"Ex. lamp on"
 			),
 			
-	LAMP_OFF(LampVerticle.Actions.SWITCH_LAMP,
+	LAMP_OFF(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP,
 			isContextFree()
 				.and(messageContains("lamp||lampara||lámpara"))
 				.and(messageContains("off||apagar||desactivar||desconectar")),

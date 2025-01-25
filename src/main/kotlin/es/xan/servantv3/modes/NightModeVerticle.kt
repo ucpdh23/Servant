@@ -6,10 +6,7 @@ import es.xan.servantv3.Constant
 import es.xan.servantv3.Events
 import es.xan.servantv3.Scheduler
 import es.xan.servantv3.Scheduler.at
-import es.xan.servantv3.api.AgentInput
-import es.xan.servantv3.api.AgentState
-import es.xan.servantv3.api.AgentTransition
-import es.xan.servantv3.api.ServantContext
+import es.xan.servantv3.api.*
 import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.lamp.LampVerticle
 import es.xan.servantv3.messages.NewStatus
@@ -18,6 +15,9 @@ import es.xan.servantv3.messages.UpdateState
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
+/**
+ *
+ */
 class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE)  {
 
     private var mScheduler: Scheduler? = null
@@ -25,15 +25,18 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
     companion object {
         val LOG = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
 
-        val ON_OFF_TRANSITION : AgentTransition<AgentInput, AgentState<AgentInput>> =  AgentTransition(
-            { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
-            { _ , input ->
-                when (input.entityAs(UpdateState::class.java).newStatus) {
-                    "on" -> { StateMachine.ON }
-                    else -> { StateMachine.OFF }
+        fun onOffTransaction(nextStep : StateMachine) : AgentTransition<AgentInput, AgentState<AgentInput>> {
+            return AgentTransition(
+                When { _ , input -> Events.REMOTE_CONTROL.equals(input.operation) },
+                Then { _ , input ->
+                    when (input.entityAs(UpdateState::class.java).newStatus) {
+                        "1_short_release" -> { nextStep }
+                        "1_long_release" -> { StateMachine.OFF }
+                        else -> { StateMachine.__INIT__ }
+                    }
                 }
-            }
-        )
+            )
+        }
 
     }
 
@@ -43,7 +46,8 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
         supportedActions(Actions::class.java)
         supportedEvents(
-            es.xan.servantv3.Events.DOOR_STATUS_CHANGED
+            es.xan.servantv3.Events.DOOR_STATUS_CHANGED,
+            es.xan.servantv3.Events.REMOTE_CONTROL,
         )
         LOG.info("initialized nightnode");
     }
@@ -55,7 +59,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         this.mScheduler = Scheduler(this.getVertx())
         this.mScheduler?.scheduleTask(at(LocalTime.of(6,0,0,0))) {
             _ ->
-                if (this.agent != null && this.agent.currentState == StateMachine.ON)
+                if (currentStateIs(StateMachine.STEP_1, StateMachine.STEP_2))
                     publishAction(Actions.CHANGE_STATUS, UpdateState("off"))
 
                 true
@@ -72,35 +76,48 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         __INIT__ {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    ON_OFF_TRANSITION
+                    onOffTransaction(StateMachine.STEP_1)
                 )
             }
         },
-        ON {
+        STEP_2 {
             override fun entering(servantContext: ServantContext<AgentInput>) {
-                servantContext.publishAction(LampVerticle.Actions.SWITCH_LAMP, UpdateState("off"))
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("off"))
             }
 
-            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+            override fun trans(v: ServantContext<AgentInput>): Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    ON_OFF_TRANSITION,
+                    onOffTransaction(StateMachine.__INIT__),
                     AgentTransition(
-                        { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation)},
-                        { _ , input ->
+                        When { _ , input ->
+                            Events.DOOR_STATUS_CHANGED.equals(input.operation)},
+                        Then { _ , input ->
                             when (input.entityAs(NewStatus::class.java).status) {
                                 "true" -> { v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door is changed")) }
                             }
 
-                            ON
+                            STEP_2
                         }
                     )
+                );
+            }
+        },
+        STEP_1 {
+            override fun entering(servantContext: ServantContext<AgentInput>) {
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("off"))
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("on"))
+            }
+
+            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+                return arrayOf(
+                    onOffTransaction(StateMachine.STEP_2),
                 )
             }
         },
         OFF {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    ON_OFF_TRANSITION
+                    onOffTransaction(StateMachine.STEP_1)
                 )
             }
         }

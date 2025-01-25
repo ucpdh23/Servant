@@ -4,10 +4,7 @@ import es.xan.servantv3.AbstractServantVerticle
 import es.xan.servantv3.Action
 import es.xan.servantv3.Constant
 import es.xan.servantv3.Events
-import es.xan.servantv3.api.AgentInput
-import es.xan.servantv3.api.AgentState
-import es.xan.servantv3.api.AgentTransition
-import es.xan.servantv3.api.ServantContext
+import es.xan.servantv3.api.*
 import es.xan.servantv3.homeautomation.HomeVerticle
 import es.xan.servantv3.lamp.LampVerticle
 import es.xan.servantv3.messages.NewStatus
@@ -21,8 +18,8 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
         val LOG = LoggerFactory.getLogger(SecurityModeVerticle::class.java.name)
 
         val ON_OFF_TRANSITION : AgentTransition<AgentInput, AgentState<AgentInput>> =  AgentTransition(
-            { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
-            { _ , input ->
+            When { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
+            Then { _ , input ->
                 when (input.entityAs(UpdateState::class.java).newStatus) {
                     "on" -> { StateMachine.ON }
                     else -> { StateMachine.OFF }
@@ -60,16 +57,16 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                 return arrayOf(
                     ON_OFF_TRANSITION,
                     AgentTransition(
-                        { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation) && "false" == input.entityAs(NewStatus::class.java).status},
-                        { _ , _ ->
+                        When { _ , input -> Events.DOOR_STATUS_CHANGED.equals(input.operation) && "false" == input.entityAs(NewStatus::class.java).status},
+                        Then { _ , _ ->
                             v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door is opened"))
                             v.publishAction(HomeVerticle.Actions.RECORD_VIDEO)
                             v.timed(WAITING_VIDEO, 20000)
                         }
                     ),
                     AgentTransition(
-                        { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
-                        { _ , input ->
+                        When { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
+                        Then { _ , input ->
                             v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("occupancy " + input.entityAs(NewStatus::class.java).status))
                             ON
                         }
@@ -82,12 +79,12 @@ class SecurityModeVerticle : AbstractServantVerticle(Constant.SECURITY_MODE_VERT
                 return arrayOf(
                     ON_OFF_TRANSITION,
                     AgentTransition(
-                        { _ , input -> Events.VIDEO_RECORDED.equals(input.operation)},
-                        { _ , _ -> ON }
+                        When { _ , input -> Events.VIDEO_RECORDED.equals(input.operation)},
+                        Then { _ , _ -> ON }
                     ),
                     AgentTransition(
-                        { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
-                        { _ , input ->
+                        When { _ , input -> Events.OCCUPANCY_CHANGED.equals(input.operation) && "true" == input.entityAs(NewStatus::class.java).status},
+                        Then { _ , input ->
                             v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("occupancy " + input.entityAs(NewStatus::class.java).status))
                             WAITING_VIDEO
                         }

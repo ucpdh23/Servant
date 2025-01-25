@@ -18,6 +18,7 @@ public class Constant {
     public static final String AWS_VERTICLE = "aws.verticle";
     public static final String PARROT_VERTICLE = "parrot.verticle";
     public static final String NETWORK_VERTICLE = "network.verticle";
+    public static final String SCRUMLEAEDER_VERTICLE = "scrumleader.verticle";
     public static final String GITHUB_VERTICLE = "github.verticle";
     public static final String SCRUMMASTER_VERTICLE = "scrummaster.verticle";
     public static final String AZUREDEVOPS_VERTICLE = "azuredevops.verticle";
