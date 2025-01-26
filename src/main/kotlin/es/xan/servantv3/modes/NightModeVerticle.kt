@@ -35,9 +35,13 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
         fun onOffTransaction(nextStep : StateMachine) : AgentTransition<AgentInput, AgentState<AgentInput>> {
             return AgentTransition(
-                When { _ , input -> Events.REMOTE_CONTROL.equals(input.operation) },
+                When { _ , input ->
+                    LOG.debug("onOffTransacition:operation [{}]", input.operation)
+                    Events.REMOTE_CONTROL.equals(input.operation);
+                },
                 Then { _ , input ->
-                    when (input.entityAs(UpdateState::class.java).newStatus) {
+                    LOG.debug("onOffTransacition:newStatus [{}]", input.entityAs(UpdateState::class.java).newStatus)
+                    when (input.entityAs(NewStatus::class.java).status) {
                         "1_short_release" -> { nextStep }
                         "1_long_release" -> { StateMachine.OFF }
                         else -> { StateMachine.__INIT__ }
@@ -67,7 +71,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         this.mScheduler = Scheduler(this.getVertx())
         this.mScheduler?.scheduleTask(at(LocalTime.of(6,0,0,0))) {
             _ ->
-                if (currentStateIs(StateMachine.STEP_1, StateMachine.STEP_2))
+                if (currentStateIs(StateMachine.STEP_1, StateMachine.STEP_2, StateMachine.STEP_3))
                     publishAction(Actions.CHANGE_STATUS, UpdateState("off"))
 
                 true
@@ -88,7 +92,30 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
                 )
             }
         },
+        STEP_1 {
+            override fun entering(servantContext: ServantContext<AgentInput>) {
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("on"))
+            }
+
+            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+                return arrayOf(
+                    onOffTransaction(StateMachine.STEP_2),
+                )
+            }
+        },
         STEP_2 {
+            override fun entering(servantContext: ServantContext<AgentInput>) {
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("off"))
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("on"))
+            }
+
+            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+                return arrayOf(
+                    onOffTransaction(StateMachine.STEP_3),
+                )
+            }
+        },
+        STEP_3 {
             override fun entering(servantContext: ServantContext<AgentInput>) {
                 servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("off"))
             }
@@ -110,18 +137,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
                 );
             }
         },
-        STEP_1 {
-            override fun entering(servantContext: ServantContext<AgentInput>) {
-                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("off"))
-                servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("on"))
-            }
 
-            override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
-                return arrayOf(
-                    onOffTransaction(StateMachine.STEP_2),
-                )
-            }
-        },
         OFF {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
