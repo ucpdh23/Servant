@@ -9,6 +9,7 @@ import es.xan.servantv3.messages.NewStatus
 import es.xan.servantv3.messages.TextMessageToTheBoss
 import es.xan.servantv3.messages.UpdateState
 import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 import java.time.LocalTime
 
 /**
@@ -31,9 +32,9 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
     private var mScheduler: Scheduler? = null
 
     companion object {
-        val LOG = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
+        val LOG: Logger = LoggerFactory.getLogger(NightModeVerticle::class.java.name)
 
-        fun onOffTransaction(nextStep : StateMachine) : AgentTransition<AgentInput, AgentState<AgentInput>> {
+        fun goAheadTransaction(nextStep : StateMachine) : AgentTransition<AgentInput, AgentState<AgentInput>> {
             return AgentTransition(
                 When { _ , input ->
                     LOG.debug("onOffTransaction:operation [{}]", input.operation)
@@ -99,7 +100,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         __INIT__ {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.STEP_1)
+                    goAheadTransaction(StateMachine.STEP_1)
                 )
             }
         },
@@ -114,7 +115,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.STEP_2),
+                    goAheadTransaction(StateMachine.STEP_2),
                     CHANGE_STATUS_TRANSITION
                 )
             }
@@ -126,7 +127,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.STEP_3),
+                    goAheadTransaction(StateMachine.STEP_3),
                     CHANGE_STATUS_TRANSITION
                 )
             }
@@ -142,7 +143,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
             override fun trans(v: ServantContext<AgentInput>): Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.OFF),
+                    goAheadTransaction(StateMachine.OFF),
                     CHANGE_STATUS_TRANSITION,
                     AgentTransition(
                         When { _ , input ->
@@ -152,7 +153,7 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
                                 "true" -> { v.publishAction(HomeVerticle.Actions.NOTIFY_BOSS, TextMessageToTheBoss("door is changed")) }
                             }
 
-                            STEP_2
+                            AgentStates.KEEP_CURRENT_STATE
                         }
                     )
                 );
@@ -162,7 +163,18 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         OFF {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.STEP_1),
+                    AgentTransition(
+                        When { _ , input ->
+                            Events.REMOTE_CONTROL.equals(input.operation);
+                        },
+                        Then { _ , input ->
+                            when (input.entityAs(NewStatus::class.java).status) {
+                                "1_short_release" -> { StateMachine.STEP_1 }
+                                "1_long_release" -> { StateMachine.STEP_2 }
+                                else -> { AgentStates.KEEP_CURRENT_STATE }
+                            }
+                        }
+                    ),
                     CHANGE_STATUS_TRANSITION
                 )
             }
