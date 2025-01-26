@@ -2,8 +2,14 @@ package es.xan.servantv3.mqtt;
 
 import com.google.gson.JsonParser;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MqttUtils {
+
+    final static Logger LOGGER = LoggerFactory.getLogger(MqttUtils.class);
+
+
     public static final JsonObject resolvePayload(String message) {
         var quotedText = message.split("payload")[1].trim();
         var txt_json = quotedText.substring(1, quotedText.length() - 1);

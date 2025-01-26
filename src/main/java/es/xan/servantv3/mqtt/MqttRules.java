@@ -10,6 +10,8 @@ import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mqtt.messages.MqttPublishMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.function.BiConsumer;
@@ -62,8 +64,10 @@ public enum MqttRules {
     MANDO(
             new TopicPredicate("zigbee2mqtt/mando"),
             (message, vertx) -> {
+                MqttUtils.LOGGER.debug("zigbee2mqtt/mando:payload [{}]", message.payload().toJsonObject());
                 String action = message.payload().toJsonObject().getString("action");
-                vertx.publishEvent(Events.REMOTE_CONTROL, new NewStatus(action));
+                if (action != null)
+                    vertx.publishEvent(Events.REMOTE_CONTROL, new NewStatus(action));
 /*                if (action.equals("1_short_release")) {
                     vertx.publishAction(NightModeVerticle.Actions.CHANGE_STATUS, new UpdateState("on"));
                 } else if (action.equals("1_long_release")) {
