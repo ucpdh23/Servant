@@ -69,6 +69,17 @@ fun interface AgentState<V> {
 	}
 }
 
+enum class AgentStates : AgentState<AgentInput> {
+	KEEP_CURRENT_STATE,
+	;
+
+	override fun trans(v: ServantContext<AgentInput>): Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
+		return arrayOf();
+	}
+
+
+}
+
 //class AgentTransition<V, S : AgentState<V>>(val predicate : (context: AgentContext, input : V) -> Boolean, val operation: (context: AgentContext, input : V)  -> S)
 class AgentTransition<V, S : AgentState<V>>(val predicate : When<V>, val operation: Then<V, S>)
 
@@ -77,6 +88,8 @@ class Then<V, S : AgentState<V>>(val operation: (context: AgentContext, input : 
 
 interface AgentContext {
 }
+
+
 
 class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle, val context: AgentContext) {
 
@@ -110,7 +123,7 @@ class Agent<V>(firstState: AgentState<V>, val verticle : AbstractServantVerticle
 					?.run { operation.operation.invoke(context, input) }
 
 
-				if (newState == null) {
+				if (newState == null || AgentStates.KEEP_CURRENT_STATE == newState) {
 					currentState
 				} else {
 					if (newState is ExtendedAgentState) {

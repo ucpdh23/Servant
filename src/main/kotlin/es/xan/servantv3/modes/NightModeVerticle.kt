@@ -36,19 +36,30 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         fun onOffTransaction(nextStep : StateMachine) : AgentTransition<AgentInput, AgentState<AgentInput>> {
             return AgentTransition(
                 When { _ , input ->
-                    LOG.debug("onOffTransacition:operation [{}]", input.operation)
+                    LOG.debug("onOffTransaction:operation [{}]", input.operation)
                     Events.REMOTE_CONTROL.equals(input.operation);
                 },
                 Then { _ , input ->
-                    LOG.debug("onOffTransacition:newStatus [{}]", input.entityAs(UpdateState::class.java).newStatus)
+                    LOG.debug("onOffTransaction:newStatus [{}] [{}]", input.entityAs(NewStatus::class.java).status, nextStep)
                     when (input.entityAs(NewStatus::class.java).status) {
                         "1_short_release" -> { nextStep }
                         "1_long_release" -> { StateMachine.OFF }
-                        else -> { StateMachine.__INIT__ }
+                        else -> { AgentStates.KEEP_CURRENT_STATE }
                     }
                 }
             )
         }
+
+        val CHANGE_STATUS_TRANSITION : AgentTransition<AgentInput, AgentState<AgentInput>> =  AgentTransition(
+            When { _ , input -> Actions.CHANGE_STATUS.equals(input.operation)},
+            Then { _ , input ->
+                when (input.entityAs(UpdateState::class.java).newStatus) {
+                    "on" -> { StateMachine.STEP_1 }
+                    else -> { StateMachine.OFF }
+                }
+            }
+        )
+
 
     }
 
@@ -97,22 +108,31 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
                 servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("on"))
             }
 
+            override fun exiting(servantContext: ServantContext<AgentInput>) {
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("off"))
+            }
+
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
                     onOffTransaction(StateMachine.STEP_2),
+                    CHANGE_STATUS_TRANSITION
                 )
             }
         },
         STEP_2 {
             override fun entering(servantContext: ServantContext<AgentInput>) {
-                servantContext.publishAction(LampVerticle.Actions.SWITCH_LIVINGROOM_LAMP, UpdateState("off"))
                 servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("on"))
             }
 
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
                     onOffTransaction(StateMachine.STEP_3),
+                    CHANGE_STATUS_TRANSITION
                 )
+            }
+
+            override fun exiting(servantContext: ServantContext<AgentInput>) {
+                servantContext.publishAction(LampVerticle.Actions.SWITCH_BEDROOM_LAMP, UpdateState("off"))
             }
         },
         STEP_3 {
@@ -122,7 +142,8 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
 
             override fun trans(v: ServantContext<AgentInput>): Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.__INIT__),
+                    onOffTransaction(StateMachine.OFF),
+                    CHANGE_STATUS_TRANSITION,
                     AgentTransition(
                         When { _ , input ->
                             Events.DOOR_STATUS_CHANGED.equals(input.operation)},
@@ -141,7 +162,8 @@ class NightModeVerticle : AbstractServantVerticle(Constant.NIGHT_MODE_VERTICLE) 
         OFF {
             override fun trans(v : ServantContext<AgentInput>) : Array<AgentTransition<AgentInput, AgentState<AgentInput>>> {
                 return arrayOf(
-                    onOffTransaction(StateMachine.STEP_1)
+                    onOffTransaction(StateMachine.STEP_1),
+                    CHANGE_STATUS_TRANSITION
                 )
             }
         }
