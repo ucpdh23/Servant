@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory
 
 /**
  * This verticle checks the current state of the outlet in order to determine whether the laundry has finished.
- * The secuence of steps is:
- *   1.- Every 60 seconds, this verticle publish the STATUS action of the outlet, and the result is send to the stream method.
- *   2.- The stream  method updates the state machine (currState field)
- *   3.- When the state is STOPPED, a event of LAUNDRY_OFF is published, this event is readed by the homeautomation module in order to notify
+ * The sequence of steps is:
+ *   1.- Every 60 seconds, this verticle publish the STATUS action of the outlet, and the result is sent to the stream method.
+ *   2.- The stream method updates the state machine (currState field)
+ *   3.- When the state is STOPPED, an event of LAUNDRY_OFF is published, this event is read by the homeautomation module in order to notify
  */
 class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	companion object {
@@ -74,7 +74,8 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 	}
 
 	val machineState = StateMachine(States.STOPPED, this);
-	
+
+
 	enum class States(override vararg val trans : Transition<LaundryVerticle, out State<LaundryVerticle>>) : State<LaundryVerticle> {
 		STOPPED(
 			Transition({x -> isWorking(x)}, { v, b -> v.storePower(b); States.WORKING})),
@@ -94,6 +95,7 @@ class LaundryVerticle : AbstractServantVerticle(Constant.LAUNDRY_VERTICLE) {
 			),
 		;
 	}
+
 	
 	var power : Float = 0F;
 	
