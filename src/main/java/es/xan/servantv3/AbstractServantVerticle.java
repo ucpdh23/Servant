@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for all the verticles of this application.
  * 
- * In order to register some actions or handle events, call the {@link AbstractServantVerticle#supportedActions(Action...)} and {@link AbstractServantVerticle#supportedEvents(Events...)}
+ * To register some actions or handle events, call the {@link AbstractServantVerticle#supportedActions(Action...)} and {@link AbstractServantVerticle#supportedEvents(Events...)}
  * in the constructor of the child class.
  * 
  * 

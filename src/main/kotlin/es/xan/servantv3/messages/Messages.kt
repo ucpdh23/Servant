@@ -43,6 +43,11 @@ data  class Sensor(var sensor: String)
 
 
 /**
+ *
+ */
+data class MCPMessage(var sessionId: String, var message: JsonObject)
+
+/**
  * Updates the state of a component
  */ 
 data class UpdateState(var newStatus: String)
