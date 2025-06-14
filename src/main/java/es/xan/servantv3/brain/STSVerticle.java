@@ -7,19 +7,20 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import es.xan.servantv3.AbstractServantVerticle;
-import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
 import es.xan.servantv3.Scheduler;
 import es.xan.servantv3.brain.nlp.Rules;
-import es.xan.servantv3.brain.nlp.Translation;
-import es.xan.servantv3.brain.nlp.TranslationFacade;
+import es.xan.servantv3.brain.nlp.Operation;
+import es.xan.servantv3.brain.nlp.OperationFacade;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.Chatbot;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
+import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import io.vertx.core.eventbus.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +29,11 @@ import org.slf4j.LoggerFactory;
  * Superior temporal sulcus.
  * 
  * This verticle handles the events from the conversational channel system and transform then into actions to be performed into the vertx event bus.
- * 
- * Further information, please see the javadoc of the nlp package.
- * 
- *  A new PERFORM Action has been included to run operations   
+ *
+ * This package initially tries to identify an operation using the nlp package. Please review this package's javadoc for further details.
+ * If a direct action is not identified, the message is redirected to an agentic chatbot implementation in order to identify the user intention.
+ *
+ *  PERFORM Action has been included to run operations
  * 
  * @author alopez
  * see https://en.wikipedia.org/wiki/Superior_temporal_sulcus
@@ -47,7 +49,7 @@ public class STSVerticle extends AbstractServantVerticle {
 
 	private Scheduler mScheduler;
 	
-	public enum Actions implements Action {
+	public enum Actions implements es.xan.servantv3.Action {
 		HELP(null),
 		PERFORM(TextMessageToTheBoss.class)
 		;
@@ -101,7 +103,7 @@ public class STSVerticle extends AbstractServantVerticle {
 		LOGGER.debug("perform [{}]", parrotMessage);
 		try {
 			UserContext bossContext = this.mContext.get("boss", () -> new UserContext("boss"));
-			final Translation translation = TranslationFacade.translate(parrotMessage.getMessage(), bossContext);
+			final Operation translation = OperationFacade.translate(parrotMessage.getMessage(), bossContext);
 
 			if (translation.action != null) {
 				if (translation.delayInfo == 0) {
@@ -133,28 +135,31 @@ public class STSVerticle extends AbstractServantVerticle {
 
 		try {
 			UserContext userContext = this.mContext.get(parrotMessage.getUser(), () -> new UserContext(parrotMessage.getUser()));
-			final Translation translation = TranslationFacade.translate(parrotMessage.getMessage(), userContext);
+			final Operation operation = OperationFacade.translate(parrotMessage.getMessage(), userContext);
 
-			if (translation.action != null) {
-				if (translation.delayInfo == 0) {
-					publishAction(translation.action, translation.message, response -> {
-						LOGGER.debug("processing boss response from [{}-{}]", translation.action, translation.message);
+			if (operation.action != null) {
+				if (operation.delayInfo == 0) {
+					publishAction(operation.action, operation.message, response -> {
+						LOGGER.debug("processing boss response from [{}-{}]", operation.action, operation.message);
 						LOGGER.debug(" response: [{}]", response);
 						LOGGER.debug(" response.result: [{}]", response.result());
 						LOGGER.debug(" response.succeded: [{}]", response.succeeded());
 						LOGGER.debug(" response.failed: [{}]", response.failed());
 
-						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
+						publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), operation.response.apply(response.result()).msg));
 					});
 				} else {
-					this.mScheduler.scheduleTask(Scheduler.in((int) translation.delayInfo, ChronoUnit.SECONDS), it -> {
-						publishAction(translation.action, translation.message, response -> {
-							publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), translation.response.apply(response.result()).msg));
+					this.mScheduler.scheduleTask(Scheduler.in((int) operation.delayInfo, ChronoUnit.SECONDS), it -> {
+						publishAction(operation.action, operation.message, response -> {
+							publishAction(es.xan.servantv3.parrot.ParrotVerticle.Actions.SEND, new TextMessage(parrotMessage.getUser(), operation.response.apply(response.result()).msg));
 						});
 
 						return false;
 					});
 				}
+			} else {
+				// Otherwise
+				publishAction(ScrumLeaderVerticle.Actions.INVOKE_CHATBOT, new Chatbot(parrotMessage.getUser() ,parrotMessage.getMessage()));
 			}
 		} catch (ExecutionException e) {
 			LOGGER.warn(e.getMessage(), e);

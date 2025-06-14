@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class TranslationFacade {
+public class OperationFacade {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(TranslationFacade.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OperationFacade.class);
 	
-	public static Translation translate(String text, UserContext context) {
-		Translation translation = new Translation();
+	public static Operation translate(String text, UserContext context) {
+		Operation translation = new Operation();
 		
 		fillTimeInformation(text, translation);
 		fillMessageAndAddress(text, translation, context);
@@ -19,7 +19,7 @@ public class TranslationFacade {
 		return translation;
 	}
 
-	private static void fillMessageAndAddress(String text, Translation translation, UserContext context) {
+	private static void fillMessageAndAddress(String text, Operation translation, UserContext context) {
 		for (Rules option : Rules.values()) {
 			if (option.mPredicate.test(Pair.of(text, context))) {
 				translation.action = option.mAddress;
@@ -36,7 +36,7 @@ public class TranslationFacade {
 		return text.split(" ");
 	}
 
-	private static void fillTimeInformation(String message, Translation translation) {
+	private static void fillTimeInformation(String message, Operation translation) {
 		long delay = TimeFactory.findTimeAndTransform(message);
 		if (delay > 0) {
 			LOGGER.info("Setting delay of [{}]", delay);
@@ -47,7 +47,7 @@ public class TranslationFacade {
 	}
 	
 
-	private static void addEveryDayInfo(Translation translation) {
+	private static void addEveryDayInfo(Operation translation) {
 		translation.everyDay = true;
 	}
 	

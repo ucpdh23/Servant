@@ -45,6 +45,7 @@ public class LampVerticle extends AbstractServantVerticle {
 	public enum Actions implements Action {
 		SWITCH_LIVINGROOM_LAMP(UpdateState.class),
 		SWITCH_BEDROOM_LAMP(UpdateState.class),
+		SWITCH_CHILDRENROOM_OUTLET(UpdateState.class),
 		;
 		
 		private Class<?> mMessageClass;
@@ -57,6 +58,14 @@ public class LampVerticle extends AbstractServantVerticle {
 		public Class<?> getPayloadClass() {
 			return mMessageClass;
 		}
+	}
+
+	public void switch_childrenroom_outlet(UpdateState status, final Message<Object> msg) {
+		boolean on = ("on".equals(status.getNewStatus().toLowerCase()))? true : false;
+
+		String topic = this.mConfiguration.getJsonObject("topics").getString("childrenroom");
+
+		switch_status(topic, on, msg);
 	}
 
 	public void switch_bedroom_lamp(UpdateState status, final Message<Object> msg) {

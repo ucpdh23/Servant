@@ -1,29 +1,28 @@
 package es.xan.servantv3.brain.nlp;
 
-import es.xan.servantv3.Action;
 import es.xan.servantv3.MessageUtils;
 import io.vertx.core.eventbus.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class TranslationUtils {
+public class OperationUtils {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TranslationUtils.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OperationUtils.class);
 	
-	public static boolean isEveryDay(Translation item) {
+	public static boolean isEveryDay(Operation item) {
 		return item.everyDay;
 	}
 
-	public static boolean isScheduled(Translation item) {
+	public static boolean isScheduled(Operation item) {
 		return item.delayInfo > 0;
 	}
 
-	public static boolean isForwarding(Translation item) {
+	public static boolean isForwarding(Operation item) {
 		return item.forwarding;
 	}
 	
-	public static long getSchedule(Translation item) {
+	public static long getSchedule(Operation item) {
 		return item.delayInfo;
 	}
 	
@@ -46,7 +45,7 @@ public class TranslationUtils {
 		
 	}
 	
-	public static Reply reply(final Action pAction, String pMsg) {
+	public static Reply reply(final es.xan.servantv3.Action pAction, String pMsg) {
 		return new Reply() {{
 			this.action = pAction;
 			this.msg = pMsg;
@@ -54,7 +53,7 @@ public class TranslationUtils {
 	}
 	
 	public static class Reply {
-		public Action action;
+		public es.xan.servantv3.Action action;
 		public String msg;
 	}
 }
