@@ -59,7 +59,9 @@ public class MqttVerticle extends AbstractServantVerticle {
     public void publish_msg(MqttMsg msg) {
         for (Map.Entry<String, MqttEndpoint> entry : this.endpoints.entrySet()) {
             if (entry.getValue().isConnected()) {
+                LOGGER.debug("[{}] is connected", entry.getKey());
                 try {
+                    LOGGER.debug("payload [{}]", msg.getPayload());
                     entry.getValue().publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false);
                 } catch (IllegalStateException e) {
                     LOGGER.warn(e.getMessage(), e);
@@ -86,86 +88,89 @@ public class MqttVerticle extends AbstractServantVerticle {
             LOGGER.warn("handling exception", handler);
         });
         mqttServer.endpointHandler(endpoint -> {
-                    LOGGER.info("registering endpoint [{}]", endpoint.clientIdentifier());
+            LOGGER.info("registering endpoint [{}]", endpoint.clientIdentifier());
 
-                    endpoints.put(endpoint.clientIdentifier(), endpoint);
+            endpoints.put(endpoint.clientIdentifier(), endpoint);
 
-                    // shows main connect info
-                    LOGGER.info("MQTT client [{}] request to connect, clean session = [{}]",
-                            endpoint.clientIdentifier(), endpoint.isCleanSession());
+            // shows main connect info
+            LOGGER.info("MQTT client [{}] request to connect, clean session = [{}]",
+                    endpoint.clientIdentifier(), endpoint.isCleanSession());
 
-                    if (endpoint.auth() != null) {
-                        LOGGER.debug("[username = {}, password = {}",
-                                endpoint.auth().getUsername(), endpoint.auth().getPassword());
-                    }
-                    LOGGER.debug("[properties = {}]", endpoint.connectProperties().listAll());
-                    if (endpoint.will() != null) {
-                        LOGGER.debug("[will topic = {} msg = {} QoS = {}]",
-                                endpoint.will().getWillTopic(), endpoint.will(), endpoint.will() );
-                    }
+            if (endpoint.auth() != null) {
+                LOGGER.debug("[username = {}, password = {}",
+                        endpoint.auth().getUsername(), endpoint.auth().getPassword());
+            }
+            LOGGER.debug("[properties = {}]", endpoint.connectProperties().listAll());
+            if (endpoint.will() != null) {
+                LOGGER.debug("[will topic = {} msg = {} QoS = {}]",
+                        endpoint.will().getWillTopic(), endpoint.will(), endpoint.will() );
+            }
 
-                    LOGGER.debug("[keep alive timeout = {}", endpoint.keepAliveTimeSeconds());
+            LOGGER.debug("[keep alive timeout = {}", endpoint.keepAliveTimeSeconds());
 
-                    // accept connection from the remote client
-                    endpoint.accept(false);
-                    endpoint.subscribeHandler(subscribe -> {
+            // accept connection from the remote client
+            endpoint.accept(false);
+            endpoint.subscribeHandler(subscribe -> {
 
-                        List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
-                        for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {
-                            reasonCodes.add(MqttSubAckReasonCode.qosGranted(s.qualityOfService()));
-                        }
-                        // ack the subscriptions request
-                        endpoint.subscribeAcknowledge(subscribe.messageId(), reasonCodes, MqttProperties.NO_PROPERTIES);
+                List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
+                for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {
+                    reasonCodes.add(MqttSubAckReasonCode.qosGranted(s.qualityOfService()));
+                }
+                // ack the subscriptions request
+                endpoint.subscribeAcknowledge(subscribe.messageId(), reasonCodes, MqttProperties.NO_PROPERTIES);
 
-                    });
-                    endpoint.publishHandler(message -> {
-                        if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
-                            endpoint.publishAcknowledge(message.messageId());
-                        } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
-                            endpoint.publishReceived(message.messageId());
-                        }
+            });
+            endpoint.publishHandler(message -> {
+                if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
+                    endpoint.publishAcknowledge(message.messageId());
+                } else if (message.qosLevel() == MqttQoS.EXACTLY_ONCE) {
+                    endpoint.publishReceived(message.messageId());
+                }
 
-                        MqttRules rule = MqttRules.identifyRule(message);
-                        if (MqttRules.MANDO.equals(rule)) {
-                            LOGGER.info("action: [{}]", message.payload().toJsonObject().getString("action"));
-                            LOGGER.info("payload: [{}]", message.payload().toString());
-                        }
+                MqttRules rule = MqttRules.identifyRule(message);
+                if (MqttRules.MANDO.equals(rule)) {
+                    LOGGER.info("action: [{}]", message.payload().toJsonObject().getString("action"));
+                    LOGGER.info("payload: [{}]", message.payload().toString());
+                }
 
-                        if (MqttRules.BUILDGENTIC_WELCOME.equals(rule)) {
-                            LOGGER.info("buildgentic: [{}]", message.payload().toJsonObject().getString("action"));
-                            LOGGER.info("buildgentic [{}]", message.payload().toString());
-                        }
+                if (MqttRules.BUILDGENTIC_WELCOME.equals(rule)) {
+                    LOGGER.info("buildgentic: [{}]", message.payload().toJsonObject().getString("action"));
+                    LOGGER.info("buildgentic [{}]", message.payload().toString());
+                }
 
-                        if (rule != null)  {
-                            LOGGER.info("Found rule [{}]", rule);
-                            rule.apply(message, this);
-                        } else {
-                            LOGGER.info("Not found rule for message.topic [{}]", message.topicName());
-                        }
+                if (rule != null)  {
+                    LOGGER.info("Found rule [{}]", rule);
+                    rule.apply(message, this);
+                } else {
+                    LOGGER.info("Not found rule for message.topic [{}]", message.topicName());
+                }
 
-                    }).publishReleaseHandler(messageId -> {
+            }).publishReleaseHandler(messageId -> {
 
-                        endpoint.publishComplete(messageId);
-                    });
-                })
-                .listen(ar -> {
+                endpoint.publishComplete(messageId);
+            });
+        })
+        .listen(ar -> {
 
-                    if (ar.succeeded()) {
+            if (ar.succeeded()) {
+                LOGGER.info("MQTT server is listening on port [{}]", ar.result().actualPort());
+            } else {
 
-                        LOGGER.info("MQTT server is listening on port " + ar.result().actualPort());
-                    } else {
+                LOGGER.warn("Error on starting the server", ar.cause());
+            }
+        });
 
-                        LOGGER.warn("Error on starting the server", ar.cause());
-                    }
-                });
 
+        /*
+        Why I need to create a client?
         client = MqttClient.create(vertx);
-        client.connect(1883, "localhost").onComplete(s -> {
-            LOGGER.info("Mqtt client connected");
+        client.connect(1883, "0.0.0.0").onComplete(s -> {
+            LOGGER.info("Mqtt connected [{}]", s);
         });
         client.publishCompletionHandler(it -> {
             LOGGER.info("Mqtt client message published [{}]", it);
         });
+         */
     }
 
 }

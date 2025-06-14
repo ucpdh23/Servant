@@ -54,7 +54,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         this.mConfiguration = Vertx.currentContext().config().getJsonObject("MCPVerticle");
 
         McpSyncServer syncServer = McpServer.sync(this)
-                .serverInfo("my-server", "1.0.0")
+                .serverInfo("servant-server", "1.0.0")
                 .capabilities(McpSchema.ServerCapabilities.builder()
                         .resources(false, false)     // Enable resource support
                         .tools(true)         // Enable tool support
@@ -77,23 +77,21 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
               "type" : "object",
               "id" : "urn:jsonschema:Operation",
               "properties" : {
-                "operation" : {
-                  "type" : "string"
-                },
-                "a" : {
-                  "type" : "number"
-                },
-                "b" : {
-                  "type" : "number"
-                }
+                    "operation" : {
+                            "type" : "string"
+                          },
+                          "sql" : {
+                            "type" : "string"
+                          }
               }
             }
             """;
         return new McpServerFeatures.SyncToolSpecification(
-                new McpSchema.Tool("calculator", "Basic calculator", schema),
+                new McpSchema.Tool("historicalData", "This tool can query the audit logs database in order to recover any historical information from the system. This database contains information about the temperature at home, when the door has been opened and closed and any other information about when the laundry has been started and stopped.", schema),
                 (exchange, arguments) -> {
+                    LOGGER.debug("historicalData tool invocation {}-{}", exchange, arguments);
                     // Tool implementation
-                    return new McpSchema.CallToolResult("result", false);
+                    return new McpSchema.CallToolResult("The database cannot resolve this query.", false);
                 }
         );
     }

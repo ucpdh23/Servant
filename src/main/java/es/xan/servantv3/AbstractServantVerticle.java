@@ -126,11 +126,11 @@ public class AbstractServantVerticle extends AbstractVerticle {
 	private void processEvent(Message<Object> message) {
 		JsonObject body = (JsonObject) message.body();
 		String eventName = body.getString("action");
-//		LOGGER.debug("Processing event [{}]", eventName);
+		LOGGER.debug("Processing event [{}]", eventName);
 		
 		if (!mEventMap.containsKey(eventName)) {
-//			LOGGER.debug("mEventMap:" + mEventMap.keySet());
-//			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
+			LOGGER.debug("mEventMap:" + mEventMap.keySet());
+			LOGGER.debug("Not processed event [{}] in verticle [{}]", eventName, this.mVerticleName);
 			return;
 		}
 		
@@ -183,11 +183,11 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		final JsonObject json = (JsonObject) message.body();
 		final String actionName = json.getString("action");
 		
-//		LOGGER.debug("Action [{}]", actionName);
+		LOGGER.debug("Action [{}]", actionName);
 		
 		Pair<Action, Method> actionPair = mActionMap.get(actionName);
 		if (actionPair == null) {
-//			LOGGER.warn("Cannot perform action [{}] in verticle [{}]", actionName, mVerticleName);
+			LOGGER.warn("Cannot perform action [{}] in verticle [{}]", actionName, mVerticleName);
 			return;
 		}
 		
@@ -274,7 +274,9 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		LOGGER.debug("publish action [{}]", send);
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
-		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
+		String verticleName = resolveVerticleName(send.getClass().getCanonicalName());
+		LOGGER.debug("verticleName {}", verticleName);
+		vertx.eventBus().send(verticleName, builder.build());
 	}
 	
 	public void publishAction(Action send, Object item) {
@@ -282,7 +284,9 @@ public class AbstractServantVerticle extends AbstractVerticle {
 		ActionBuilder builder = MessageBuilder.createAction();
 		builder.setAction(send.getName());
 		builder.setBean(JsonUtils.toJson(item));
-		vertx.eventBus().send(resolveVerticleName(send.getClass().getCanonicalName()), builder.build());
+		String verticleName = resolveVerticleName(send.getClass().getCanonicalName());
+		LOGGER.debug("verticleName {}", verticleName);
+		vertx.eventBus().send(verticleName, builder.build());
 	}
 
 	public void publishActionWithRawBean(Action send, JsonObject bean) {
@@ -341,9 +345,9 @@ public class AbstractServantVerticle extends AbstractVerticle {
 			final String actionsVerticleName = resolveVerticleName(actions[0].getClass().getCanonicalName());
 			
 			if (actionsVerticleName.equals(mVerticleName)) {
-				LOGGER.info("adding support for actions of verticleName [" + actionsVerticleName + "]", actionsVerticleName);
+				LOGGER.info("adding support for actions of verticleName [{}]", actionsVerticleName);
 			} else {
-				LOGGER.error("actionsVerticleName [{}] is not equals to verticle provided name [{}]", actionsVerticleName, mVerticleName);
+				LOGGER.error("actions VerticleName [{}] is not equals to verticle provided name [{}]", actionsVerticleName, mVerticleName);
 				throw new RuntimeException("verticleName " + mVerticleName + " is not valid");
 			}
 		} else {

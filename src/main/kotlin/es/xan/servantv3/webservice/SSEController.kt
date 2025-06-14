@@ -21,7 +21,9 @@ class SSEController constructor(val router: Router, val publisher : WebServerVer
     val messageEndpoint = "/message"
 
     val handler : Router.() -> Unit = {
+        LOGGER.info("Creating SSE endpoints...")
         get(sseEndpoint).handler { context ->
+            LOGGER.debug("invoking SEE get method...")
             val request = context.request()
             val response = context.response()
             response.setChunked(true)
@@ -47,17 +49,38 @@ class SSEController constructor(val router: Router, val publisher : WebServerVer
             this@SSEController.writer = response;
 
             this@SSEController.sendEvent("endpoint", messageEndpoint + "?sessionId=" + sessionId)
+
+            /*
+            // Mantener conexión viva con "ping" cada X segundos
+            publisher.vertx.setPeriodic(5000) {
+                if (!response.closed()) {
+                    response.write("event: ping\n")
+                    response.write("data: keep-alive\n\n")
+                }
+            }
+             */
         }
 
         post(messageEndpoint).handler { context ->
+            LOGGER.debug("invoking SEE post method...")
+
             val request = context.request()
+            val response = context.response()
+
             val sessionId = request.getParam("sessionId")
             LOGGER.debug("sessionId {}", sessionId)
 
             val body = context.body().asJsonObject()
             LOGGER.debug("body {}", body)
 
-            publisher.publishAction(MCPVerticle.Actions.HANDLE_MESSAGE, MCPMessage(sessionId, body))
+            publisher.publishAction(MCPVerticle.Actions.HANDLE_MESSAGE, MCPMessage(sessionId, body)) { response ->
+                LOGGER.debug("response {}", response)
+                if (response.failed())
+                    LOGGER.info("{}", response.cause());
+            }
+
+            response.setStatusCode(200)
+            response.end()
         }
     };
 
@@ -68,7 +91,6 @@ class SSEController constructor(val router: Router, val publisher : WebServerVer
 
     fun create() : Router {
         this.router.apply(this.handler)
-
         return this.router;
     }
 

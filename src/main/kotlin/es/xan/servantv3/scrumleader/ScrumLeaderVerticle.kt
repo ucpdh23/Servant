@@ -41,6 +41,7 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
         WELCOME(null),
         REGISTER(Agent::class.java),
         NOP(null),
+        INVOKE_CHATBOT(Chatbot::class.java),
         EXECUTED(Executed::class.java),
         REFRESH_SOURCE(Agent::class.java)
         ;
@@ -57,8 +58,20 @@ class ScrumLeaderVerticle : AbstractServantVerticle(Constant.SCRUMLEAEDER_VERTIC
         SSHUtils.runRemoteCommand(host, username, password, command);
     }
 
-    fun executed(msg: Executed) {
-        LOG.info("EXECUTED", msg.message)
+    fun invoke_chatbot(chatbot: Chatbot) {
+        LOG.info("INVOKE_CHATBOT", chatbot.message)
+        val payload = JsonObject.of(
+            "action", "execute",
+            "query", chatbot.message,
+            "user", chatbot.user,
+            "output", "toBoss"
+        )
+
+        publishAction(MqttVerticle.Actions.PUBLISH_MSG, MqttMsg("servant/buildgentic/chatbot", payload))
+    }
+
+    fun executed(executed: Executed) {
+        LOG.debug("Executed {}", executed.message)
     }
 
     fun nop() {
