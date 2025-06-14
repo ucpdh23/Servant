@@ -84,6 +84,7 @@ enum class DeviceSecurity {
 }
 
 data class Agent(var name: String)
+data class Chatbot(var user: String, var message: String)
 data class Executed(var message: String)
 
 data class Device(var user: String, var mac: String, var status: DeviceStatus, var security: DeviceSecurity, var firstTimestamp : Long, var lastTimestamp: Long)
