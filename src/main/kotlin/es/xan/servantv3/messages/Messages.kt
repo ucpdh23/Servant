@@ -2,6 +2,7 @@ package es.xan.servantv3.messages
 
 import es.xan.servantv3.road.RoadUtils.Window
 import io.vertx.core.json.JsonObject
+import java.time.LocalTime
 
 /**
  * Actions Messages
@@ -60,6 +61,8 @@ data class Configure(var field: String, var value: String)
 /**
  * DTOs
  */
+
+data class HourlyInfo(var time: LocalTime, var weather: String, var weatherId: String, var temperature: Integer, var price: Float)
 
 data class VersionInfo(var filename: String, var tagName: String, var url: String)
 

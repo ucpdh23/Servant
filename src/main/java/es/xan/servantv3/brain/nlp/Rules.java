@@ -129,7 +129,7 @@ public enum Rules {
 			.and(messageContains("lista")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"Ex. Muestra lista"
+			"Loads the list of items for the grocery. Ex. Muestra lista"
 	),
 	ADD_TO_SHOPPING_LIST(ShoppingListVerticle.Actions.SAVE_ITEM,
 			isContext("Shopping"),
@@ -283,7 +283,7 @@ public enum Rules {
 				.and(messageContains("temperatura||temperature")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, TemperatureUtils.toString(msg));},
-			"Ex. temperature"
+			"Returns the temperature from the different sensors at home (internal and external sensors). The response contains the timestamp and temperature for each location. Shortcut 'temperature'"
 			),
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
 			isContextFree()
@@ -369,6 +369,14 @@ public enum Rules {
 		this.mFunction = variantFunction;
 		this.mResponse = response;
 		this.mHelpMessage = helpMessage;
+	}
+
+	public Action getAction() {
+		return this.mAddress;
+	}
+
+	public Function<Message<Object>, Reply> getResponseProcessor() {
+		return this.mResponse;
 	}
 	
 	public String getHelpMessage() {

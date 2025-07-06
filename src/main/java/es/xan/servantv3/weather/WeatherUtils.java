@@ -1,5 +1,6 @@
 package es.xan.servantv3.weather;
 
+import es.xan.servantv3.messages.HourlyInfo;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.http.HttpEntity;
@@ -90,15 +91,15 @@ public class WeatherUtils {
 
         boolean isToday = true;
         for (HourlyInfo info : output) {
-            info.price = isToday?
-                    todaysPrices.get(info.time.getHour()) :
-                    tomorrowsPrices.get(info.time.getHour());
+            info.setPrice(isToday?
+                    todaysPrices.get(info.getTime().getHour()) :
+                    tomorrowsPrices.get(info.getTime().getHour()));
 
-            if (info.price == null) {
+            /*if (info.getPrice() == null) {
                 info.price = 0F;
-            }
+            }*/
 
-            if (info.time.getHour() == 23) {
+            if (info.getTime().getHour() == 23) {
                 isToday = false;
             }
         }
@@ -178,11 +179,12 @@ public class WeatherUtils {
 
             Integer temperature = Integer.parseInt(ele.getTextContent());
 
-            HourlyInfo info = new HourlyInfo();
-            info.time = LocalTime.of(hour, 0);
-            info.weather = "despejado";
-            info.temperature = temperature;
-            info.price = 0.4F;
+            HourlyInfo info = new HourlyInfo(
+                LocalTime.of(hour, 0),
+                "despejado",
+                "",
+                temperature,
+                0.4F);
 
             items.put(hour, info);
 
@@ -200,8 +202,8 @@ public class WeatherUtils {
 
             HourlyInfo info = items.get(hour);
             if (info != null) {
-                info.weather = ele.getAttribute("descripcion");
-                info.weatherId = ele.getTextContent();
+                info.setWeather(ele.getAttribute("descripcion"));
+                info.setWeatherId(ele.getTextContent());
             }
 
         }
@@ -211,13 +213,5 @@ public class WeatherUtils {
     public static void main(String agrs[]) {
         // updateEnergyPrice(null, LocalDateTime.now());
         System.out.println(computeTodaysPrices());
-    }
-
-    public static class HourlyInfo {
-        public LocalTime time;
-        public String weather;
-        public String weatherId;
-        public Integer temperature;
-        public Float price;
     }
 }

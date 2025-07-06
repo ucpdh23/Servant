@@ -3,6 +3,7 @@ package es.xan.servantv3.whiteboard;
 import es.xan.servantv3.*;
 import es.xan.servantv3.calendar.GCalendarUtils;
 import es.xan.servantv3.calendar.Notification;
+import es.xan.servantv3.messages.HourlyInfo;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.shoppinglist.ShoppingListUtils;
 import es.xan.servantv3.weather.WeatherUtils;
@@ -88,7 +89,7 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         try {
             LOGGER.info("creating dashboard...");
             List<Notification> nextNotifications = GCalendarUtils.nextNotificationsInWeek(secretFile, calendar);
-            List<WeatherUtils.HourlyInfo> hourlyInfo = WeatherUtils.resolveHourlyInfo();
+            List<HourlyInfo> hourlyInfo = WeatherUtils.resolveHourlyInfo();
 
             Map<String, Object> data = new HashMap<>();
             data.put("notifications", nextNotifications);

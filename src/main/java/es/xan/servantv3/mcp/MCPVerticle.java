@@ -6,6 +6,8 @@ import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.JsonUtils;
+import es.xan.servantv3.brain.nlp.OperationUtils;
+import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.messages.MCPMessage;
 import es.xan.servantv3.webservice.WebServerVerticle;
 import io.modelcontextprotocol.server.McpAsyncServer;
@@ -53,6 +55,61 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         super.start();
         this.mConfiguration = Vertx.currentContext().config().getJsonObject("MCPVerticle");
 
+        McpAsyncServer asyncServer = McpServer.async(this)
+                .capabilities(McpSchema.ServerCapabilities.builder()
+                        .resources(false, false)
+                        .tools(true)
+                        .prompts(false)
+                        .logging()
+                        .build())
+                .build();
+
+        addTool(asyncServer, Rules.TEMPERATURE);
+        addTool(asyncServer, Rules.SHOW_SHOPPING);
+    }
+
+    private void addTool(McpAsyncServer asyncServer, Rules rule) {
+        Action action = rule.getAction();
+        var schema = _createSchema(action.getPayloadClass());
+
+        var tool = new McpServerFeatures.AsyncToolSpecification(
+                new McpSchema.Tool(rule.name(), rule.getHelpMessage(), schema),
+                (exchange, arguments) -> {
+                    return Mono.create(sink -> {
+                        publishAction(action, arguments,  x -> {
+                            if (x.succeeded()) {
+                                OperationUtils.Reply reply = rule.getResponseProcessor().apply(x.result());
+                                sink.success(new McpSchema.CallToolResult(reply.msg, false));
+                            } else {
+                                sink.error(x.cause());
+                            }
+                        });
+                    });
+                }
+        );
+
+        asyncServer.addTool(tool);
+    }
+
+    private String _createSchema(Class<?> clazz) {
+        try {
+            return SchemaConverter.convertClassToSchema(clazz);
+        } catch (Exception e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            return "";
+        }
+    }
+
+
+    /*
+     * Sync implementation
+    @Override
+    public void start() {
+        LOGGER.debug("starting MCP...");
+
+        super.start();
+        this.mConfiguration = Vertx.currentContext().config().getJsonObject("MCPVerticle");
+
         McpSyncServer syncServer = McpServer.sync(this)
                 .serverInfo("servant-server", "1.0.0")
                 .capabilities(McpSchema.ServerCapabilities.builder()
@@ -70,7 +127,9 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         LOGGER.info("started MCP");
     }
 
+
     private McpServerFeatures.SyncToolSpecification toolCreation() {
+
         // Sync tool specification
         var schema = """
             {
@@ -95,6 +154,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                 }
         );
     }
+    */
 
     @Override
     public void setSessionFactory(McpServerSession.Factory sessionFactory) {
@@ -140,7 +200,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         LOGGER.debug("handle_message", message.getMessage());
         try {
             McpSchema.JSONRPCMessage rpcMessage = McpSchema.deserializeJsonRpcMessage(this.objectMapper, message.getMessage().toString());
-            this.session.handle(rpcMessage).block();;
+            this.session.handle(rpcMessage).block();
         } catch (Exception e) {
             e.printStackTrace();
         }
