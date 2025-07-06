@@ -62,7 +62,7 @@ data class Configure(var field: String, var value: String)
  * DTOs
  */
 
-data class HourlyInfo(var time: LocalTime, var weather: String, var weatherId: String, var temperature: Integer, var price: Float)
+data class HourlyInfo(var time: LocalTime, var weather: String, var weatherId: String?, var temperature: Integer, var price: Float)
 
 data class VersionInfo(var filename: String, var tagName: String, var url: String)
 
