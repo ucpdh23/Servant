@@ -33,6 +33,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
 
     private McpServerSession.Factory sessionFactory;
     private McpServerSession session;
+    private McpAsyncServer mAsyncServer;
 
     public MCPVerticle() {
         super(Constant.MCP_VERTICLE);
@@ -62,6 +63,8 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         addTool(asyncServer, Rules.SHOW_SHOPPING);
 
         asyncServer.addTool(createDummyTool());
+
+        this.mAsyncServer = asyncServer;
     }
 
     private McpServerFeatures.AsyncToolSpecification createDummyTool() {
