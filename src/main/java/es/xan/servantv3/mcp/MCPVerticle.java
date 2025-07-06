@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.xan.servantv3.AbstractServantVerticle;
 import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
-import es.xan.servantv3.JsonUtils;
 import es.xan.servantv3.brain.nlp.OperationUtils;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.messages.MCPMessage;
@@ -13,21 +12,16 @@ import es.xan.servantv3.webservice.WebServerVerticle;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
-import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerSession;
 import io.modelcontextprotocol.spec.McpServerTransport;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 
 public class MCPVerticle extends AbstractServantVerticle implements McpServerTransportProvider {
 
@@ -66,7 +60,37 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
 
         addTool(asyncServer, Rules.TEMPERATURE);
         addTool(asyncServer, Rules.SHOW_SHOPPING);
+
+        asyncServer.addTool(createDummyTool());
     }
+
+    private McpServerFeatures.AsyncToolSpecification createDummyTool() {
+
+        // Sync tool specification
+        var schema = """
+            {
+              "type" : "object",
+              "id" : "urn:jsonschema:Operation",
+              "properties" : {
+                    "operation" : {
+                            "type" : "string"
+                          },
+                          "sql" : {
+                            "type" : "string"
+                          }
+              }
+            }
+            """;
+        return new McpServerFeatures.AsyncToolSpecification(
+                new McpSchema.Tool("historicalData", "This tool can query the audit logs database in order to recover any historical information from the system. This database contains information about the temperature at home, when the door has been opened and closed and any other information about when the laundry has been started and stopped.", schema),
+                (exchange, arguments) -> {
+                    LOGGER.debug("historicalData tool invocation {}-{}", exchange, arguments);
+                    // Tool implementation
+                    return Mono.create(sink -> sink.success(new McpSchema.CallToolResult("The database cannot resolve this query.", false)));
+                }
+        );
+    }
+
 
     private void addTool(McpAsyncServer asyncServer, Rules rule) {
         Action action = rule.getAction();
