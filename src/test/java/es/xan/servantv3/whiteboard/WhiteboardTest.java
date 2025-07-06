@@ -1,6 +1,7 @@
 package es.xan.servantv3.whiteboard;
 
 import es.xan.servantv3.calendar.Notification;
+import es.xan.servantv3.messages.HourlyInfo;
 import es.xan.servantv3.weather.WeatherUtils;
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.TestContext;
@@ -51,16 +52,11 @@ public class WhiteboardTest {
         return result;
     }
 
-    private List<WeatherUtils.HourlyInfo> buildWeatherInfo() {
-        ArrayList<WeatherUtils.HourlyInfo> result = new ArrayList<>();
+    private List<HourlyInfo> buildWeatherInfo() {
+        ArrayList<HourlyInfo> result = new ArrayList<>();
 
         for (int i=0; i < 24; i++) {
-            WeatherUtils.HourlyInfo item = new WeatherUtils.HourlyInfo();
-            item.price = 0.123F;
-            item.temperature = 5 + i;
-            item.weather = "a";
-            item.time = LocalTime.of(i, 0);
-
+            HourlyInfo item = new HourlyInfo(LocalTime.of(i, 0), "a", null, 5+ i, 0.123F);
             result.add(item);
         }
 
