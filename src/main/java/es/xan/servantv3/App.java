@@ -97,6 +97,7 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(SecurityModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
@@ -110,7 +111,6 @@ public class App extends AbstractVerticle {
 		vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(KnowledgeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));

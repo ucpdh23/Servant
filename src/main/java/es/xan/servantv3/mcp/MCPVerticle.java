@@ -12,6 +12,7 @@ import es.xan.servantv3.webservice.WebServerVerticle;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerSession;
 import io.modelcontextprotocol.spec.McpServerTransport;
@@ -21,6 +22,8 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 
 public class MCPVerticle extends AbstractServantVerticle implements McpServerTransportProvider {
@@ -43,6 +46,9 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         this.objectMapper = new ObjectMapper();
     }
 
+    /*
+     *
+     */
     @Override
     public void start() {
         LOGGER.debug("starting MCP...");
@@ -59,12 +65,15 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                         .build())
                 .build();
 
-        addTool(asyncServer, Rules.TEMPERATURE);
+        //addTool(asyncServer, Rules.TEMPERATURE);
         addTool(asyncServer, Rules.SHOW_SHOPPING);
 
-        asyncServer.addTool(createDummyTool());
+        asyncServer.addTool(createDummyTool()).doOnSuccess(v -> LOGGER.info("Prompt registered")).subscribe();
 
-        this.mAsyncServer = asyncServer;
+        //this.mAsyncServer = asyncServer;
+        //LOGGER.info("Tools: {}", asyncServer.getServerCapabilities().tools());
+
+        LOGGER.info("started MCP");
     }
 
     private McpServerFeatures.AsyncToolSpecification createDummyTool() {
@@ -103,7 +112,9 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                 new McpSchema.Tool(rule.name(), rule.getHelpMessage(), schema),
                 (exchange, arguments) -> {
                     return Mono.create(sink -> {
-                        publishAction(action, arguments,  x -> {
+                        final Map<String, Object> to_send = arguments == null || arguments.isEmpty()? null : arguments;
+                        publishAction(action, to_send,  x -> {
+                            LOGGER.debug("{}({})->{}", action, to_send, x);
                             if (x.succeeded()) {
                                 OperationUtils.Reply reply = rule.getResponseProcessor().apply(x.result());
                                 sink.success(new McpSchema.CallToolResult(reply.msg, false));
@@ -115,7 +126,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                 }
         );
 
-        asyncServer.addTool(tool);
+        asyncServer.addTool(tool).doOnSuccess(v -> LOGGER.info("Rule {}", rule.getAction())).subscribe();
     }
 
     private String _createSchema(Class<?> clazz) {
@@ -128,8 +139,11 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
     }
 
 
+    // */
+
     /*
      * Sync implementation
+     *
     @Override
     public void start() {
         LOGGER.debug("starting MCP...");
@@ -181,7 +195,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                 }
         );
     }
-    */
+    // */
 
     @Override
     public void setSessionFactory(McpServerSession.Factory sessionFactory) {
@@ -218,18 +232,18 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
     }
 
     public void create_session(MCPMessage message) {
-        LOGGER.debug("Creating Session", message.getSessionId());
+        LOGGER.debug("Creating Session [{}]", message.getSessionId());
         this.session = this.sessionFactory.create(new ServantMCPServerTransport());
-        LOGGER.debug("Created Session {}", this.session);
+        LOGGER.debug("Created Session [{}]", this.session);
     }
 
     public void handle_message(MCPMessage message) {
-        LOGGER.debug("handle_message", message.getMessage());
+        LOGGER.debug("handle_message [{}]", message.getMessage().toString());
         try {
             McpSchema.JSONRPCMessage rpcMessage = McpSchema.deserializeJsonRpcMessage(this.objectMapper, message.getMessage().toString());
             this.session.handle(rpcMessage).block();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
