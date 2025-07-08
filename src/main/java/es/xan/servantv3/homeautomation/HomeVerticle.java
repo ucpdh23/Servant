@@ -69,7 +69,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 		MANAGE_VIDEO(Recorded.class),
 		RECORD_VIDEO(null),
 		SHUTDOWN_SECURITY(null),
-		PROCESS_DEVICE_SECURITY(TextMessage.class)
+		PROCESS_DEVICE_SECURITY(TextMessage.class),
+		PHONE_CALL(null)
 		;
 		
 		Class<?> beanClass;
@@ -86,6 +87,14 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	public void door_open() {
 		publishEvent(Events.DOOR_STATUS_CHANGED, new NewStatus("on"));
+	}
+
+	public void phone_call(final Message<Object> msg) {
+		try {
+			SSHUtils.runLocalCommand("cd /home/pi/lab/servant/caller/pjproject-2.15.1/pjsip-apps/src/swig/python && ./venv/bin/python sample5.py");
+		} catch (Exception e) {
+			LOGGER.error("Error", e);
+		}
 	}
 
 	public void water_leak_status_changed(final NewStatus status) {

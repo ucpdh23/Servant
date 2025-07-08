@@ -285,6 +285,13 @@ public enum Rules {
 			msg -> { return reply(null, TemperatureUtils.toString(msg));},
 			"Returns the temperature from the different sensors at home (internal and external sensors). The response contains the timestamp and temperature for each location. Shortcut 'temperature'"
 			),
+	PHONE_CALL(HomeVerticle.Actions.PHONE_CALL,
+			isContextFree()
+					.and(messageContains("telefono||teléfono")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, HomeUtils.toString(msg));},
+			"Ex. telefono"
+			),
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
 			isContextFree()
 				.and(messageContains("home||casa")),
