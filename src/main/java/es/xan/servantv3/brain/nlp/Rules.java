@@ -129,13 +129,13 @@ public enum Rules {
 			.and(messageContains("lista")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"Loads the list of items for the grocery. Ex. Muestra lista"
+			"Load the list of items for the grocery. Ex. Muestra lista"
 	),
 	ADD_TO_SHOPPING_LIST(ShoppingListVerticle.Actions.SAVE_ITEM,
 			isContext("Shopping"),
 			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"Ex. Item"
+			"Add a new item into the shopping list for the grocery. Ex. Item"
 	),
 	PRINT_ACTION(WhiteboardVerticle.Actions.PRINT,
 			isContextFree()
@@ -289,7 +289,7 @@ public enum Rules {
 			isContextFree()
 					.and(messageContains("telefono||teléfono")),
 			(tokens, userContext) -> {return null;},
-			msg -> { return reply(null, HomeUtils.toString(msg));},
+			msg -> { return reply(null, "Done!");},
 			"Ex. telefono"
 			),
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
