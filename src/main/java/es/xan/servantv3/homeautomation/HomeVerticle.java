@@ -91,7 +91,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	public void phone_call(final Message<Object> msg) {
 		try {
-			SSHUtils.runLocalCommand("cd /home/pi/lab/servant/caller/pjproject-2.15.1/pjsip-apps/src/swig/python && ./venv/bin/python sample5.py");
+			SSHUtils.runLocalCommand("bash /opt/servant/make_call.sh");
 		} catch (Exception e) {
 			LOGGER.error("Error", e);
 		}
