@@ -105,10 +105,22 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 	public void aggregation(Aggregation array, final Message<Object> msg) {
 		JsonArray _array = new JsonArray(array.getAggregationPipelineAsString());
 
-		mongoClient.aggregate(mCollection, _array).handler(res -> {
-			ReplyBuilder builder = MessageBuilder.createReply();
-			builder.setResult(res);
-			msg.reply(builder.build());
+		JsonObject command = new JsonObject()
+				.put("aggregate", mCollection)
+				.put("pipeline", _array);
+		mongoClient.runCommand("aggregate", command, res -> {
+			if (res.succeeded()) {
+				JsonArray resArr = res.result().getJsonArray("result");
+
+				ReplyBuilder builder = MessageBuilder.createReply();
+				builder.setResult(resArr.getList());
+				msg.reply(builder.build());
+			} else {
+				ReplyBuilder builder = MessageBuilder.createReply();
+				builder.setError();
+				msg.reply(builder.build());
+
+			}
 		});
 	}
 
