@@ -13,6 +13,7 @@ import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.messages.Aggregation;
 import es.xan.servantv3.messages.Query;
 import es.xan.servantv3.messages.Room;
 import es.xan.servantv3.messages.Temperature;
@@ -60,6 +61,7 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 	public enum Actions implements Action {
 		SAVE(Temperature.class),
 		QUERY(Query.class),
+		AGGREGATION(Aggregation.class),
 		LAST_VALUES(null);
 		
 
@@ -115,7 +117,8 @@ public class TemperatureVerticle extends AbstractMongoVerticle<Temperature> {
 			publishEvent(Events.NO_TEMPERATURE_INFO,  new Room(room));
 		};
 	}
-	
+
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void last_values(Message<Object> msg) {
 		JsonArray array = new JsonArray();

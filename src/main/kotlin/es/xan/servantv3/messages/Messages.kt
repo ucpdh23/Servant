@@ -115,6 +115,7 @@ data class Knowledge(var _what: String, var _who: String, var _when: String, var
 
 
 data class Query(var limit: Int, var sort: Map<String,Any>, var filter: Map<String,Any>, var fields: Map<String,Any>)
+data class Aggregation(var aggregationPipelineAsString: String)
 
 
 data class DGTMessage(var precision: String, var poblacion: String, var descripcion: String, var carretera: String, var codEle: String)

@@ -285,12 +285,28 @@ public enum Rules {
 			msg -> { return reply(null, TemperatureUtils.toString(msg));},
 			"Returns the temperature from the different sensors at home (internal and external sensors). The response contains the timestamp and temperature for each location. Shortcut 'temperature'"
 			),
+	TEMPERATURE_AGGREGATION(TemperatureVerticle.Actions.AGGREGATION,
+			isContextFree()
+					.and(messageContains("temperatura||temperature"))
+					.and(messageContains("aggregation")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, TemperatureUtils.toString(msg));},
+			"Returns a data aggregation from the temperature datamodel. This tool can response questions about the average or max or min temperature for a defined range of time. This tools requires a valid JsonArray object to query the internal mongodb database. The data model is composed by room (String) suported values [inside,outside], temperature (Float) temperature in celcius degree, timestamp (Long): Timestamp in epoch format"
+		),
 	PHONE_CALL(HomeVerticle.Actions.PHONE_CALL,
 			isContextFree()
 					.and(messageContains("telefono||teléfono")),
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, "Done!");},
 			"Ex. telefono"
+			),
+	NEXT_EVENTS(WhiteboardVerticle.Actions.RESOLVE_CALENDAR_EVENTS,
+			isContextFree()
+					.and(messageContains("events"))
+					.and(messageContains("google")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, OperationUtils.forwarding(msg));},
+			"Returns the list of the next events in the calendar. This list contains information of events for the next few days. Ex. events google"
 			),
 	HOME(HomeVerticle.Actions.GET_HOME_STATUS,
 			isContextFree()
@@ -319,7 +335,7 @@ public enum Rules {
 					.and(messageContains("security")),
 			(tokens, userContext) -> { return new UpdateState("on");},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"Ex. security on"
+			"Enable the security mode in order to monitor the main door status. Ex. security on"
 			),
 	SECURITY_MODE_OFF(SecurityModeVerticle.Actions.CHANGE_STATUS,
 			isContextFree()
@@ -327,7 +343,7 @@ public enum Rules {
 					.and(messageContains("security")),
 			(tokens, userContext) -> { return new UpdateState("off");},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"Ex. security off"
+			"Disable the security mode. Ex. security off"
 	),
 	GITHUB_VERSION_UPDATE(GithubVerticle.Actions.UPDATE_VERSION,
 			isContextFree()

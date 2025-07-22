@@ -1,10 +1,12 @@
 package es.xan.servantv3;
 
 import es.xan.servantv3.MessageBuilder.ReplyBuilder;
+import es.xan.servantv3.messages.Aggregation;
 import es.xan.servantv3.messages.Query;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
@@ -98,6 +100,16 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 	private void onSaved(T item, AsyncResult<String> res) {
 		final BiConsumer<T, String> onSaved = onSaved();
 		if (onSaved != null) onSaved.accept(item, res.result());
+	}
+
+	public void aggregate(Aggregation array, final Message<Object> msg) {
+		JsonArray _array = new JsonArray(array.getAggregationPipelineAsString());
+
+		mongoClient.aggregate(mCollection, _array).handler(res -> {
+			ReplyBuilder builder = MessageBuilder.createReply();
+			builder.setResult(res);
+			msg.reply(builder.build());
+		});
 	}
 
 	public void query(Query query, final Message<Object> msg) {

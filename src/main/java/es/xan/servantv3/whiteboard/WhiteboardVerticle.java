@@ -36,6 +36,7 @@ import java.net.NoRouteToHostException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.*;
@@ -70,7 +71,8 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
     public enum Actions implements Action {
         PRINT(TextMessage.class),
         PRINT_IMAGE(TextMessage.class),
-        CREATE_DASHBOARD(null)
+        CREATE_DASHBOARD(null),
+        RESOLVE_CALENDAR_EVENTS(null),
         ;
 
         private Class<?> mMessageClass;
@@ -82,6 +84,30 @@ public class WhiteboardVerticle extends AbstractServantVerticle {
         @Override
         public Class<?> getPayloadClass() {
             return mMessageClass;
+        }
+    }
+
+    public void resolve_calendar_events(Message<Object> message) {
+        try {
+            List<Notification> nextNotifications = GCalendarUtils.nextNotificationsInWeek(secretFile, calendar);
+
+            StringBuilder builder = new StringBuilder();
+            if (!nextNotifications.isEmpty()) {
+                builder.append("Próximos eventos:\n");
+            }
+            for (Notification notification : nextNotifications) {
+                builder.append(notification.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).append(": ").append(notification.text).append("\n");
+            }
+
+            builder.toString();
+
+            MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
+            builderOn.setOk();
+            builderOn.setMessage(builder.toString());
+            message.reply(builderOn.build());
+
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

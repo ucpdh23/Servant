@@ -66,10 +66,12 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
                 .build();
 
         addTool(asyncServer, Rules.TEMPERATURE);
+        addTool(asyncServer, Rules.TEMPERATURE_AGGREGATION);
         addTool(asyncServer, Rules.SHOW_SHOPPING);
         addTool(asyncServer, Rules.ADD_TO_SHOPPING_LIST);
+        addTool(asyncServer, Rules.NEXT_EVENTS);
 
-        //asyncServer.addTool(createDummyTool()).doOnSuccess(v -> LOGGER.info("Prompt registered")).subscribe();
+        // asyncServer.addTool(createDummyTool()).doOnSuccess(v -> LOGGER.info("Prompt registered")).subscribe();
 
         //this.mAsyncServer = asyncServer;
         //LOGGER.info("Tools: {}", asyncServer.getServerCapabilities().tools());
