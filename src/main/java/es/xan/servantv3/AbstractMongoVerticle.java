@@ -102,7 +102,7 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 		if (onSaved != null) onSaved.accept(item, res.result());
 	}
 
-	public void aggregate(Aggregation array, final Message<Object> msg) {
+	public void aggregation(Aggregation array, final Message<Object> msg) {
 		JsonArray _array = new JsonArray(array.getAggregationPipelineAsString());
 
 		mongoClient.aggregate(mCollection, _array).handler(res -> {
