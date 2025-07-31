@@ -133,6 +133,7 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		}
 
 
