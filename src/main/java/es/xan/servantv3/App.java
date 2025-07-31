@@ -1,5 +1,6 @@
 package es.xan.servantv3;
 
+import com.google.common.base.Strings;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.calendar.CalendarVerticle;
 import es.xan.servantv3.folder.FolderVerticle;
@@ -46,10 +47,13 @@ public class App extends AbstractVerticle {
 
 	TcpEventBusBridge bridge;
 	public static Connection connection;
+	private JsonObject mConfiguration;
 
 	@Override
 	public void start() {
 		LOGGER.info("Starting servant app");
+
+		this.mConfiguration = Vertx.currentContext().config().getJsonObject("App");
 
 		initializeLogBridges();
 		initializeLocalDatabase();
@@ -90,33 +94,47 @@ public class App extends AbstractVerticle {
 
 	private void initializeVerticles() {
 		JsonObject config = Vertx.currentContext().config();
-		
-		vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(MCPVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(ScrumLeaderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(SecurityModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(RoadVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(SensorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(OutletVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(LaundryVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(KnowledgeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
-		vertx.deployVerticle(AzureDevOpsVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+
+		final String mode = this.mConfiguration.getString("mode");
+
+		if (Strings.isNullOrEmpty(mode) || "complete".equals(mode.toLowerCase())) {
+			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(MCPVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ScrumLeaderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ShoppingListVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(SecurityModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(TemperatureVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(RoadVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(NetworkVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ThermostatVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(SensorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(OutletVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(LaundryVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(LampVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(CalendarVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(WhiteboardVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(KnowledgeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(OpenIAVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(AzureDevOpsVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		} else if ("security".equals(mode.toLowerCase())) {
+			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(MqttVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(SecurityModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(NightModeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		}
+
 
 	}
 
