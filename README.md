@@ -1,29 +1,30 @@
 # **Servant**
 
-**My Smart Home System**
+**My Smart Home Assistance Prototype**
 
-Let me ask you some home management questions:
-- How do you manage your Shopping list to avoid forgiving anything?
-- Don't you like to manage your heating system from your google calendar?
-- Don't you like to monitor the home and outdoor temperature from everywhere?
-- Would you like a DIY security system for your home?
-- What about tracking your utilities bills?
+Let me ask you some home errand questions:
+- How do you control your *shopping list* to avoid forgiving anything?
+- Wouldn't you like to manage your heating system from your google calendar?
+- Wouldn't you like to monitor your indoor and outdoor temperature from anywhere?
 
-
-**Servant is a home assistant platform to handle various domestic and recurrent activities efficiently.**
+**Servant is your home assistant platform to handle domestic and recurrent tasks efficiently.**
      
-
 ## **Introduction**
 
-Servant aims to provide a software architecture with capacity to integrate various sensors, transformers, and actuators into a single platform. 
+Servant is a different home assistance implementation to provide a software architecture with capabilities to integrate sensors, transformers, and actuators. This customizable implementation supports new integrations as well as new workflows for your personal data. 
 
 See bellow some key features of Servant:
 
+**Modularity**
+
+Servant is a composition of modules. Each module corresponds to a logical subsystem and includes a series of functionalities grouped into actions and events.
+
 **IA Capabilities**
+
+*MCP implementation*. Servant implements the MCP protocol providing MCP tools. This toolkit provide interactivitity of Servant in any agentic solution.  
 
 LLMs offer a novel way to interact with your data. In addition to generating content from a given input, LLMs can be utilized to transform heterogeneous and irregular content into a structured and more analyzable output.
 Then, this transformed content can be used to build a knowledge data model for future activities.  
-
 
 **Interaction**
 Human or machine interactions with Servant are possible thanks to the pre built-in interfaces:
@@ -32,9 +33,9 @@ Human or machine interactions with Servant are possible thanks to the pre built-
 
 * Web interface that allows the creation of a web application.
 
-* Includes a Telegram chatbot as a human/system interface. 
+* Telegram chatbot as an asynchronous human/system interface. 
 
-* Google Calendar integration in order to schedule and run operations.
+* Google Calendar integration in order to schedule and run actions in specific time.
 
 
 **Extensibility**
@@ -43,10 +44,11 @@ Servant provides an extensible framework, implemented in Java and Kotlin, that a
 
 Integration of any kind of device into the Internet of Things technology is easy. Thanks to a distributed messaging system and Java, interfacing with any system in order to send or receive data from/to the cloud never will be a hard work. Integration with systems like IFTTT 
 
+Servant provides a MQTT interface to interacts with sensors and external actuators. This solution is already inetgrated with a zigbee2mqtt solution in order to connect to other systems.  
 
 
 **Smart**
-* Based on a events and actions systems. It is easy to create advanced algorithms interacting devices together (sensors and/or actuators) or with external systems.
+* Implementation based on two basic concepts of events and actions. It is easy to create advanced algorithms interacting devices together (sensors and/or actuators) or with external systems.
 
 * Natural language processing in order to a better human/system interaction.
 
@@ -65,7 +67,7 @@ Integration of any kind of device into the Internet of Things technology is easy
 
 * In order to simplify development, a [Conventions over configurations](https://en.wikipedia.org/wiki/Convention_over_configuration) policy has been adopted. This project implement abstract some concepts, providing a mini-framework to simplify development:
        - Providing almost a 99% friendly object-oriented static way to map and use json data.
-       - improved communication system inside the vertx nodes system thanks to java enum objects.
+       - Improved communication system inside the vertx nodes system thanks to java enum objects.
        - Toolkit to build state machines with a java enums language.
        - Interaction between java with kotlin code.
 
@@ -73,8 +75,7 @@ Integration of any kind of device into the Internet of Things technology is easy
 
 * Built-in facilities on top of Vertx event bus to handle the interaction with events in a controlled way. 
 
-* SMTP bridge to interact with external systems.
-
 **Requirements**
 
 * Java 21
+* Linux based system
