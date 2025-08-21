@@ -11,7 +11,7 @@ Let me ask you some questions about your homeworks:
      
 ## **Introduction**
 
-Servant is a different home assistance implementation to provide a software architecture with capabilities to integrate sensors, transformers, and actuators. This customizable implementation supports new integrations as well as new workflows for your personal data. 
+Servant is an alternative home assistance platform designed to provide a software architecture with capabilities to integrate external elements such as sensors, transformers, and actuators. This customizable solution supports new integrations as well as new workflows for your persobal purposes. 
 
 See bellow some key features of Servant:
 
