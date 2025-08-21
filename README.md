@@ -2,9 +2,9 @@
 
 **My Smart Home Assistance Prototype**
 
-Let me ask you some home errand questions:
+Let me ask you some questions about your homeworks:
 - How do you control your *shopping list* to avoid forgiving anything?
-- Wouldn't you like to manage your heating system from your google calendar?
+- Wouldn't you like to manage your heating system using your calendar scheduler?
 - Wouldn't you like to monitor your indoor and outdoor temperature from anywhere?
 
 **Servant is your home assistant platform to handle domestic and recurrent tasks efficiently.**
