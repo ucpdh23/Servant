@@ -2,6 +2,7 @@ package es.xan.servantv3.folder;
 
 import com.google.common.io.Files;
 import es.xan.servantv3.*;
+import es.xan.servantv3.calendar.CalendarVerticle;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.VideoMessage;
 import es.xan.servantv3.parrot.ParrotVerticle;
@@ -17,8 +18,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class FolderVerticle extends AbstractServantVerticle {
@@ -28,14 +33,34 @@ public class FolderVerticle extends AbstractServantVerticle {
     private JsonObject mConfiguration;
     private Map<String, File> mTypes;
 
+    private File mCheckFolder;
+    private Map<String, String> checkedFiles;
+
     private Map<String, String> mDefaults;
 
-    public FolderVerticle() {
+    public FolderVerticle() throws SQLException {
         super(Constant.FOLDER_VERTICLE);
 
-        supportedActions(FolderVerticle.Actions.values());
+        initialize();
 
+        supportedActions(FolderVerticle.Actions.values());
         supportedEvents(Events.PARROT_FILE_RECEIVED);
+    }
+
+    private void initialize() throws SQLException {
+        LOGGER.info("loading known files...");
+
+        try (Statement statement = App.connection.createStatement()) {
+            statement.executeUpdate("create table if not exists folder_files (filename string, status string)");
+
+            ResultSet rs = statement.executeQuery("select * from folder_files");
+            while (rs.next()) {
+                String filename = rs.getString("filename");
+                String status = rs.getString("status");
+
+                checkedFiles.put(filename, status);
+            }
+        }
     }
 
     @Override
@@ -45,12 +70,15 @@ public class FolderVerticle extends AbstractServantVerticle {
 
         this.mFolder = new File(this.mConfiguration.getString("path"));
 
+        this.mCheckFolder = new File(this.mConfiguration.getString("checker"));
+
         JsonArray types = this.mConfiguration.getJsonArray("types");
         this.mTypes = this._populateTypes(types.getList(), this.mFolder);
 
         JsonArray defaults = this.mConfiguration.getJsonArray("default");
         this.mDefaults = this._populateDefaults(defaults.getList());
 
+        vertx.setPeriodic(TimeUnit.SECONDS.toMillis(10), id -> {publishAction(FolderVerticle.Actions.CHECK_NEW_FILES);});
 
         LOGGER.info("started Folder");
     }
@@ -85,7 +113,8 @@ public class FolderVerticle extends AbstractServantVerticle {
     public enum Actions implements Action {
         STORE_FILE(VideoMessage.class),
         RESOLVE_FILE(TextMessage.class),
-        RESOLVE_TYPES(null)
+        RESOLVE_TYPES(null),
+        CHECK_NEW_FILES(null)
         ;
 
         private Class<?> mMessageClass;
@@ -102,6 +131,56 @@ public class FolderVerticle extends AbstractServantVerticle {
 
     public void parrot_file_received(VideoMessage toStore, Message<Object> message) {
         store_file(toStore, message);
+    }
+
+    public void check_new_files(Message<Object> message) {
+        for (File file : mCheckFolder.listFiles()) {
+            String filename = file.getName();
+            Boolean canWrite = file.canWrite();
+            Boolean isFile = file.isFile();
+
+            boolean to_publish = false;
+            boolean to_insert = false;
+            boolean to_update = false;
+
+            String new_status = canWrite? "CAN_WRITE" : "NOT_EDITABLE";
+
+            if (isFile) {
+                if (canWrite) {
+                    if (this.checkedFiles.containsKey(filename)) {
+                        String status = this.checkedFiles.get(filename);
+                        if (!status.equals(new_status)) {
+                            to_publish = true;
+                            to_update = true;
+                            this.checkedFiles.put(filename, new_status);
+                        }
+                    } else {
+                        to_insert = true;
+                        to_publish = true;
+                        this.checkedFiles.put(filename, new_status);
+                    }
+                }
+
+                if (to_insert) {
+                    try (Statement statement = App.connection.createStatement()) {
+                        statement.executeUpdate("INSERT INTO folder_files (filename, status) VALUES ('%s','%s')".formatted(filename, new_status));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (to_update) {
+                    try (Statement statement = App.connection.createStatement()) {
+                        statement.executeUpdate("UPDATE folder_files SET status = '%s' WHERE filename = '%s'".formatted(new_status, filename));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                if (to_publish) {
+                    VideoMessage vMsg = new VideoMessage("admin", "checker", file.getAbsolutePath());
+                    publishEvent(Events.NEW_FILE_STORED, vMsg);
+                }
+            }
+        }
     }
 
     public void resolve_file(TextMessage textMessage, Message<Object> message) {

@@ -21,7 +21,7 @@ Servant is a composition of modules. Each module corresponds to a logical subsys
 
 **IA Capabilities**
 
-*MCP implementation*. Servant implements the MCP protocol providing MCP tools. This toolkit provide interactivitity of Servant in any agentic solution.  
+*MCP implementation*. Servant supports the MCP protocol implementing several MCP tools. This toolkit provide integration of Servant in any agentic solution. With these tools one external LLM Agent can interact with the shopping list, query the calendar to review future tasks, and review the temperature. In future versions new tool will be created in order to provide new possibilities.  
 
 LLMs offer a novel way to interact with your data. In addition to generating content from a given input, LLMs can be utilized to transform heterogeneous and irregular content into a structured and more analyzable output.
 Then, this transformed content can be used to build a knowledge data model for future activities.  

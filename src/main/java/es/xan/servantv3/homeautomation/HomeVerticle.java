@@ -40,11 +40,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
-	protected Cache<String, String> memory = CacheBuilder.newBuilder()
-			.expireAfterAccess(1, TimeUnit.MINUTES)
-			.expireAfterWrite(1, TimeUnit.MINUTES)
-			.build();
-	
 	public HomeVerticle() {
 		super(Constant.HOME_VERTICLE);
 		
@@ -56,8 +51,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.NO_TEMPERATURE_INFO,  
 			Events.NETWORK_DEVICES_STATUS_UPDATED,
 			Events.LAUNDRY_OFF,
-			Events.WATER_LEAK_STATUS_CHANGED,
-			Events._EVENT_);
+			Events.WATER_LEAK_STATUS_CHANGED);
 	}
 	
 	public enum Actions implements Action {
@@ -67,7 +61,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
 		REPORT_TEMPERATURE(null),
 		MANAGE_VIDEO(Recorded.class),
-		RECORD_VIDEO(null),
 		SHUTDOWN_SECURITY(null),
 		PROCESS_DEVICE_SECURITY(TextMessage.class),
 		PHONE_CALL(null)
@@ -130,91 +123,17 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	}
 
-	public void record_video(final Message<Object> msg) {
-		try {
-			Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
-			LOGGER.info("WaitingVideo [{}]", waitingVideo);
-
-			if (!waitingVideo) {
-				LOGGER.info("publishing event");
-
-				this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
-				LOGGER.debug("Waiting video");
-				memory.put("WAITING_VIDEO", "true");
-			} else {
-				LOGGER.info("cannot publish RECORD_VIDEO action");
-			}
-		} catch (ExecutionException e) {
-			LOGGER.warn(e.getMessage(), e);
-		}
-
-		MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
-		builderOn.setOk();
-		msg.reply(builderOn.build());
-	}
-
 	public void manage_video(Recorded recorded) {
 		LOGGER.debug("recorded [{}-{}-{}]", recorded.getFilepath(), new File(recorded.getFilepath()).exists(), recorded.getCode());
-		memory.put("WAITING_VIDEO", "false");
 
 		this.mMasters.forEach( master -> {
 			VideoMessage message = new VideoMessage(master, "", recorded.getFilepath());
 			publishAction(ParrotVerticle.Actions.SEND_VIDEO, message);
 			publishEvent(Events.VIDEO_RECORDED);
 		});
-
-/*		publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
-		if (mLampOffScheduledTask != null) {
-			this.mScheduler.removeScheduledTask(this.mLampOffScheduledTask);
-		}*/
 	}
 
 	UUID mLampOffScheduledTask = null;
-
-	public void _event_(Event event) {
-		LOGGER.debug("proceesing event");
-
-		LOGGER.debug("event. [{}-{}]", event.getName(), event.getStatus());
-		if ("door".equals(event.getName()) && event.getStatus().startsWith("BUTTON")) {
-			LOGGER.info("processing door...");
-			try {
-				Boolean waitingVideo = Boolean.parseBoolean(memory.get("WAITING_VIDEO", () -> "false"));
-				LOGGER.info("WaitingVideo [{}]", waitingVideo);
-
-				if (!waitingVideo) {
-					LOGGER.info("publishing event");
-
-/*					this.publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("on"));
-					if (mLampOffScheduledTask != null) mScheduler.removeScheduledTask(mLampOffScheduledTask);
-					this.mLampOffScheduledTask = mScheduler.scheduleTask(in(1, ChronoUnit.MINUTES), (UUID id) -> {
-						publishAction(LampVerticle.Actions.SWITCH_LAMP, new UpdateState("off"));
-						return false;
-					});*/
-
-					this.publishRawAction("RECORD_VIDEO", new Recording(10, "CODE"));
-					LOGGER.debug("Waiting video");
-					memory.put("WAITING_VIDEO", "true");
-				} else {
-					LOGGER.info("cannot publish RECORD_VIDEO action");
-				}
-			} catch (ExecutionException e) {
-				LOGGER.warn(e.getMessage(), e);
-			}
-		} else if ("door".equals(event.getName()) && event.getStatus().startsWith("temp")) {
-			String data = event.getStatus().split("=")[1];
-			String s_securityTemp = data.substring(0, data.indexOf("'"));
-			LOGGER.debug("Computed temperature [{}]", s_securityTemp);
-
-			Float temperature = Float.parseFloat(s_securityTemp);
-			if (temperature > 60) {
-				for (String master : this.mMasters) {
-					publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, "Temperature de rasp de seguridad muy alta " + temperature));
-				}
-			}
-		} else {
-			LOGGER.debug("unsupported event");
-		}
-	}
 
 	public void get_home_status(Message<Object> message) {
 		ReplyBuilder builder = MessageBuilder.createReply();
