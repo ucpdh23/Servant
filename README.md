@@ -2,18 +2,16 @@
 
 **My Smart Home Assistance Prototype**
 
-Let me ask you some questions about your homeworks:
-- How do you control your *shopping list* to avoid forgiving anything?
-- Wouldn't you like to manage your heating system using your calendar scheduler?
-- Wouldn't you like to monitor your indoor and outdoor temperature from anywhere?
+Managing a household involves many small but important tasks: keeping your shopping list up to date, adjusting the heating system, or tracking indoor and outdoor temperatures. Servant helps you take care of these recurring activities automatically and intelligently—so your home works with you, not against you.
 
-**Servant is your home assistant platform to handle domestic and recurrent tasks efficiently.**
+**Servant is your home assistant platform to simplify and automate domestic tasks efficiently.**
+
      
 ## **Introduction**
 
-Servant is an alternative home assistance platform designed to provide a software architecture with capabilities to integrate external elements such as sensors, transformers, and actuators. This customizable solution supports new integrations as well as new workflows for your persobal purposes. 
+Servant is a flexible and extensible home assistance platform designed to integrate seamlessly with sensors, actuators, and external systems. Unlike traditional solutions, Servant provides a customizable software architecture that adapts to your needs—whether it’s managing daily tasks, automating workflows, or enabling advanced AI-driven interactions.
 
-See bellow some key features of Servant:
+## **Key Features**
 
 **Modularity**
 
