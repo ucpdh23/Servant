@@ -34,7 +34,7 @@ public class FolderVerticle extends AbstractServantVerticle {
     private Map<String, File> mTypes;
 
     private File mCheckFolder;
-    private Map<String, String> checkedFiles;
+    private Map<String, String> checkedFiles = new HashMap<>();
 
     private Map<String, String> mDefaults;
 
