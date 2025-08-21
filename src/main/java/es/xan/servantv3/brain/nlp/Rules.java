@@ -75,14 +75,6 @@ public enum Rules {
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"untrack"
 	),
-	VIDEO(HomeVerticle.Actions.RECORD_VIDEO,
-			isContextFree()
-					.and(messageContains("record||grabar||graba"))
-					.and(messageContains("video")),
-			(tokens, userContext) -> {return null;},
-			msg -> { return reply(null, OperationUtils.forwarding(msg));},
-			"graba video"
-	),
 	SHUTDOWN_SECURITY(HomeVerticle.Actions.SHUTDOWN_SECURITY,
 			isContextFree()
 					.and(messageContains("apagar"))
