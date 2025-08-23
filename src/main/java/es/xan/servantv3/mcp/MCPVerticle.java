@@ -70,6 +70,7 @@ public class MCPVerticle extends AbstractServantVerticle implements McpServerTra
         addTool(asyncServer, Rules.SHOW_SHOPPING);
         addTool(asyncServer, Rules.ADD_TO_SHOPPING_LIST);
         addTool(asyncServer, Rules.NEXT_EVENTS);
+        addTool(asyncServer, Rules.NOTIFY_BOSS);
 
         // asyncServer.addTool(createDummyTool()).doOnSuccess(v -> LOGGER.info("Prompt registered")).subscribe();
 

@@ -61,6 +61,13 @@ public enum Rules {
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Start tracking a journey"
 	),
+	NOTIFY_BOSS(HomeVerticle.Actions.NOTIFY_BOSS,
+			isContextFree()
+					.and(messageStartsWith("Notify:")),
+			(tokens, userContext) -> {return new TextMessageToTheBoss(concatStrings(tokens));},
+			msg -> { return reply(null, OperationUtils.forwarding(msg));},
+			"Send a Instant Message (or notification) to the user."
+	),
 	HOME_DOOR_OPEN(HomeVerticle.Actions.DOOR_OPEN,
 			isContextFree()
 					.and(messageContains("testing")),
