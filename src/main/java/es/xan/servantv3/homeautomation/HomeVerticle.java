@@ -192,11 +192,17 @@ public class HomeVerticle extends AbstractServantVerticle {
 		publishAction(ParrotVerticle.Actions.SEND, message);
 	}
 	
-	public void notify_all_boss(TextMessageToTheBoss content) {
+	public void notify_all_boss(TextMessageToTheBoss content, Message<Object> message) {
 		this.mMasters.forEach( master -> {
 			TextMessage message = new TextMessage(master, content.getMessage());
 			publishAction(ParrotVerticle.Actions.SEND, message);
 		});
+		
+		MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
+		builder.setOk();
+    builder.setMessage("Done");
+    
+    message.reply(builder.build());
 	}
 
 	Map<String, Device> notified = new HashMap<>();

@@ -61,7 +61,7 @@ public enum Rules {
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Start tracking a journey"
 	),
-	NOTIFY_BOSS(HomeVerticle.Actions.NOTIFY_BOSS,
+	NOTIFY_BOSS(HomeVerticle.Actions.NOTIFY_ALL_BOSS,
 			isContextFree()
 					.and(messageStartsWith("Notify:")),
 			(tokens, userContext) -> {return new TextMessageToTheBoss(concatStrings(tokens));},
