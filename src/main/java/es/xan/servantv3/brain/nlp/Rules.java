@@ -63,7 +63,7 @@ public enum Rules {
 	),
 	NOTIFY_BOSS(HomeVerticle.Actions.NOTIFY_ALL_BOSS,
 			isContextFree()
-					.and(messageStartsWith("Notify:")),
+					.and(messageStartsWith("notify")),
 			(tokens, userContext) -> {return new TextMessageToTheBoss(concatStrings(tokens));},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Send a Instant Message (or notification) to the user."
