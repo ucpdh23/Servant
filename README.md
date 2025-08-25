@@ -2,7 +2,7 @@
 
 **My Smart Home Assistance Prototype**
 
-Managing a household involves many small but important tasks: keeping your shopping list up to date, adjusting the heating system, or tracking indoor and outdoor temperatures. Servant helps you take care of these recurring activities automatically and intelligently—so your home works with you, not against you.
+Managing a household involves many small but important tasks: keeping your shopping list up to date, adjusting the heating system, have control over your home calendar so you don't forget picking up your child when he finishes his music lessons, or tracking indoor and outdoor temperatures. Servant helps you take care of these recurring activities automatically and intelligently—so your home works with you, not against you.
 
 **Servant is your home assistant platform to simplify and automate domestic tasks efficiently.**
 
