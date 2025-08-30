@@ -19,7 +19,7 @@ Servant is a composition of modules. Each module corresponds to a logical subsys
 
 **IA Capabilities**
 
-*MCP implementation*. Servant supports the MCP protocol implementing several MCP tools. This toolkit provide integration of Servant in any agentic solution. With these tools one external LLM Agent can interact with the shopping list, query the calendar to review future tasks, and review the temperature. In future versions new tool will be created in order to provide new possibilities.  
+*MCP implementation*. Servant implements the [java SDK MCP server API](https://github.com/modelcontextprotocol/java-sdk), providing several MCP tools. This toolkit allows the integration of Servant in any GENAI Agentic system. The current implementation allows interaction with the shopping list, query the calendar to review future tasks, review the temperature and publish Notifications (Telegram messages) to one specific context. In future versions of Servant, new MCP tools will be provided with other commands and actions.  
 
 LLMs offer a novel way to interact with your data. In addition to generating content from a given input, LLMs can be utilized to transform heterogeneous and irregular content into a structured and more analyzable output.
 Then, this transformed content can be used to build a knowledge data model for future activities.  
