@@ -43,6 +43,8 @@ Human or machine interactions with Servant are possible through the pre-built in
 * [Telegram](https://telegram.org/) chatbot as an asynchronous human/system interface. 
 
 * [Google Calendar](https://calendar.google.com/) integration to schedule and run actions at specific times.
+  
+* [VoIP](https://github.com/ucpdh23/ServantPhone) solution which provides a conversational solution.
 
 
 **Extensibility**
