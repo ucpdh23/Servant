@@ -24,11 +24,11 @@ Servant is a flexible and extensible home assistance platform designed to integr
 
 **Modularity**
 
-Servant is a composition of modules. Each module corresponds to a logical subsystem and includes a series of functionalities grouped into actions and events.
+Servant is composed for several modules. Each one corresponds to a logical subsystem. A module provides a set of functionalities provided as action calls and events subscription.
 
 **AI Capabilities**
 
-*MCP implementation*. Servant implements the [Java SDK MCP server API](https://github.com/modelcontextprotocol/java-sdk), providing several [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) tools. This toolkit allows the integration of Servant in any GenAI Agentic system. The current implementation allows interaction with the shopping list, querying the calendar to review future tasks, reviewing the temperature, and publishing notifications ([Telegram](https://core.telegram.org/bots/api) messages) to specific contexts. In future versions of Servant, new MCP tools will be provided with additional commands and actions.  
+*MCP implementation*. Servant implements the [Java SDK MCP server API](https://github.com/modelcontextprotocol/java-sdk), providing several [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) tools. This toolkit allows the integration of Servant in any GenAI Agentic system. The current implementation allows interaction with several modules of servant such as the shopping list, the calendar, temperature monitoring system and the notifications manager which facilitates ([Telegram](https://core.telegram.org/bots/api) messages) messages publication. In future versions of Servant, new MCP tools will be provided with additional commands and actions.  
 
 [Large Language Models (LLMs)](https://en.wikipedia.org/wiki/Large_language_model) offer a novel way to interact with your data. In addition to generating content from a given input, LLMs can be utilized to transform heterogeneous and irregular content into structured and more analyzable output.
 This transformed content can then be used to build a knowledge data model for future activities.  
