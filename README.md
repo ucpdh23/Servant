@@ -44,7 +44,7 @@ Human or machine interactions with Servant are possible through the pre-built in
 
 * [Google Calendar](https://calendar.google.com/) integration to schedule and run actions at specific times.
   
-* [VoIP](https://github.com/ucpdh23/ServantPhone) solution which provides a conversational solution.
+* [VoIP](https://github.com/ucpdh23/ServantPhone) interface which provides a conversational solution between the user and Servant.
 
 
 **Extensibility**
