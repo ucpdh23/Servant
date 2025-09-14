@@ -21,6 +21,7 @@ public class ProductivityUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductivityUtils.class);
 
     public static List<HNData> resolveData() {
+        LOGGER.info("Resolving data from hn");
         List<HNData> output = new ArrayList<>();
         try {
             org.jsoup.nodes.Document doc = Jsoup.connect("https://histre.com/hn/").get();
@@ -39,7 +40,7 @@ public class ProductivityUtils {
                 Elements hnLinks = content.select("a");
                 org.jsoup.nodes.Element hnlink = hnLinks.get(0);
                 String comments_text = hnlink.text();
-                comments_text = RegExUtils.removeAll(comments_text, " comments");
+                comments_text = RegExUtils.removeAll(comments_text, " comment(s)?");
                 Integer comments = Integer.parseInt(comments_text);
                 String commentsUrl = hnlink.attr("href");
 
@@ -53,7 +54,6 @@ public class ProductivityUtils {
 
                 String date = computeDate(0);
                 output.add(new HNData(url, name, comments, commentsUrl, StringUtils.join(tags), date, 0));
-//                 System.out.println("" + url + name + comments + commentsUrl + StringUtils.join(tags));
             }
 
         } catch (Exception e) {
@@ -96,40 +96,41 @@ public class ProductivityUtils {
                 selectStmt.setString(1, sanitizeAndLimit(item.getUrl(), 200)); // validación básica
                 selectStmt.setString(2, item.getDate());      // setDateParam maneja distintos tipos
 
+                boolean found = false;
                 try (ResultSet rs = selectStmt.executeQuery()) {
-                    boolean found = rs.next();
+                    found = rs.next();
+                }
 
-                    if (found) {
-                        // 2) Si existe -> UPDATE (solo los campos indicados)
-                        String updateSql = "UPDATE productivity_hn SET comments_url = ?, coments_counter = ?, tags = ?, times = times + 1 WHERE url = ? AND date = ?";
-                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                            // Asumimos comments -> String o int según tu modelo
-                            setObjectOrNull(updateStmt, 1, item.getCommentsUrl());
-                            setObjectOrNull(updateStmt, 2, item.getCommentsCounter());
-                            setObjectOrNull(updateStmt, 3, sanitizeAndLimit(item.getTags(), 1000));
-                            updateStmt.setString(4, sanitizeAndLimit(item.getUrl(), 500));
-                            updateStmt.setString( 5, item.getDate());
+                if (found) {
+                    // 2) Si existe -> UPDATE (solo los campos indicados)
+                    String updateSql = "UPDATE productivity_hn SET comments_url = ?, coments_counter = ?, tags = ?, times = times + 1 WHERE url = ? AND date = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        // Asumimos comments -> String o int según tu modelo
+                        setObjectOrNull(updateStmt, 1, item.getCommentsUrl());
+                        setObjectOrNull(updateStmt, 2, item.getCommentsCounter());
+                        setObjectOrNull(updateStmt, 3, sanitizeAndLimit(item.getTags(), 1000));
+                        updateStmt.setString(4, sanitizeAndLimit(item.getUrl(), 500));
+                        updateStmt.setString( 5, item.getDate());
 
-                            int updated = updateStmt.executeUpdate();
-                            if (updated == 0) {
-                                // Esto no debería ocurrir porque ya comprobamos existencia, pero podemos registrarlo
-                                System.err.println("Advertencia: UPDATE no afectó filas aunque el SELECT indicó existencia.");
-                            }
+                        int updated = updateStmt.executeUpdate();
+                        if (updated == 0) {
+                            // Esto no debería ocurrir porque ya comprobamos existencia, pero podemos registrarlo
+                            System.err.println("Advertencia: UPDATE no afectó filas aunque el SELECT indicó existencia.");
                         }
-                    } else {
-                        // 3) Si no existe -> INSERT
-                        String insertSql = "INSERT INTO productivity_hn (url, date, comments_url, comments_counter, tags, times) VALUES (?, ?, ?, ?, ?, ?)";
-                        try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-                            insertStmt.setString(1, sanitizeAndLimit(item.getUrl(), 500));
-                            insertStmt.setString( 2, item.getDate());
+                    }
+                } else {
+                    // 3) Si no existe -> INSERT
+                    String insertSql = "INSERT INTO productivity_hn (url, date, comments_url, comments_counter, tags, times) VALUES (?, ?, ?, ?, ?, ?)";
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setString(1, sanitizeAndLimit(item.getUrl(), 500));
+                        insertStmt.setString( 2, item.getDate());
 
-                            setObjectOrNull(insertStmt, 3, item.getCommentsUrl());
-                            setObjectOrNull(insertStmt, 4, item.getCommentsCounter());
-                            setObjectOrNull(insertStmt, 5, sanitizeAndLimit(item.getTags(), 1000));
-                            setObjectOrNull(insertStmt, 6, 1);
+                        setObjectOrNull(insertStmt, 3, item.getCommentsUrl());
+                        setObjectOrNull(insertStmt, 4, item.getCommentsCounter());
+                        setObjectOrNull(insertStmt, 5, sanitizeAndLimit(item.getTags(), 1000));
+                        setObjectOrNull(insertStmt, 6, 1);
 
-                            insertStmt.executeUpdate();
-                        }
+                        insertStmt.executeUpdate();
                     }
                 }
             }
@@ -139,15 +140,14 @@ public class ProductivityUtils {
             try {
                 conn.rollback();
             } catch (SQLException exRollback) {
-                exRollback.printStackTrace();
+                LOGGER.warn(exRollback.getMessage(), exRollback);
             }
-            // Manejo de errores: loguear con detalle útil
-            sqle.printStackTrace();
+            LOGGER.warn(sqle.getMessage(), sqle);
         } finally {
             try {
                 conn.setAutoCommit(previousAutoCommit);
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         }
     }

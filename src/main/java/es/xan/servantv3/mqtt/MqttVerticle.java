@@ -139,10 +139,10 @@ public class MqttVerticle extends AbstractServantVerticle {
                 }
 
                 if (rule != null)  {
-                    LOGGER.info("Found rule [{}]", rule);
+                    LOGGER.trace("Found rule [{}]", rule);
                     rule.apply(message, this);
                 } else {
-                    LOGGER.info("Not found rule for message.topic [{}]", message.topicName());
+                    LOGGER.trace("Not found rule for message.topic [{}]", message.topicName());
                 }
 
             }).publishReleaseHandler(messageId -> {
