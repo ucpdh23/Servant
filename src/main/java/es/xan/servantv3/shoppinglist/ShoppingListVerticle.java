@@ -128,6 +128,7 @@ public class ShoppingListVerticle extends AbstractServantVerticle {
             if (updatedOn) {
                 MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();
                 builderOn.setOk();
+                builderOn.setMessage("Added " + text + " to the list");
                 msg.reply(builderOn.build());
             } else {
                 MessageBuilder.ReplyBuilder builderOn = MessageBuilder.createReply();

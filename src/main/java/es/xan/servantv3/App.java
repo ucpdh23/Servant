@@ -3,6 +3,7 @@ package es.xan.servantv3;
 import com.google.common.base.Strings;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.calendar.CalendarVerticle;
+import es.xan.servantv3.eventsprocessor.EventsprocessorVerticle;
 import es.xan.servantv3.folder.FolderVerticle;
 import es.xan.servantv3.github.AzureDevOpsVerticle;
 import es.xan.servantv3.github.GithubVerticle;
@@ -19,6 +20,7 @@ import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.openia.OpenIAVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
@@ -124,6 +126,8 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(Neo4jVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(AzureDevOpsVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(ProductivityVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(EventsprocessorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		} else if ("security".equals(mode.toLowerCase())) {
 			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));

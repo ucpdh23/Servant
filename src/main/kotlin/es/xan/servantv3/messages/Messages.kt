@@ -71,6 +71,8 @@ data class Event(var name: String, var status: String, var timestamp: Long)
 data class Person(var name: String, var inHome: Boolean)
 data class Room(var name: String)
 
+data class HNData(val url:String, val name:String, val commentsCounter: Int, val commentsUrl: String, val tags: String, val date: String, val times: Int)
+
 enum class DeviceStatus {
 	UP,
 	UNKNOWN,
@@ -102,6 +104,8 @@ data class Power(var power: Float)
 data class ParrotMessageReceived(var user: String, var message: String)
 
 data class MqttMsg(val topic : String, val payload: JsonObject)
+
+data class EventWrapper(val event : String, val body: Object)
 
 /**
  * POJOS

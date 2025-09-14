@@ -9,11 +9,13 @@ public class Constant {
     public static final String LAMP_VERTICLE = "lamp.verticle";
     public static final String WHITEBOARD_VERTICLE = "whiteboard.verticle";
     public static final String WHEATHER_VERTICLE = "wheater.verticle";
+    public static final String PRODUCTIVITY_VERTICLE = "productivity.verticle";
     public static final String FOLDER_VERTICLE = "folder.verticle";
     public static final String SHOPPINGLIST_VERTICLE = "shoppinglist.verticle";
     public static final String KNOWLEDGE_VERTICLE = "knowledge.verticle";
     public static final String CALENDAR_VERTICLE = "calendar.verticle";
     public static final String TEMPERATURE_VERTICLE = "temperature.verticle";
+    public static final String EVENTSPROCESSOR_VERTICLE = "eventsprocessor.verticle";
     public static final String OPENIA_VERTICLE = "openia.verticle";
     public static final String NEO4J_VERTICLE = "neo4j.verticle";
     public static final String AWS_VERTICLE = "aws.verticle";

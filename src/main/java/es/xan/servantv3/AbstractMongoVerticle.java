@@ -79,16 +79,18 @@ public abstract class AbstractMongoVerticle<T> extends AbstractServantVerticle {
 			if (elapsed > MAX_ELAPSED_TIME) LOGGER.info("Inserting in mongo required [{}] millis", elapsed);
 			
 			onSaved(item, res);
-			if (res.succeeded()) {
-				ReplyBuilder builder = MessageBuilder.createReply();
-				builder.setId(res.result());
-				msg.reply(builder.build());
-			} else {
-				LOGGER.warn(res.cause().getMessage(), res.cause());
-				
-				ReplyBuilder builder = MessageBuilder.createReply();
-				builder.setError();
-				msg.reply(builder.build());
+			if (msg != null) {
+				if (res.succeeded()) {
+					ReplyBuilder builder = MessageBuilder.createReply();
+					builder.setId(res.result());
+					msg.reply(builder.build());
+				} else {
+					LOGGER.warn(res.cause().getMessage(), res.cause());
+
+					ReplyBuilder builder = MessageBuilder.createReply();
+					builder.setError();
+					msg.reply(builder.build());
+				}
 			}
 		});
 	}

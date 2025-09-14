@@ -9,6 +9,7 @@ import es.xan.servantv3.messages.Event;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
@@ -40,6 +41,16 @@ public class HomeVerticle extends AbstractServantVerticle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeVerticle.class);
 
+	private Map<String, Person> mPopulation = new HashMap<>();
+	private List<String> mMasters;
+	private String mBoss;
+	private Scheduler mScheduler;
+	private UUID mScheduledTask;
+	private UUID mScheduledTaskHN;
+
+	private static final boolean OUTSIDE_HOME = false;
+	private static final boolean INSIDE_HOME = true;
+
 	public HomeVerticle() {
 		super(Constant.HOME_VERTICLE);
 		
@@ -53,13 +64,35 @@ public class HomeVerticle extends AbstractServantVerticle {
 			Events.LAUNDRY_OFF,
 			Events.WATER_LEAK_STATUS_CHANGED);
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public void start() {
+		super.start();
+
+		final JsonArray homeConfig = vertx.getOrCreateContext().config().getJsonArray("HomeVerticle");
+		this.mPopulation = loadPopulation(homeConfig.getList());
+
+		JsonArray masters = vertx.getOrCreateContext().config().getJsonArray("masters");
+		this.mMasters = loadMasters(masters.getList());
+		this.mBoss = this.mMasters.get(0);
+
+		this.mScheduler = new Scheduler(getVertx());
+
+		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
+		this.mScheduledTaskHN = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_HN);  return true; });
+
+
+		LOGGER.info("Started HomeVerticle");
+	}
+
+
 	public enum Actions implements Action {
 		DOOR_OPEN(null),
 		GET_HOME_STATUS(null),
 		NOTIFY_BOSS(TextMessageToTheBoss.class),
 		NOTIFY_ALL_BOSS(TextMessageToTheBoss.class),
 		REPORT_TEMPERATURE(null),
+		REPORT_HN(null),
 		MANAGE_VIDEO(Recorded.class),
 		SHUTDOWN_SECURITY(null),
 		PROCESS_DEVICE_SECURITY(TextMessage.class),
@@ -88,6 +121,14 @@ public class HomeVerticle extends AbstractServantVerticle {
 		} catch (Exception e) {
 			LOGGER.error("Error", e);
 		}
+	}
+
+	public void report_hn(final Message<Object> msg) {
+		publishAction(ProductivityVerticle.Actions.RESOLVE_YESTERDAY_ITEMS, response -> {
+			for (String master : this.mMasters) {
+				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, response.result().toString()));
+			}
+		});
 	}
 
 	public void water_leak_status_changed(final NewStatus status) {
@@ -152,35 +193,6 @@ public class HomeVerticle extends AbstractServantVerticle {
 		});
 	}
 	
-	private Map<String, Person> mPopulation = new HashMap<>();
-	private List<String> mMasters;
-	private String mBoss;
-	private Scheduler mScheduler;
-	private UUID mScheduledTask;
-	private UUID mScheduledStartBoilerTask;
-	private UUID mScheduledStopBoilerTask;
-	
-	private static final boolean OUTSIDE_HOME = false;
-	private static final boolean INSIDE_HOME = true;
-	
-	
-	@SuppressWarnings("unchecked")
-	public void start() {
-		super.start();
-		
-		final JsonArray homeConfig = vertx.getOrCreateContext().config().getJsonArray("HomeVerticle");
-		this.mPopulation = loadPopulation(homeConfig.getList());
-
-		JsonArray masters = vertx.getOrCreateContext().config().getJsonArray("masters");
-		this.mMasters = loadMasters(masters.getList());
-		this.mBoss = this.mMasters.get(0);
-		
-		this.mScheduler = new Scheduler(getVertx());
-		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
-
-		
-		LOGGER.info("Started HomeVerticle");
-	}
 
 	public void no_temperature_info(Room room) {
 		notify_boss(new TextMessageToTheBoss("no temperature info since 1 hour for room " + room.getName()));
