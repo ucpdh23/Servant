@@ -103,14 +103,15 @@ public class ProductivityUtils {
 
                 if (found) {
                     // 2) Si existe -> UPDATE (solo los campos indicados)
-                    String updateSql = "UPDATE productivity_hn SET comments_url = ?, coments_counter = ?, tags = ?, times = times + 1 WHERE url = ? AND date = ?";
+                    String updateSql = "UPDATE productivity_hn SET name = ?, comments_url = ?, comments_counter = ?, tags = ?, times = times + 1 WHERE url = ? AND date = ?";
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
                         // Asumimos comments -> String o int según tu modelo
-                        setObjectOrNull(updateStmt, 1, item.getCommentsUrl());
-                        setObjectOrNull(updateStmt, 2, item.getCommentsCounter());
-                        setObjectOrNull(updateStmt, 3, sanitizeAndLimit(item.getTags(), 1000));
-                        updateStmt.setString(4, sanitizeAndLimit(item.getUrl(), 500));
-                        updateStmt.setString( 5, item.getDate());
+                        setObjectOrNull(updateStmt, 1, item.getName());
+                        setObjectOrNull(updateStmt, 2, item.getCommentsUrl());
+                        setObjectOrNull(updateStmt, 3, item.getCommentsCounter());
+                        setObjectOrNull(updateStmt, 4, sanitizeAndLimit(item.getTags(), 1000));
+                        updateStmt.setString(5, sanitizeAndLimit(item.getUrl(), 500));
+                        updateStmt.setString( 6, item.getDate());
 
                         int updated = updateStmt.executeUpdate();
                         if (updated == 0) {
@@ -120,15 +121,17 @@ public class ProductivityUtils {
                     }
                 } else {
                     // 3) Si no existe -> INSERT
-                    String insertSql = "INSERT INTO productivity_hn (url, date, comments_url, comments_counter, tags, times) VALUES (?, ?, ?, ?, ?, ?)";
+                    String insertSql = "INSERT INTO productivity_hn (url, name, date, comments_url, comments_counter, tags, times) VALUES (?, ?, ?, ?, ?, ?, ?)";
                     try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                         insertStmt.setString(1, sanitizeAndLimit(item.getUrl(), 500));
-                        insertStmt.setString( 2, item.getDate());
+                        insertStmt.setString(2, sanitizeAndLimit(item.getName(), 700));
 
-                        setObjectOrNull(insertStmt, 3, item.getCommentsUrl());
-                        setObjectOrNull(insertStmt, 4, item.getCommentsCounter());
-                        setObjectOrNull(insertStmt, 5, sanitizeAndLimit(item.getTags(), 1000));
-                        setObjectOrNull(insertStmt, 6, 1);
+                        insertStmt.setString( 3, item.getDate());
+
+                        setObjectOrNull(insertStmt, 4, item.getCommentsUrl());
+                        setObjectOrNull(insertStmt, 5, item.getCommentsCounter());
+                        setObjectOrNull(insertStmt, 6, sanitizeAndLimit(item.getTags(), 1000));
+                        setObjectOrNull(insertStmt, 7, 1);
 
                         insertStmt.executeUpdate();
                     }
@@ -203,7 +206,7 @@ public class ProductivityUtils {
                         String _date = rs.getString(6);
                         Integer times = rs.getInt(7);
 
-                        output.add(new HNData(url, name, comments_counter, comments_url, tags, _date, times));
+                        output.add(new HNData(url, name != null? name : "", comments_counter, comments_url, tags, _date, times));
                     }
                 }
             }
