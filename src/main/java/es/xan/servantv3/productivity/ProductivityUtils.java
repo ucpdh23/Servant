@@ -236,8 +236,8 @@ public class ProductivityUtils {
 
             String name = news.getString("name");
             String url = news.getString("url");
-            String comments_url = news.getString("comments_url");
-            String comments_counter = news.getString("comments_counter");
+            String comments_url = news.getString("commentsUrl");
+            Integer comments_counter = news.getInteger("commentsCounter");
             String tags = news.getString("tags");
 
             output += "[" + name + "](" + url + ") [" + comments_counter + "](" + comments_url + ") "  + tags + "\n";
