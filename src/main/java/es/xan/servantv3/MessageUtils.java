@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class MessageUtils {
@@ -29,10 +30,25 @@ public class MessageUtils {
 		final JsonObject response = (JsonObject) msg.body();
 		return response.fieldNames().contains("message");
 	}
-	
+
 	public static String getMessage(Message<Object> msg) {
 		final JsonObject response = (JsonObject) msg.body();
 		return response.getString("message");
+	}
+
+	public static boolean hasResult(Message<Object> msg) {
+		final JsonObject response = (JsonObject) msg.body();
+		return response.fieldNames().contains("result");
+	}
+
+	public static String getResult(Message<Object> msg) {
+		final JsonObject response = (JsonObject) msg.body();
+
+		if (response.fieldNames().contains("resultSize")) {
+			return response.getJsonArray("result").toString();
+		} else {
+			return response.getJsonObject("result").toString();
+		}
 	}
 
 }

@@ -25,10 +25,27 @@ public class OperationUtils {
 	public static long getSchedule(Operation item) {
 		return item.delayInfo;
 	}
+
+	public static String result(Message<Object> msg) {
+		if (msg == null) {
+			LOGGER.debug("no message provided for result");
+			return "Sorry, but something extremally weird happened";
+		}
+
+		if (MessageUtils.isOk(msg)) {
+			if (MessageUtils.hasResult(msg)) {
+				return MessageUtils.getResult(msg);
+			} else {
+				return "Without message";
+			}
+		}
+
+		return "Response is not ok";
+	}
 	
 	public static String forwarding(Message<Object> msg) {
 		if (msg == null) {
-			LOGGER.debug("no message provided");
+			LOGGER.debug("no message provided for forwarding");
 			return "Sorry, but something extremally weird happened";
 		}
 		

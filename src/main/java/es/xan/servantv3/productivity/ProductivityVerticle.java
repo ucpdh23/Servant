@@ -47,7 +47,9 @@ public class ProductivityVerticle extends AbstractServantVerticle {
 
     public enum Actions implements Action {
         RETRIEVE_HN_INFO(null),
-        RESOLVE_YESTERDAY_ITEMS(null);
+        RESOLVE_YESTERDAY_ITEMS(null),
+        RESOLVE_TODAY_ITEMS(null),
+        ;
 
         private Class<?> mBeanClass;
 
@@ -69,6 +71,22 @@ public class ProductivityVerticle extends AbstractServantVerticle {
             ProductivityUtils.upsertItem(connection, item);
         }
 
+    }
+
+    public void resolve_today_items(Message<Object> message) {
+        Connection connection = App.connection;
+
+        // compute yesterday date
+        String date = ProductivityUtils.computeDate(0);
+
+        List<HNData> data = ProductivityUtils.resolveDateData(connection, date);
+
+        MessageBuilder.ReplyBuilder builder = MessageBuilder.createReply();
+        List<JsonObject> items = data.stream().map(item -> { return JsonUtils.toJson(item);}).collect(Collectors.toList());
+
+        builder.setResult(items);
+
+        message.reply(builder.build());
     }
 
     public void resolve_yesterday_items(Message<Object> message) {

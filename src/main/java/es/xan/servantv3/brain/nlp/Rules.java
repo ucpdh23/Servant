@@ -14,6 +14,7 @@ import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.SecurityModeVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
+import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.shoppinglist.ShoppingListVerticle;
@@ -136,6 +137,15 @@ public enum Rules {
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Add a new item into the shopping list for the grocery. Ex. Item"
 	),
+
+	HN_TODAYS_ITEMS(ProductivityVerticle.Actions.RESOLVE_TODAY_ITEMS,
+			isContextFree()
+					.and(messageStartsWith("hacker news")),
+			(tokens, userContext) -> {return null;},
+			msg -> { return reply(null, OperationUtils.result(msg));},
+			"Ex. hacker news"
+	),
+
 	PRINT_ACTION(WhiteboardVerticle.Actions.PRINT,
 			isContextFree()
 				.and(messageStartsWith("imprimir")),
