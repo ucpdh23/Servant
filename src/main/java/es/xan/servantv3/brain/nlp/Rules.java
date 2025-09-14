@@ -14,6 +14,7 @@ import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.SecurityModeVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
+import es.xan.servantv3.productivity.ProductivityUtils;
 import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
@@ -142,7 +143,7 @@ public enum Rules {
 			isContextFree()
 					.and(messageStartsWith("hacker news")),
 			(tokens, userContext) -> {return null;},
-			msg -> { return reply(null, OperationUtils.result(msg));},
+			msg -> { return reply(null, ProductivityUtils.getResult(msg));},
 			"Ex. hacker news"
 	),
 

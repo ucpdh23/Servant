@@ -2,6 +2,9 @@ package es.xan.servantv3.productivity;
 
 import es.xan.servantv3.messages.HNData;
 import es.xan.servantv3.weather.WeatherUtils;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -212,6 +215,36 @@ public class ProductivityUtils {
             }
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
+        }
+
+        return output;
+    }
+
+    public static String getResult(Message<Object> msg) {
+        String output = "";
+
+        final JsonObject response = (JsonObject) msg.body();
+
+        JsonArray result = response.getJsonArray("result");
+        List list = result.getList();
+
+        output += "" + list.size() + " items\n";
+
+        int items = 0;
+        for (Object item : list) {
+            JsonObject news = (JsonObject) item;
+
+            String name = news.getString("name");
+            String url = news.getString("url");
+            String comments_url = news.getString("comments_url");
+            String comments_counter = news.getString("comments_counter");
+            String tags = news.getString("tags");
+
+            output += "[" + name + "](" + url + ") [" + comments_counter + "](" + comments_url + ") "  + tags + "\n";
+
+            items++;
+
+            if (items > 15) break;
         }
 
         return output;
