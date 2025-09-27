@@ -212,9 +212,9 @@ public class HomeVerticle extends AbstractServantVerticle {
 		
 		MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
 		builder.setOk();
-    builder.setMessage("Done");
+    	builder.setMessage("Done");
     
-    _message.reply(builder.build());
+    	_message.reply(builder.build());
 	}
 
 	Map<String, Device> notified = new HashMap<>();

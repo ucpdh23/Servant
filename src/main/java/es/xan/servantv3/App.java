@@ -1,6 +1,7 @@
 package es.xan.servantv3;
 
 import com.google.common.base.Strings;
+import es.xan.servantv3.brain.BrainVerticle;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.calendar.CalendarVerticle;
 import es.xan.servantv3.eventsprocessor.EventsprocessorVerticle;
@@ -128,6 +129,7 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(AzureDevOpsVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(ProductivityVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(EventsprocessorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(BrainVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		} else if ("security".equals(mode.toLowerCase())) {
 			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
@@ -138,6 +140,11 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+		} else if ("testing".equals(mode.toLowerCase())) {
+			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(BrainVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(HomeVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		}
 
 

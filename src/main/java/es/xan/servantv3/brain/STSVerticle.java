@@ -81,7 +81,8 @@ public class STSVerticle extends AbstractServantVerticle {
 		super.start();
 		
 		this.mScheduler = new Scheduler(getVertx());
-		LOGGER.info("Started brainVerticle");
+
+		LOGGER.info("Started STSVerticle");
 	}
 	
 	public void help(final Message<Object> msg) {

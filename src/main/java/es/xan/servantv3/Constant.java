@@ -12,6 +12,7 @@ public class Constant {
     public static final String PRODUCTIVITY_VERTICLE = "productivity.verticle";
     public static final String FOLDER_VERTICLE = "folder.verticle";
     public static final String SHOPPINGLIST_VERTICLE = "shoppinglist.verticle";
+    public static final String BRAIN_VERTICLE = "brain.verticle";
     public static final String KNOWLEDGE_VERTICLE = "knowledge.verticle";
     public static final String CALENDAR_VERTICLE = "calendar.verticle";
     public static final String TEMPERATURE_VERTICLE = "temperature.verticle";

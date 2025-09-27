@@ -2,6 +2,7 @@ package es.xan.servantv3.brain.nlp;
 
 
 import es.xan.servantv3.Action;
+import es.xan.servantv3.brain.BrainVerticle;
 import es.xan.servantv3.brain.STSVerticle;
 import es.xan.servantv3.brain.UserContext;
 import es.xan.servantv3.brain.nlp.OperationUtils.Reply;
@@ -55,6 +56,28 @@ public enum Rules {
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Information about all the available commands"
+	),
+	START_CHATBOT(BrainVerticle.Actions.START_CHATBOT,
+			isContextFree()
+					.and(messageContains("comenzar"))
+					.and(messageContains("chatbot")),
+			(tokens, userContext) -> {userContext.setAttention("Chatbot"); return null; },
+			msg -> { return reply( null, OperationUtils.forwarding(msg));},
+			"Ex. comenzar chatbot"
+	),
+	END_CHATBOT(BrainVerticle.Actions.END_CHATBOT,
+			isContext("Chatbot")
+					.and(messageContains("finalizar"))
+					.and(messageContains("chatbot")),
+			(tokens, userContext) -> {userContext.setAttention(""); return null; },
+			msg -> { return reply( null, OperationUtils.forwarding(msg));},
+			"Ex. finalizar chatbot"
+	),
+	CHATBOT_MESSAGE(BrainVerticle.Actions.PROCESS_MESSAGE,
+			isContext("Chatbot"),
+			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
+			msg -> { return reply(null, OperationUtils.forwarding(msg));},
+			"Continue chatbot message"
 	),
 	TRACK_TRAVEL(RoadVerticle.Actions.START_MONITORING,
 			isContextFree()
