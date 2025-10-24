@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import org.slf4j.LoggerFactory
+import org.thymeleaf.util.StringUtils
 import java.util.*
 
 
@@ -96,7 +97,7 @@ class SSEController constructor(val router: Router, val publisher : WebServerVer
 
     fun publishEvent(message : JsonObject) {
         LOGGER.debug("publish Event {}", message);
-        sendEvent("", message.toString())
+        sendEvent("message", message.toString())
     }
 
 }

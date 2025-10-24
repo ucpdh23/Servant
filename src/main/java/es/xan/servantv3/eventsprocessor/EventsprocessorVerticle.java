@@ -4,6 +4,7 @@ import es.xan.servantv3.AbstractMongoVerticle;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.Events;
 import es.xan.servantv3.messages.EventWrapper;
+import es.xan.servantv3.messages.NewStatus;
 import es.xan.servantv3.messages.Power;
 import es.xan.servantv3.messages.Temperature;
 import io.vertx.core.logging.Logger;
@@ -20,7 +21,7 @@ public class EventsprocessorVerticle extends AbstractMongoVerticle<EventWrapper>
     public EventsprocessorVerticle() {
         super(EVENTS_COLLECTION, Constant.EVENTSPROCESSOR_VERTICLE);
 
-        supportedEvents(Events.TEMPERATURE_RECEIVED, Events.LAUNDRY_OFF);
+        supportedEvents(Events.TEMPERATURE_RECEIVED, Events.LAUNDRY_OFF, Events.DOOR_STATUS_CHANGED);
     }
 
     public void temperature_received(Temperature temperature) {
@@ -29,6 +30,10 @@ public class EventsprocessorVerticle extends AbstractMongoVerticle<EventWrapper>
 
     public void laundry_off(Power power) {
         save(new EventWrapper(Events.LAUNDRY_OFF.name(), power), null);
+    }
+
+    public void door_status_changed(NewStatus status) {
+        save(new EventWrapper(Events.DOOR_STATUS_CHANGED.name(), status), null);
     }
 
     @Override
