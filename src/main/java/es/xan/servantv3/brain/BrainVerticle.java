@@ -1,5 +1,6 @@
 package es.xan.servantv3.brain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.adk.events.Event;
 import com.google.adk.models.BaseLlm;
 import com.google.adk.models.BaseLlmConnection;
@@ -8,11 +9,15 @@ import com.google.adk.models.LlmResponse;
 import com.google.adk.models.langchain4j.LangChain4j;
 import com.google.adk.runner.InMemoryRunner;
 import com.google.adk.sessions.Session;
+import com.google.adk.tools.BaseTool;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import es.xan.servantv3.*;
 
 import com.google.adk.agents.LlmAgent;
-import com.google.adk.tools.GoogleSearchTool;
+import com.google.adk.tools.mcp.SseServerParameters;
+import com.google.adk.tools.mcp.McpToolset;
+import es.xan.servantv3.brain.adk.ServantTool;
+import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
@@ -29,9 +34,7 @@ import com.google.genai.types.Part;
 import io.reactivex.rxjava3.core.Flowable;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class BrainVerticle extends AbstractServantVerticle {
 
@@ -53,23 +56,62 @@ public class BrainVerticle extends AbstractServantVerticle {
     public void start() {
         super.start();
 
-        JsonObject config = vertx.getOrCreateContext().config().getJsonObject("BrainVerticle");
-        String model = config.getString("model");
-        String apiKey = config.getString("secret");
+        this.vertx.setTimer(30000, id -> {
+            LOGGER.info("Starting agent...");
 
-        OpenAiChatModel dmrChatModel = OpenAiChatModel.builder()
-                .modelName(model)
-                .temperature(0D)
-                .apiKey(apiKey)
-                .build();
+            JsonObject config = vertx.getOrCreateContext().config().getJsonObject("BrainVerticle");
+            String model = config.getString("model");
+            String apiKey = config.getString("secret");
 
+            String mcpServerUrl = config.getString("mcpServerUrl");
+
+            OpenAiChatModel dmrChatModel = OpenAiChatModel.builder()
+                    .modelName(model)
+                    .temperature(0D)
+                    .apiKey(apiKey)
+                    .build();
+
+            LOGGER.info("loading tools from url [{}]", mcpServerUrl);
+            SseServerParameters params = SseServerParameters.builder().url(mcpServerUrl).build();
+
+            McpToolset mcpToolset = new McpToolset(params, new ObjectMapper());
+            Flowable<BaseTool> tools = mcpToolset.getTools(null);
+
+            List<BaseTool> allTools = new ArrayList<>();
+
+            tools.subscribeWith(new DisposableSubscriber<BaseTool>() {
+                @Override
+                public void onNext(BaseTool baseTool) {
+                    LOGGER.info("adding Tool [{}]", baseTool);
+                    allTools.add(baseTool);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    LOGGER.warn(throwable.getMessage(), throwable);
+                }
+
+                @Override
+                public void onComplete() {
+                    create_root_agent(dmrChatModel, config, allTools);
+                }
+            });
+
+            LOGGER.info("Started brainVerticle");
+        });
+
+    }
+
+    private void create_root_agent(OpenAiChatModel dmrChatModel, JsonObject config, List<BaseTool> allTools) {
+        LOGGER.info("creating root agent [{}-{}]", dmrChatModel, allTools);
 
         rootAgent = LlmAgent.builder()
                 .name("servant_assistant")
                 .description("Tu nombre es Servant. Eres un asistente virtual.")
                 .model(new LangChain4j(dmrChatModel))
                 .instruction("Por favor, ayuda en aquello en lo que se te requiera")
-//                .tools(new GoogleSearchTool())
+                .tools(allTools)
+                .subAgents()
                 .build();
 
         runner = new InMemoryRunner(rootAgent);
@@ -78,7 +120,7 @@ public class BrainVerticle extends AbstractServantVerticle {
         for (int i=0; i < users.size(); i++) {
             JsonObject userInfo = users.getJsonObject(i);
             String name = userInfo.getString("email");
-            String user_id = UUID.randomUUID().toString();
+            LOGGER.info("creating session for user [{}]", name);
 
             Session session = runner
                     .sessionService()
@@ -87,11 +129,8 @@ public class BrainVerticle extends AbstractServantVerticle {
 
 
             this.mSessions.put(name, session);
-            LOGGER.debug("creating Session [{}-{}]", name, user_id);
+            LOGGER.debug("creating Session [{}-{}]", name, session.id());
         }
-
-        LOGGER.info("Started brainVerticle");
-
     }
 
 

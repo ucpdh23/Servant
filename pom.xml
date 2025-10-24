@@ -46,7 +46,7 @@
         <aws.sdk.version>2.25.55</aws.sdk.version>
 
         <langchain.version>1.6.0</langchain.version>
-        <google.adk.langchain4j.version>0.2.0</google.adk.langchain4j.version>
+        <google.adk.langchain4j.version>0.3.0</google.adk.langchain4j.version>
 
         <google.adk.version>0.3.0</google.adk.version>
         <google.maps.version>2.2.0</google.maps.version>
@@ -77,7 +77,7 @@
 
         <dependency>
             <groupId>com.google.adk</groupId>
-            <artifactId>google-adk-contrib-langchain4j</artifactId>
+            <artifactId>google-adk-langchain4j</artifactId>
             <version>${google.adk.langchain4j.version}</version>
         </dependency>
 
