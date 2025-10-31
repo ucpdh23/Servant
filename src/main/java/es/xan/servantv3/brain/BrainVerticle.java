@@ -6,7 +6,6 @@ import com.google.adk.models.BaseLlm;
 import com.google.adk.models.BaseLlmConnection;
 import com.google.adk.models.LlmRequest;
 import com.google.adk.models.LlmResponse;
-import com.google.adk.models.langchain4j.LangChain4j;
 import com.google.adk.runner.InMemoryRunner;
 import com.google.adk.sessions.Session;
 import com.google.adk.tools.BaseTool;
@@ -16,6 +15,7 @@ import es.xan.servantv3.*;
 import com.google.adk.agents.LlmAgent;
 import com.google.adk.tools.mcp.SseServerParameters;
 import com.google.adk.tools.mcp.McpToolset;
+import es.xan.servantv3.brain.adk.LangChain4j;
 import es.xan.servantv3.brain.adk.ServantTool;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.messages.ParrotMessageReceived;
@@ -173,16 +173,23 @@ public class BrainVerticle extends AbstractServantVerticle {
 
         Content userMsg = Content.fromParts(Part.fromText(parrotMessage.getMessage()));
         Flowable<Event> eventFlowable = this.runner.runAsync(user, session.id(), userMsg);
+
+        MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
+        builder.setOk();
+
         eventFlowable.subscribeWith(new DisposableSubscriber<Event>() {
             @Override
             public void onNext(Event event) {
                 LOGGER.info("evento : [{}]", event.stringifyContent());
 
-                MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
-                builder.setOk();
-                builder.setMessage(event.stringifyContent());
-
-                msg.reply(builder.build());
+                if (event.content().isPresent() && event.content().get().parts().isPresent()) {
+                    List<Part> parts = event.content().get().parts().get();
+                    for (Part part : parts) {
+                        if (part.text().isPresent()) {
+                            builder.setMessage(part.text().get());
+                        }
+                    }
+                }
             }
 
             @Override
@@ -199,6 +206,7 @@ public class BrainVerticle extends AbstractServantVerticle {
             @Override
             public void onComplete() {
                 LOGGER.info("flowable: completed");
+                msg.reply(builder.build());
             }
         });
     }

@@ -70,6 +70,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>1.24.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.adk</groupId>
             <artifactId>google-adk</artifactId>
             <version>${google.adk.version}</version>
