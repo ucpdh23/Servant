@@ -78,7 +78,7 @@ public class A2ATool extends BaseTool {
         builder.description(this.description());
 
         Schema.Builder parameterBuilder = Schema.builder();
-        parameterBuilder.title("remoteAction");
+        parameterBuilder.title("operation");
         parameterBuilder.description("action to request to the remote agent");
         parameterBuilder.type("string");
         builder.parameters(parameterBuilder.build());
