@@ -8,6 +8,7 @@ import com.google.adk.models.LlmRequest;
 import com.google.adk.models.LlmResponse;
 import com.google.adk.runner.InMemoryRunner;
 import com.google.adk.sessions.Session;
+import com.google.adk.tools.AgentTool;
 import com.google.adk.tools.BaseTool;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import es.xan.servantv3.*;
@@ -15,12 +16,16 @@ import es.xan.servantv3.*;
 import com.google.adk.agents.LlmAgent;
 import com.google.adk.tools.mcp.SseServerParameters;
 import com.google.adk.tools.mcp.McpToolset;
+import es.xan.servantv3.brain.a2a.A2ATool;
+import es.xan.servantv3.brain.a2a.RemoteA2AAgent;
 import es.xan.servantv3.brain.adk.LangChain4j;
 import es.xan.servantv3.brain.adk.ServantTool;
 import es.xan.servantv3.brain.nlp.Rules;
 import es.xan.servantv3.messages.ParrotMessageReceived;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
+import io.a2a.client.http.A2ACardResolver;
+import io.a2a.client.http.JdkA2AHttpClient;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subscribers.DisposableSubscriber;
 import io.vertx.core.eventbus.Message;
@@ -78,6 +83,7 @@ public class BrainVerticle extends AbstractServantVerticle {
             Flowable<BaseTool> tools = mcpToolset.getTools(null);
 
             List<BaseTool> allTools = new ArrayList<>();
+            allTools.add(A2ATool.builder("http://192.168.1.2:8008", "/a2a/manager/.well-known/agent-card.json"));
 
             tools.subscribeWith(new DisposableSubscriber<BaseTool>() {
                 @Override
@@ -111,7 +117,13 @@ public class BrainVerticle extends AbstractServantVerticle {
                 .model(new LangChain4j(dmrChatModel))
                 .instruction("Por favor, ayuda en aquello en lo que se te requiera")
                 .tools(allTools)
-                .subAgents()
+                /*.subAgents(
+                        /*RemoteA2AAgent.builder()
+                                .name("manager")
+                                .description("description")
+                                .agentCardOrSource(new A2ACardResolver(new JdkA2AHttpClient(), "http://192.168.1.2:8008", "/a2a/manager/.well-known/agent-card.json").getAgentCard())
+                                .build()
+                )*/
                 .build();
 
         runner = new InMemoryRunner(rootAgent);

@@ -48,6 +48,8 @@
         <langchain.version>1.6.0</langchain.version>
         <google.adk.langchain4j.version>0.3.0</google.adk.langchain4j.version>
 
+        <a2a.sdk.version>0.3.1.Final</a2a.sdk.version>
+
         <google.adk.version>0.3.0</google.adk.version>
         <google.maps.version>2.2.0</google.maps.version>
         <google.gson.version>2.11.0</google.gson.version>
@@ -68,6 +70,27 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-spec</artifactId>
+            <version>${a2a.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-transport-rest</artifactId>
+            <version>${a2a.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-http-client</artifactId>
+            <version>${a2a.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.a2asdk</groupId>
+            <artifactId>a2a-java-sdk-client</artifactId>
+            <version>${a2a.sdk.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.genai</groupId>

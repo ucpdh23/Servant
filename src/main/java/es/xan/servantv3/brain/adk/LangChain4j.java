@@ -52,13 +52,8 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 
 @Experimental
 public class LangChain4j extends BaseLlm {
@@ -478,6 +473,10 @@ public class LangChain4j extends BaseLlm {
             return JsonObjectSchema.builder()
                     .addProperties(toProperties(schema))
                     .required(schema.required().orElse(List.of()))
+                    .build();
+        } else if (schema.type().isPresent() && Type.Known.STRING.equals(schema.type().get().knownEnum())){
+            return JsonObjectSchema.builder()
+                    .addStringProperty(schema.title().get(), schema.description().get())
                     .build();
         } else {
             throw new UnsupportedOperationException(
