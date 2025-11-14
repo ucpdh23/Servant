@@ -156,6 +156,7 @@ public class A2ATool extends BaseTool {
                         }
                     }
 
+
                     Map<String, Object> response = new HashMap<>();
                     response.put("response", textBuilder.toString());
 
