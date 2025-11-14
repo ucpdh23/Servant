@@ -7,24 +7,21 @@ import com.google.genai.types.Content;
 import com.google.genai.types.FunctionDeclaration;
 import com.google.genai.types.Schema;
 import io.a2a.A2A;
-import io.a2a.client.Client;
-import io.a2a.client.ClientEvent;
-import io.a2a.client.MessageEvent;
+import io.a2a.client.*;
 import io.a2a.client.config.ClientConfig;
 import io.a2a.client.http.A2ACardResolver;
-import io.a2a.client.http.JdkA2AHttpClient;
 import io.a2a.client.transport.jsonrpc.JSONRPCTransport;
 import io.a2a.client.transport.jsonrpc.JSONRPCTransportConfig;
-import io.a2a.spec.AgentCard;
-import io.a2a.spec.Message;
-import io.a2a.spec.Part;
-import io.a2a.spec.TextPart;
+import io.a2a.spec.*;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleEmitter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.tnb.model.TaskStatus;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
@@ -63,11 +60,20 @@ public class A2ATool extends BaseTool {
 
         this.consumer = new A2AConsumer();
 
+
+        final HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.ofSeconds(60))
+                .build();
+
+        JSONRPCTransportConfig rpcConfig = new JSONRPCTransportConfig(new JdkA2AHttpClient(httpClient));
+
         this.a2aClient = Client.builder(this.agentCard)
                 .clientConfig(clientConfig)
                 .addConsumer(consumer)
                 .streamingErrorHandler(errorHandler)
-                .withTransport(JSONRPCTransport.class, new JSONRPCTransportConfig())
+                .withTransport(JSONRPCTransport.class, rpcConfig)
                 .build();
     }
 
@@ -79,7 +85,7 @@ public class A2ATool extends BaseTool {
 
         Schema.Builder parameterBuilder = Schema.builder();
         parameterBuilder.title("remoteAction");
-        parameterBuilder.description("action to request to the remote agent");
+        parameterBuilder.description("prompt to request to the remote agent");
         parameterBuilder.type("string");
         builder.parameters(parameterBuilder.build());
 
@@ -90,7 +96,7 @@ public class A2ATool extends BaseTool {
     public Single<Map<String, Object>> runAsync(Map<String, Object> args, ToolContext toolContext) {
         Single<Map<String, Object>> responseContext = consumer.createResponseContext(toolContext.invocationId());
 
-        Message a2aMessage = new Message.Builder(A2A.toUserMessage((String) args.get("operation"))).contextId(toolContext.invocationId()).build();
+        Message a2aMessage = new Message.Builder(A2A.toUserMessage((String) args.get("remoteAction"))).contextId(toolContext.invocationId()).build();
         a2aClient.sendMessage(a2aMessage);
 
         return responseContext;
@@ -128,17 +134,36 @@ public class A2ATool extends BaseTool {
                     }
                 }
 
-                List<com.google.genai.types.Part> parts = new ArrayList<>();
-
                 Map<String, Object> response = new HashMap<>();
                 response.put("response", textBuilder.toString());
 
 
                 SingleEmitter<Map<String, Object>> mapSingleEmitter = emitters.get(contextId);
                 mapSingleEmitter.onSuccess(response);
-            } else {
-                System.out.println("Received client event: " + event.getClass().getSimpleName());
+            } else if (event instanceof TaskUpdateEvent taskUpdateEvent) {
+                io.a2a.spec.TaskStatus status = taskUpdateEvent.getTask().getStatus();
+                logger.info("Received updateEvent event [{}-{}]", taskUpdateEvent.getTask().getId(), status);
+                TaskState state = status.state();
+                if (TaskState.COMPLETED.equals(state)) {
+                    logger.info("[{}-{}]", taskUpdateEvent.getTask(), status.message());
+                    StringBuilder textBuilder = new StringBuilder();
 
+                    for (var artifact : taskUpdateEvent.getTask().getArtifacts()) {
+                        for (var part : artifact.parts()) {
+                            if (part instanceof TextPart textPart) {
+                                textBuilder.append(textPart.getText());
+                            }
+                        }
+                    }
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("response", textBuilder.toString());
+
+                    SingleEmitter<Map<String, Object>> mapSingleEmitter = emitters.get(taskUpdateEvent.getTask().getContextId());
+                    mapSingleEmitter.onSuccess(response);
+                }
+            } else {
+                logger.info("Received client event [{}-{}]", event.getClass().getSimpleName(), event);
             }
         }
     }
@@ -151,7 +176,13 @@ public class A2ATool extends BaseTool {
      * @return
      */
     public static A2ATool builder(String baseUrl, String cardPath) {
-        A2ACardResolver resolver = new A2ACardResolver(new JdkA2AHttpClient(), baseUrl, cardPath);
+        final HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.ofSeconds(60))
+                .build();
+
+        A2ACardResolver resolver = new A2ACardResolver(new JdkA2AHttpClient(httpClient), baseUrl, cardPath);
         AgentCard agentCard = resolver.getAgentCard();
         return new A2ATool(agentCard);
     }

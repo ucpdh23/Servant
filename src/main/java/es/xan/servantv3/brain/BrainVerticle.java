@@ -28,6 +28,7 @@ import io.a2a.client.http.A2ACardResolver;
 import io.a2a.client.http.JdkA2AHttpClient;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subscribers.DisposableSubscriber;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -50,6 +51,8 @@ public class BrainVerticle extends AbstractServantVerticle {
     private InMemoryRunner runner;
     private final Map<String, Session> mSessions;
 
+    private JsonObject mConfiguration;
+
     public BrainVerticle() {
         super(Constant.BRAIN_VERTICLE);
 
@@ -61,14 +64,17 @@ public class BrainVerticle extends AbstractServantVerticle {
     public void start() {
         super.start();
 
-        this.vertx.setTimer(30000, id -> {
+        this.mConfiguration = Vertx.currentContext().config().getJsonObject("BrainVerticle");
+        final JsonObject config = this.mConfiguration;
+
+        this.vertx.setTimer(15000, id -> {
             LOGGER.info("Starting agent...");
 
-            JsonObject config = vertx.getOrCreateContext().config().getJsonObject("BrainVerticle");
-            String model = config.getString("model");
-            String apiKey = config.getString("secret");
+            String model = this.mConfiguration.getString("model");
+            String apiKey = this.mConfiguration.getString("secret");
 
-            String mcpServerUrl = config.getString("mcpServerUrl");
+            String mcpServerUrl = this.mConfiguration.getString("mcpServerUrl");
+            String a2aManagerHost = this.mConfiguration.getString("managerA2AHost");
 
             OpenAiChatModel dmrChatModel = OpenAiChatModel.builder()
                     .modelName(model)
@@ -83,7 +89,7 @@ public class BrainVerticle extends AbstractServantVerticle {
             Flowable<BaseTool> tools = mcpToolset.getTools(null);
 
             List<BaseTool> allTools = new ArrayList<>();
-            allTools.add(A2ATool.builder("http://192.168.1.2:8008", "/a2a/manager/.well-known/agent-card.json"));
+            allTools.add(A2ATool.builder(a2aManagerHost, "/a2a/manager/.well-known/agent-card.json"));
 
             tools.subscribeWith(new DisposableSubscriber<BaseTool>() {
                 @Override
