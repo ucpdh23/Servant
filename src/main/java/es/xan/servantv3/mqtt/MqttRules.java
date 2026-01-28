@@ -54,6 +54,13 @@ public enum MqttRules {
                 vertx.publishEvent(Events.WATER_LEAK_STATUS_CHANGED, new NewStatus(learking.toString()));
             }
     ),
+    WATER_2(
+            new TopicPredicate("zigbee2mqtt/0xf4b3b1fffe5200d8"),
+            (message, vertx) -> {
+                Boolean learking = message.payload().toJsonObject().getBoolean("alarm_1");
+                vertx.publishEvent(Events.WATER_LEAK_STATUS_CHANGED, new NewStatus(learking.toString()));
+            }
+    ),
     AWS_COST(
             new TopicPredicate("aws/cost"),
             (message, vertx) -> {
