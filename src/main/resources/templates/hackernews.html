@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HackerNews</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+ul {
+  list-style-type: none;
+}
+
+ol {
+    -moz-column-count: 2;
+    -moz-column-gap: 5px;
+    -webkit-column-count: 2;
+    -webkit-column-gap: 5px;
+    column-count: 2;
+    column-gap: 5px;
+}
+
+body {
+	width: 800px;
+	height: 480px;
+	display: flex;
+	flex-direction: column;
+}
+
+.cl_calendar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    font-weight: 600;
+}
+.cl_day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    border: 1px solid black;
+    justify-content: flex-start;
+}
+
+.cl_day_item {
+    display:flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.cl_day_item_time {
+    font-size: 10px;
+    width: 40px;
+    text-align: center;
+}
+
+.cl_day_item_content {
+    font-weight: 500;
+    width: 100%;
+    font-size: 14px;
+    text-align: center;
+}
+
+.cl_table {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.cl_shopping_list {
+    border: 1px solid black;
+    flex: 2;
+    max
+}
+
+.cl_hourly {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+    height: 100px;
+}
+
+.cl_hourly_item:first-child {
+    width: 45px;
+    margin-top: -10px;
+    background-color: white;
+    border-top: 3px solid black;
+    font-size: 20px;
+}
+
+
+.cl_hourly_item {
+   display: flex;
+   flex-direction: column;
+   width: 32px;
+
+}
+
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.cl_hourly_item_content_weather {
+    width: 160px;
+}
+
+.cl_hourly_item_content_data {
+    text-align: center;
+}
+
+.price {
+    font-size: 13px;
+}
+
+</style>
+</head>
+<body class="cl_body">
+   <div class="cl_hackerNews">
+        <span class="title">Hacker News</span>
+
+        <div class="cl_shopping_items">
+            <div th:if="${#lists.isEmpty(items)}">
+                --Hacker News está vacio--
+            </div>
+            <ol>
+                <li th:each="item: ${items}">
+                    <span th:text="|${name}|">item.name</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

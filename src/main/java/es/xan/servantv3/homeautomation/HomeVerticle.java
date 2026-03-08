@@ -13,19 +13,26 @@ import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.sensors.SensorVerticle;
 import es.xan.servantv3.temperature.TemperatureUtils;
 import es.xan.servantv3.temperature.TemperatureVerticle;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import software.amazon.awssdk.services.internetmonitor.model.Network;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static es.xan.servantv3.Scheduler.at;
@@ -48,6 +55,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 	private UUID mScheduledTask;
 	private UUID mScheduledTaskHN;
 
+	private ThymeleafTemplateEngine engine;
+
 	private static final boolean OUTSIDE_HOME = false;
 	private static final boolean INSIDE_HOME = true;
 
@@ -69,6 +78,9 @@ public class HomeVerticle extends AbstractServantVerticle {
 	public void start() {
 		super.start();
 
+		this.engine = ThymeleafTemplateEngine.create(this.vertx);
+		this.engine.getThymeleafTemplateEngine().addDialect(new Java8TimeDialect());
+
 		final JsonArray homeConfig = vertx.getOrCreateContext().config().getJsonArray("HomeVerticle");
 		this.mPopulation = loadPopulation(homeConfig.getList());
 
@@ -79,7 +91,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		this.mScheduler = new Scheduler(getVertx());
 
 		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
-		this.mScheduledTaskHN = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_HN);  return true; });
+		this.mScheduledTaskHN = mScheduler.scheduleTask(at(LocalTime.of(6,0)), (UUID id) -> { publishAction(Actions.REPORT_HN);  return true; });
 
 
 		LOGGER.info("Started HomeVerticle");
@@ -123,13 +135,42 @@ public class HomeVerticle extends AbstractServantVerticle {
 		}
 	}
 
-	public void report_hn(final Message<Object> msg) {
+	public void report_hn(final Message<JsonObject> msg) {
 		publishAction(ProductivityVerticle.Actions.RESOLVE_YESTERDAY_ITEMS, response -> {
-			for (String master : this.mMasters) {
-				publishAction(ParrotVerticle.Actions.SEND, new TextMessage(master, response.result().toString()));
-			}
+			JsonArray result = msg.body().getJsonArray("result");
+			List<JsonObject> list = result.getList();
+
+			final File output = new File("hackernews.html");
+			_create_image(list, output);
 		});
 	}
+
+	protected void _create_image(List<JsonObject> list, File output) {
+		LOGGER.info("_create_image", list);
+
+		Map<String, Object> payload = new HashMap<>();
+		payload.put("items", list);
+
+		engine.render(payload, "templates/hackernews.html", res -> {
+			if (res.succeeded()) {
+				Buffer buffer = res.result();
+
+				LOGGER.info("creating file [{}-{}]", output.getAbsolutePath(), output.toURI());
+				try (BufferedWriter writer = new BufferedWriter(new FileWriter(output))) {
+					writer.write(buffer.toString());
+				} catch (IOException e) {
+					LOGGER.error("cannot create hackernews", e);
+					throw new RuntimeException(e);
+				}
+			} else {
+				LOGGER.error("cannot create hackernews", res.cause());
+				throw new RuntimeException(res.cause());
+			}
+		});
+
+
+	}
+
 
 	public void water_leak_status_changed(final NewStatus status) {
 		LOGGER.info("water_leak_status_changed: [{}]", status.getStatus());

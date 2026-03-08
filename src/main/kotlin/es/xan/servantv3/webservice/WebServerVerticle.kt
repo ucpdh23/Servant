@@ -43,6 +43,7 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		this.sseController = SSEController(router, this)
 		router = this.sseController?.create();
 		router = DashboardController(router, this).create();
+		router = HackerNewsController(router, this).create();
 		router = TemperatureController(router, this).create();
 		router = DevicesController(router, this).create();
 		router = MainController(router, this).create();
