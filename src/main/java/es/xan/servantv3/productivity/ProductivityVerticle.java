@@ -97,9 +97,12 @@ public class ProductivityVerticle extends AbstractServantVerticle {
 
         List<HNData> data = ProductivityUtils.resolveDateData(connection, date);
 
+        LOGGER.info("data [{}]", data);
+        
         MessageBuilder.ReplyBuilder builder = MessageBuilder.createReply();
         List<JsonObject> items = data.stream().map(item -> { return JsonUtils.toJson(item);}).collect(Collectors.toList());
-
+        
+        builder.setOk();
         builder.setResult(items);
 
         message.reply(builder.build());
