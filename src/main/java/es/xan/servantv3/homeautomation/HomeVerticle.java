@@ -137,8 +137,8 @@ public class HomeVerticle extends AbstractServantVerticle {
 
 	public void report_hn(final Message<JsonObject> msg) {
 		publishAction(ProductivityVerticle.Actions.RESOLVE_YESTERDAY_ITEMS, response -> {
-		  LOGGER.info("report_hn [{}]", msg.body());
-			JsonArray result = msg.body().getJsonArray("result");
+		  LOGGER.info("report_hn [{}]", response.body());
+			JsonArray result = response.body().getJsonArray("result");
 			List<JsonObject> list = result.getList();
 
 			final File output = new File("hackernews.html");
