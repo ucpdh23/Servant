@@ -78,14 +78,14 @@ a.item-link:hover {
             <!-- Itera la lista items. Cada item es un JsonObject; usamos los getters de JsonObject -->
             <li th:each="item : ${items}">
                 <div class="item">
-                    <!-- Si existe url, muestra como enlace; si no, muestra el título en texto -->
+                    <!-- Use the JsonObject keys produced by HNData (name, url, commentsCounter, commentsUrl, tags, date, times) -->
                     <div class="item-title">
-                        <a th:if="${item.getString('url') != null}" th:href="${item.getString('url')}" th:text="${item.getString('title')}" class="item-link">Title</a>
-                        <span th:if="${item.getString('url') == null}" th:text="${item.getString('title')}">Title</span>
+                        <a th:if="${item.getString('url') != null}" th:href="${item.getString('url')}" th:text="${item.getString('name')}" class="item-link">Title</a>
+                        <span th:if="${item.getString('url') == null}" th:text="${item.getString('name')}">Title</span>
                     </div>
                     <div class="item-meta">
-                        <span th:if="${item.getInteger('score') != null}" th:text="${item.getInteger('score')} + ' points'">0 points</span>
-                        <span th:if="${item.getString('by') != null}"> — <span th:text="${item.getString('by')}">author</span></span>
+                        <span th:if="${item.getInteger('commentsCounter') != null}" th:text="${item.getInteger('commentsCounter')} + ' comments'">0 comments</span>
+                        <span th:if="${item.getString('commentsUrl') != null}"> — <a th:href="${item.getString('commentsUrl')}" th:text="${item.getString('commentsUrl')}">comments</a></span>
                     </div>
                 </div>
             </li>
