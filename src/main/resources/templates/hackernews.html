@@ -21,122 +21,75 @@ ol {
     -webkit-column-gap: 5px;
     column-count: 2;
     column-gap: 5px;
+    padding-left: 16px;
 }
 
+/* Remove fixed dimensions so layout adapts to browser size */
 body {
-	width: 800px;
-	height: 480px;
-	display: flex;
-	flex-direction: column;
+    display: block;
+    font-family: sans-serif;
+    padding: 8px;
 }
-
-.cl_calendar {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    font-size: 20px;
-    font-weight: 600;
-}
-.cl_day {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    border: 1px solid black;
-    justify-content: flex-start;
-}
-
-.cl_day_item {
-    display:flex;
-    flex-direction: row;
-    width: 100%;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.cl_day_item_time {
-    font-size: 10px;
-    width: 40px;
-    text-align: center;
-}
-
-.cl_day_item_content {
-    font-weight: 500;
-    width: 100%;
-    font-size: 14px;
-    text-align: center;
-}
-
-.cl_table {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-}
-
-.cl_shopping_list {
-    border: 1px solid black;
-    flex: 2;
-    max
-}
-
-.cl_hourly {
-    border: 1px solid black;
-    display: flex;
-    flex-direction: row;
-    height: 100px;
-}
-
-.cl_hourly_item:first-child {
-    width: 45px;
-    margin-top: -10px;
-    background-color: white;
-    border-top: 3px solid black;
-    font-size: 20px;
-}
-
-
-.cl_hourly_item {
-   display: flex;
-   flex-direction: column;
-   width: 32px;
-
-}
-
 
 .title {
     font-size: 20px;
     font-weight: 600;
+    margin: 8px 0;
 }
 
-.cl_hourly_item_content_weather {
-    width: 160px;
+.container {
+    padding: 8px;
 }
 
-.cl_hourly_item_content_data {
-    text-align: center;
+.item {
+    margin-bottom: 8px;
 }
 
-.price {
-    font-size: 13px;
+.item-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.item-meta {
+    font-size: 12px;
+    color: #444;
+}
+
+a.item-link {
+    color: #111;
+    text-decoration: none;
+}
+
+a.item-link:hover {
+    text-decoration: underline;
 }
 
 </style>
 </head>
 <body class="cl_body">
-   <div class="cl_hackerNews">
-        <span class="title">Hacker News</span>
+   <div class="container">
+        <div class="title">Hacker News</div>
 
-        <div class="cl_shopping_items">
-            <div th:if="${#lists.isEmpty(items)}">
-                --Hacker News está vacio--
-            </div>
-            <ol>
-                <li th:each="item: ${items}">
-                    <span th:text="|${name}|">item.name</span>
-                </li>
-            </ol>
+        <div th:if="${#lists.isEmpty(items)}">
+            -- Hacker News está vacío --
         </div>
+
+        <ol>
+            <!-- Itera la lista items. Cada item es un JsonObject; usamos los getters de JsonObject -->
+            <li th:each="item : ${items}">
+                <div class="item">
+                    <!-- Si existe url, muestra como enlace; si no, muestra el título en texto -->
+                    <div class="item-title">
+                        <a th:if="${item.getString('url') != null}" th:href="${item.getString('url')}" th:text="${item.getString('title')}" class="item-link">Title</a>
+                        <span th:if="${item.getString('url') == null}" th:text="${item.getString('title')}">Title</span>
+                    </div>
+                    <div class="item-meta">
+                        <span th:if="${item.getInteger('score') != null}" th:text="${item.getInteger('score')} + ' points'">0 points</span>
+                        <span th:if="${item.getString('by') != null}"> — <span th:text="${item.getString('by')}">author</span></span>
+                    </div>
+                </div>
+            </li>
+        </ol>
     </div>
 </body>
 </html>
