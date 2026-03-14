@@ -101,6 +101,8 @@ public class ProductivityVerticle extends AbstractServantVerticle {
         
         MessageBuilder.ReplyBuilder builder = MessageBuilder.createReply();
         List<JsonObject> items = data.stream().map(item -> { return JsonUtils.toJson(item);}).collect(Collectors.toList());
+
+        LOGGER.info("items [{}]", items);
         
         builder.setOk();
         builder.setResult(items);
