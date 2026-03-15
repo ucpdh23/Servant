@@ -91,7 +91,7 @@ public class HomeVerticle extends AbstractServantVerticle {
 		this.mScheduler = new Scheduler(getVertx());
 
 		this.mScheduledTask = mScheduler.scheduleTask(at(LocalTime.of(8,0)), (UUID id) -> { publishAction(Actions.REPORT_TEMPERATURE);  return true; });
-		this.mScheduledTaskHN = mScheduler.scheduleTask(at(LocalTime.of(18,55)), (UUID id) -> { publishAction(Actions.REPORT_HN);  return true; });
+		this.mScheduledTaskHN = mScheduler.scheduleTask(at(LocalTime.of(19,30)), (UUID id) -> { publishAction(Actions.REPORT_HN);  return true; });
 
 
 		LOGGER.info("Started HomeVerticle");

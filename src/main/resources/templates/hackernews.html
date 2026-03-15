@@ -64,6 +64,12 @@ a.item-link:hover {
     text-decoration: underline;
 }
 
+.item-tags {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #666;
+}
+
 </style>
 </head>
 <body class="cl_body">
@@ -85,7 +91,9 @@ a.item-link:hover {
                     </div>
                     <div class="item-meta">
                         <span th:if="${item.getInteger('commentsCounter') != null}" th:text="${item.getInteger('commentsCounter')} + ' comments'">0 comments</span>
+                        <span th:if="${item.getInteger('times') != null}"> — <span th:text="${item.getInteger('times')} + ' times'">0</span></span>
                         <span th:if="${item.getString('commentsUrl') != null}"> — <a th:href="${item.getString('commentsUrl')}" th:text="${item.getString('commentsUrl')}">comments</a></span>
+                        <div class="item-tags" th:if="${item.getString('tags') != null}" th:text="${item.getString('tags')}">[tags]</div>
                     </div>
                 </div>
             </li>
