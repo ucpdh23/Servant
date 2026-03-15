@@ -38,8 +38,8 @@ public class HackerNewsTemplateTest {
     public void renderHackerNewsTemplate() throws Exception {
         // Create a sample list of JsonObject items
         List<JsonObject> items = new ArrayList<>();
-        JsonObject it1 = new JsonObject().put("title", "First item").put("url", "https://example.com/1").put("score", 123).put("by", "alice");
-        JsonObject it2 = new JsonObject().put("title", "Second item").put("score", 5).put("by", "bob");
+        JsonObject it1 = new JsonObject().put("name", "First item").put("url", "https://example.com/1").put("commentsCounter", 123).put("commentsUrl", "https://example.com/1/comments").put("times", 12).put("tags", "[ai, programming, web]");
+        JsonObject it2 = new JsonObject().put("name", "Second item").put("url", "https://example.com/2").put("commentsCounter", 432).put("commentsUrl", "https://example.com/2/comments").put("times", 44).put("tags", "[windows, virtualization]");
         items.add(it1);
         items.add(it2);
 
