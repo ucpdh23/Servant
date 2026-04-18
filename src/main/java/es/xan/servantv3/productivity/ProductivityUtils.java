@@ -35,8 +35,12 @@ public class ProductivityUtils {
                 Elements links = priceRow.select("a.fs-3");
                 if (links.size() < 1) continue;
                 org.jsoup.nodes.Element link = links.get(0);
+                LOGGER.info("[{}]", link);
                 String url = link.attr("href");
                 String name = link.text();
+                LOGGER.info("[{}-{}]", url, name);
+                
+                LOGGER.info("[{}]", priceRow);
 
                 Elements contents = priceRow.select("div.text-muted");
                 org.jsoup.nodes.Element content = contents.get(0);
