@@ -75,6 +75,8 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 	
 	fun webSocketConfiguration(router : Router) {
 		val options = SockJSBridgeOptions().apply {
+			pingTimeout = 60000
+
 			addOutboundPermitted(PermittedOptions().setAddress("servant.pi.out"))
 			addInboundPermitted(PermittedOptions().setAddress("servant.pi.in"))
 		}
