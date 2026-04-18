@@ -5,6 +5,7 @@ import es.xan.servantv3.Events;
 import es.xan.servantv3.homeautomation.HomeVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.NightModeVerticle;
+import es.xan.servantv3.pi.PiVerticle;
 import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
 import es.xan.servantv3.temperature.TemperatureVerticle;
 import es.xan.servantv3.thermostat.ThermostatVerticle;
@@ -18,6 +19,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public enum MqttRules {
+    PI_OUT(
+            new TopicPredicate("servant/pi/out"),
+            (message, vertx) -> {
+                vertx.publishAction(PiVerticle.Actions.PROCESS_PI_MESSAGE, new TextMessage("", message.payload().toString()));
+            }
+    ),
     TEMPERATURE_OUTSIDE(
             new TopicPredicate("rtl_433/112/temperature_C"),
             (message, vertx) -> {

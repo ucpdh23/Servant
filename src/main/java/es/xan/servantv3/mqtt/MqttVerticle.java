@@ -57,6 +57,22 @@ public class MqttVerticle extends AbstractServantVerticle {
     }
 
     public void publish_msg(MqttMsg msg) {
+        boolean sent = false;
+        String topic = msg.getTopic();
+        if (this.topicsSubscriptions.containsKey(topic)) {
+            LOGGER.debug("topic [{}] registered", topic);
+            for (String clientId : this.topicsSubscriptions.get(topic)) {
+                MqttEndpoint endpoint = this.endpoints.get(clientId);
+
+                if (endpoint.isConnected()) {
+                    endpoint.publish(msg.getTopic(), msg.getPayload().toBuffer(), MqttQoS.AT_MOST_ONCE, false, false);
+                    sent = true;
+
+                }
+            }
+        }
+
+        if (sent) return;
         for (Map.Entry<String, MqttEndpoint> entry : this.endpoints.entrySet()) {
             if (entry.getValue().isConnected()) {
                 LOGGER.debug("[{}] is connected", entry.getKey());
@@ -73,6 +89,7 @@ public class MqttVerticle extends AbstractServantVerticle {
     }
 
     Map<String, MqttEndpoint> endpoints = new HashMap<>();
+    Map<String, Set<String>> topicsSubscriptions = new HashMap<>();
 
     @Override
     public void start() {
@@ -111,6 +128,11 @@ public class MqttVerticle extends AbstractServantVerticle {
             // accept connection from the remote client
             endpoint.accept(false);
             endpoint.subscribeHandler(subscribe -> {
+                for (MqttTopicSubscription suscription : subscribe.topicSubscriptions()) {
+                    LOGGER.info("Subscribe [{}-{}]", endpoint.clientIdentifier(),  suscription.topicName());
+                    Set<String> items = this.topicsSubscriptions.computeIfAbsent(suscription.topicName(), it -> new HashSet<String>());
+                    items.add(endpoint.clientIdentifier());
+                }
 
                 List<MqttSubAckReasonCode> reasonCodes = new ArrayList<>();
                 for (MqttTopicSubscription s: subscribe.topicSubscriptions()) {

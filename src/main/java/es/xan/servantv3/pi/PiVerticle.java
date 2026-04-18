@@ -5,8 +5,10 @@ import es.xan.servantv3.Action;
 import es.xan.servantv3.Constant;
 import es.xan.servantv3.MessageBuilder;
 import es.xan.servantv3.homeautomation.HomeVerticle;
+import es.xan.servantv3.messages.MqttMsg;
 import es.xan.servantv3.messages.TextMessage;
 import es.xan.servantv3.messages.TextMessageToTheBoss;
+import es.xan.servantv3.mqtt.MqttVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
 import es.xan.servantv3.road.RoadUtils;
 import es.xan.servantv3.road.RoadVerticle;
@@ -35,16 +37,12 @@ public class PiVerticle extends AbstractServantVerticle {
         LOGGER.debug("starting pi...");
         super.start();
 
-        final EventBus eb = vertx.eventBus();
-        eb.consumer("servant.pi.out").handler(event -> piOutput(event));
-
-
         LOGGER.info("started pi");
     }
 
     private void piOutput(Message<Object> event) {
-        LOGGER.debug("text from pi");
         String rawBody = (String) event.body();
+        LOGGER.debug("text from pi [{}]", rawBody);
         JsonObject json = new JsonObject(rawBody);
 
         if (json.containsKey("result")) {
@@ -63,7 +61,9 @@ public class PiVerticle extends AbstractServantVerticle {
     public enum Actions implements Action {
         START_PI(null),
         END_PI(null),
-        PROCESS_USER_MESSAGE(TextMessage.class)
+        PROCESS_USER_MESSAGE(TextMessage.class),
+        PROCESS_PI_MESSAGE(TextMessage.class)
+
         ;
 
         private Class<?> mBeanClass;
@@ -94,8 +94,25 @@ public class PiVerticle extends AbstractServantVerticle {
         msg.reply(builder.build());
     }
 
-    public void process_user_message(TextMessage msg) {
-        vertx.eventBus().publish("servant.pi.in", msg.getMessage());
+    public void process_pi_message(TextMessage text, Message<Object> msg) {
+        LOGGER.info("process_pi_message []", text);
+        publishAction(HomeVerticle.Actions.NOTIFY_BOSS, new TextMessageToTheBoss(text.getMessage()));
+    }
+
+    public void process_user_message(TextMessage text, Message<Object> msg) {
+        LOGGER.info("process_user_message []", text);
+
+        JsonObject object = new JsonObject();
+        object.put("message", text.getMessage());
+
+        publishAction(MqttVerticle.Actions.PUBLISH_MSG, new MqttMsg("servant/pi/in", object));
+
+        MessageBuilder.ReplyBuilder builder = new MessageBuilder.ReplyBuilder();
+        builder.setOk();
+        builder.setMessage("Ok");
+
+        msg.reply(builder.build());
+
     }
 
 }

@@ -8,7 +8,6 @@ import es.xan.servantv3.Action
 import es.xan.servantv3.Constant
 import es.xan.servantv3.github.AzureDevOpsVerticle
 import es.xan.servantv3.github.AzureDevOpsVerticle.Actions
-import es.xan.servantv3.github.AzureDevOpsVerticle.Companion
 import es.xan.servantv3.messages.MCPMessage
 import io.vertx.core.eventbus.Message
 import io.vertx.ext.bridge.PermittedOptions
@@ -19,11 +18,11 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import org.slf4j.LoggerFactory
 
 class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
-	
+
 	companion object {
-        val LOG = LoggerFactory.getLogger(WebServerVerticle::class.java.name) 
+        val LOG = LoggerFactory.getLogger(WebServerVerticle::class.java.name)
     }
-	
+
 	val mPort by lazy { config().getJsonObject("WebServerVerticle").getInteger("port", 8080) }
 	var sseController : SSEController? = null;
 
@@ -32,13 +31,13 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		supportedActions(Actions::class.java)
 		AzureDevOpsVerticle.LOG.info("loaded WebServerVerticle")
 	}
-	
+
 	override fun start() {
 		super.start();
-		
+
 		var router = Router.router(vertx);
 		router.route().handler(BodyHandler.create());
-		
+
 		webSocketConfiguration(router);
 
 		this.sseController = SSEController(router, this)
@@ -51,11 +50,11 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		router = SecurityController(router, this).create();
 
 		vertx.createHttpServer().requestHandler(router).listen(mPort);
-		
+
 		LOG.info("Started web server listening in port [{}]", mPort);
 
 		this.supportedActions(Actions::class.java)
-		
+
 	}
 
 	enum class Actions(val clazz : Class<*>? ) : Action {
@@ -72,28 +71,30 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		LOG.debug("public_sse_event {}", message)
 		this.sseController?.publishEvent(message.message)
 	}
-	
+
 	fun webSocketConfiguration(router : Router) {
 		val options = SockJSBridgeOptions().apply {
 			pingTimeout = 60000
 
-			addOutboundPermitted(PermittedOptions().setAddress("servant.pi.out"))
-			addInboundPermitted(PermittedOptions().setAddress("servant.pi.in"))
+			addInboundPermitted(PermittedOptions().setAddressRegex(".*"))
+			addOutboundPermitted(PermittedOptions().setAddressRegex(".*"))
+			//addOutboundPermitted(PermittedOptions().setAddress("servant.pi.out"))
+			//addInboundPermitted(PermittedOptions().setAddress("servant.pi.in"))
 		}
-		
+
 		val sockJSHandler = SockJSHandler.create(vertx);
 		// val options = SockJSBridgeOptions();
 		// mount the bridge on the router
-	
+
 		router.route("/eventbus/*")
 			.subRouter(sockJSHandler.bridge(options));
 		/*
-		.handler(SockJSHandler.create(vertx).bridge(options, { 
+		.handler(SockJSHandler.create(vertx).bridge(options, {
 	         if (it.type().equals(BridgeEventType.SOCKET_CREATED)) {
 	            LOG.info("A socket was created");
 	         }
 	         it.complete(true);
 		}));*/
 	}
-	
+
 }
