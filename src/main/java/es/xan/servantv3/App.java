@@ -21,6 +21,7 @@ import es.xan.servantv3.network.NetworkVerticle;
 import es.xan.servantv3.openia.OpenIAVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
 import es.xan.servantv3.parrot.ParrotVerticle;
+import es.xan.servantv3.pi.PiVerticle;
 import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.road.RoadVerticle;
 import es.xan.servantv3.scrumleader.ScrumLeaderVerticle;
@@ -130,6 +131,7 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(ProductivityVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(EventsprocessorVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(BrainVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(PiVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		} else if ("security".equals(mode.toLowerCase())) {
 			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
@@ -141,6 +143,8 @@ public class App extends AbstractVerticle {
 			vertx.deployVerticle(FolderVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(GithubVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 		} else if ("testing".equals(mode.toLowerCase())) {
+			vertx.deployVerticle(WebServerVerticle.class.getName(), new DeploymentOptions().setConfig(config));
+			vertx.deployVerticle(MCPVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(ParrotVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(STSVerticle.class.getName(), new DeploymentOptions().setConfig(config));
 			vertx.deployVerticle(BrainVerticle.class.getName(), new DeploymentOptions().setConfig(config));

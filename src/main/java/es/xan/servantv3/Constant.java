@@ -34,6 +34,7 @@ public class Constant {
     public static final String LAUNDRY_VERTICLE = "laundry.verticle";
     public static final String AUTOTHERMOSTAT_VERTICLE = "autothermostat.verticle";
     public static final String ROAD_VERTICLE = "road.verticle";
+    public static final String PI_VERTICLE = "pi.verticle";
     public static final String MCP_VERTICLE = "mcp.verticle";
 
 

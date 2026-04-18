@@ -15,6 +15,7 @@ import es.xan.servantv3.laundry.LaundryVerticle;
 import es.xan.servantv3.messages.*;
 import es.xan.servantv3.modes.SecurityModeVerticle;
 import es.xan.servantv3.outlet.OutletVerticle;
+import es.xan.servantv3.pi.PiVerticle;
 import es.xan.servantv3.productivity.ProductivityUtils;
 import es.xan.servantv3.productivity.ProductivityVerticle;
 import es.xan.servantv3.road.RoadVerticle;
@@ -56,6 +57,28 @@ public enum Rules {
 			(tokens, userContext) -> {return null;},
 			msg -> { return reply(null, OperationUtils.forwarding(msg));},
 			"Information about all the available commands"
+	),
+	START_PI(PiVerticle.Actions.START_PI,
+			isContextFree()
+					.and(messageContains("comenzar"))
+					.and(messageContains("pi")),
+			(tokens, userContext) -> {userContext.setAttention("Pi"); return null; },
+			msg -> { return reply( null, OperationUtils.forwarding(msg));},
+			"Ex. comenzar pi"
+	),
+	END_PI(PiVerticle.Actions.END_PI,
+			isContext("Pi")
+					.and(messageContains("finalizar"))
+					.and(messageContains("pi")),
+			(tokens, userContext) -> {userContext.setAttention(""); return null; },
+			msg -> { return reply( null, OperationUtils.forwarding(msg));},
+			"Ex. finalizar pi"
+	),
+	PI_MESSAGE(PiVerticle.Actions.PROCESS_USER_MESSAGE,
+			isContext("Pi"),
+			(tokens, userContext) -> {return new TextMessage(userContext.getUser(), concatStrings(tokens));},
+			msg -> { return reply(null, OperationUtils.forwarding(msg));},
+			"Continue pi message"
 	),
 	START_CHATBOT(BrainVerticle.Actions.START_CHATBOT,
 			isContextFree()
