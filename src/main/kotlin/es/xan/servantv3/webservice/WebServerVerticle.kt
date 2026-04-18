@@ -11,6 +11,7 @@ import es.xan.servantv3.github.AzureDevOpsVerticle.Actions
 import es.xan.servantv3.github.AzureDevOpsVerticle.Companion
 import es.xan.servantv3.messages.MCPMessage
 import io.vertx.core.eventbus.Message
+import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
@@ -73,14 +74,13 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 	}
 	
 	fun webSocketConfiguration(router : Router) {
-	/*
-		val options = BridgeOptions().apply {
-    			addOutboundPermitted(PermittedOptions().setAddressRegex(Constant.EVENT))
-    			addInboundPermitted(PermittedOptions().setAddressRegex(".*"));
-		}*/
+		val options = SockJSBridgeOptions().apply {
+			addOutboundPermitted(PermittedOptions().setAddress("servant.pi.out"))
+			addInboundPermitted(PermittedOptions().setAddress("servant.pi.in"))
+		}
 		
 		val sockJSHandler = SockJSHandler.create(vertx);
-		val options = SockJSBridgeOptions();
+		// val options = SockJSBridgeOptions();
 		// mount the bridge on the router
 	
 		router.route("/eventbus/*")
