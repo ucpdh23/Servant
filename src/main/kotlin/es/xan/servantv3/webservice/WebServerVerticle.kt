@@ -46,6 +46,7 @@ class WebServerVerticle : AbstractServantVerticle(Constant.WEBSERVER_VERTICLE) {
 		router = HackerNewsController(router, this).create();
 		router = TemperatureController(router, this).create();
 		router = DevicesController(router, this).create();
+		router = NotifyController(router, this).create();
 		router = MainController(router, this).create();
 		router = SecurityController(router, this).create();
 
