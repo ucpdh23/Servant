@@ -118,12 +118,12 @@ public class WeatherUtils {
                 
                 //System.out.println(line);
 
-                Integer hour = Integer.parseInt(line.split(":")[0]);
+                Integer hour = Integer.parseInt(line.split("h")[0]);
                 //System.out.println("hour" + hour);
                 
                 //System.out.println(line.split(" ")[4]);
                 
-                Float price = Float.parseFloat(line.split(" ")[4].replace(',','.').split("€")[0]);
+                Float price = Float.parseFloat(line.split(" ")[1].replace(',','.').split("€")[0]);
                 //System.out.println("price"+price);
 
                 output.put(hour, price);
@@ -142,13 +142,13 @@ public class WeatherUtils {
         try {
             org.jsoup.nodes.Document doc = Jsoup.connect("https://tarifaluzhora.es/").get();
 
-            Elements priceRows = doc.select(".col-xs-11");
+            Elements priceRows = doc.select(".relative.flex.items-center.justify-center.gap-3.py-2.px-2.rounded-lg");
 
             for (org.jsoup.nodes.Element priceRow : priceRows) {
                 String line = priceRow.text();
                 System.out.println(line);
-                Integer hour = Integer.parseInt(line.split(":")[0]);
-                Float price = Float.parseFloat(line.split(" ")[3].replace(",","."));
+                Integer hour = Integer.parseInt(line.split("-")[0]);
+                Float price = Float.parseFloat(line.split(" ")[1].replace(",","."));
 
                 output.put(hour, price);
             }
@@ -212,6 +212,7 @@ public class WeatherUtils {
 
     public static void main(String agrs[]) {
         // updateEnergyPrice(null, LocalDateTime.now());
-        System.out.println(computeTodaysPrices());
+        //System.out.println(computeTodaysPrices());
+        System.out.println(computeTomorrowsPrices());
     }
 }
